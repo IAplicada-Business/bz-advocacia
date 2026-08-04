@@ -5,7 +5,7 @@ export const divorcioContent: LpContent = {
   metaTitle: "Partilha Protegida | Borges & Zembruski Advocacia",
   metaDescription:
     "Divórcio com partilha de bens com mapa patrimonial completo. Análise gratuita do seu caso.",
-  eyebrow: "Partilha Protegida · Divórcio com partilha de bens",
+  eyebrow: "PARTILHA PROTEGIDA · DIVÓRCIO COM PARTILHA DE BENS",
   headline: (
     <>
       Saia do casamento em <em>6 meses</em>, com o mapa completo do que{" "}
@@ -24,6 +24,7 @@ export const divorcioContent: LpContent = {
   heroImage: "/IMG_8339.jpg",
   heroObjectPosition: "center 18%",
   finalCtaImage: "/IMG_8535.jpg",
+  finalCtaObjectPosition: "center 30%",
   formTitle: "Análise gratuita do seu caso",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [

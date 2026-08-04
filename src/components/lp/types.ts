@@ -48,12 +48,8 @@ export type LpContent = {
   heroImage: string;
   /** CSS object-position do hero (ex.: "center 22%") para não cortar rostos */
   heroObjectPosition?: string;
-  /**
-   * photo-panel: foto em frame à direita (padrão)
-   * background: foto atrás com transparência + formulário à direita
-   */
-  heroStyle?: "photo-panel" | "background";
   finalCtaImage: string;
+  finalCtaObjectPosition?: string;
   formTitle: string;
   formSubtitle: string;
   formFields: LpFormField[];

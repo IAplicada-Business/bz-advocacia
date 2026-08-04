@@ -5,7 +5,7 @@ export const saudeContent: LpContent = {
   metaTitle: "Cobertura Garantida | Borges & Zembruski Advocacia",
   metaDescription:
     "Análise gratuita da negativa do plano de saúde. Especialistas em Direito da Saúde com atendimento em todo o Brasil.",
-  eyebrow: "Cobertura Garantida · Direito da Saúde",
+  eyebrow: "COBERTURA GARANTIDA · DIREITO DA SAÚDE",
   headline: (
     <>
       Garanta o tratamento do seu familiar sem depender da autorização do{" "}
@@ -18,13 +18,12 @@ export const saudeContent: LpContent = {
   bullets: [
     "Especialistas em Direito da Saúde",
     "Atendimento em todo o Brasil",
-    "Desde 2019 com foco em planos de saúde",
+    "Desde 2019 exclusivamente com planos",
   ],
-  // Ref: sócias no sofá — fica atrás com transparência (não em frame)
   heroImage: "/IMG_8379.jpg",
   heroObjectPosition: "72% 28%",
-  heroStyle: "background",
   finalCtaImage: "/IMG_8432.jpg",
+  finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
   formSubtitle: "Resposta em até 1 dia útil · WhatsApp",
   formFields: [

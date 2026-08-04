@@ -5,7 +5,7 @@ export const inventarioContent: LpContent = {
   metaTitle: "Inventário Otimizado | Borges & Zembruski Advocacia",
   metaDescription:
     "Reduza o imposto do inventário e desatravese a partilha com estratégia. Análise gratuita do seu inventário.",
-  eyebrow: "Inventário Otimizado · Sucessões",
+  eyebrow: "INVENTÁRIO OTIMIZADO · SUCESSÕES",
   headline: (
     <>
       Reduza o imposto do inventário em <em>até 87%</em> — e destrave a partilha sem guerra na família.
@@ -21,9 +21,9 @@ export const inventarioContent: LpContent = {
     "Mais de 10 anos em família e sucessões",
   ],
   heroImage: "/IMG_8077.jpg",
-  // Sofá: rostos no terço superior — evita corte no topo do frame arredondado
-  heroObjectPosition: "center 12%",
+  heroObjectPosition: "center 14%",
   finalCtaImage: "/IMG_8287.jpg",
+  finalCtaObjectPosition: "center 25%",
   formTitle: "Análise gratuita do seu inventário",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [
