@@ -21,8 +21,8 @@ export const inventarioContent: LpContent = {
     "Mais de 10 anos em família e sucessões",
   ],
   heroImage: "/IMG_8077_hero.jpg",
-  // Foco um pouco mais baixo: mais folga acima das cabeças
-  heroObjectPosition: "center 18%",
+  // Foco um pouco mais baixo ainda: folga acima das cabeças
+  heroObjectPosition: "center 12%",
   // Anexo 3 — motion blur das sócias (CTA final inventário + divórcio)
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 55%",
