@@ -21,7 +21,8 @@ export const saudeContent: LpContent = {
     "Desde 2019 com foco em planos de saúde",
   ],
   heroImage: "/IMG_8432.jpg",
-  heroObjectPosition: "center 35%",
+  // Foto vertical com motion blur: ancora no meio para mostrar as duas sócias
+  heroObjectPosition: "center 42%",
   finalCtaImage: "/IMG_8379.jpg",
   formTitle: "Análise gratuita da negativa",
   formSubtitle: "Resposta em até 1 dia útil · WhatsApp",
