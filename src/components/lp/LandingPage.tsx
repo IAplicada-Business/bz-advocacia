@@ -62,8 +62,8 @@ export function LandingPage({ content }: LandingPageProps) {
           src={content.heroImage}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.55]"
-          style={{ objectPosition: content.heroObjectPosition ?? "70% 65%" }}
+          className="absolute inset-0 h-full w-full object-cover object-top opacity-[0.55]"
+          style={{ objectPosition: content.heroObjectPosition ?? "center top" }}
         />
         {/* Gradiente só da esquerda; sem véu no topo */}
         <div className="absolute inset-0 bg-gradient-to-r from-lp-cream from-[0%] via-lp-cream/85 via-[42%] to-transparent to-[78%]" />

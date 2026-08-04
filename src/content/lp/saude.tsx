@@ -20,9 +20,9 @@ export const saudeContent: LpContent = {
     "Atendimento em todo o Brasil",
     "Desde 2019 exclusivamente com planos",
   ],
-  heroImage: "/IMG_8379.jpg",
-  // Y alto = sobe as caras (estão na parte de baixo do JPG)
-  heroObjectPosition: "70% 65%",
+  heroImage: "/IMG_8379_hero.jpg",
+  // Asset já recortado com as caras no frame; ancora no topo
+  heroObjectPosition: "center top",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
