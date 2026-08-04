@@ -24,16 +24,6 @@ export const saudeContent: LpContent = {
   heroImage: "/IMG_8379.jpg",
   heroObjectPosition: "72% 28%",
   heroStyle: "background",
-  trustPanel: {
-    brand: "Forbes",
-    eyebrow: "Qualificação",
-    title: "Reconhecimento Forbes",
-    lines: [
-      "Escritório listado entre os destaques de advocacia.",
-      "Credibilidade nacional para casos de Direito da Saúde.",
-      "Padrão de atendimento reconhecido pelo mercado.",
-    ],
-  },
   finalCtaImage: "/IMG_8432.jpg",
   formTitle: "Análise gratuita da negativa",
   formSubtitle: "Resposta em até 1 dia útil · WhatsApp",

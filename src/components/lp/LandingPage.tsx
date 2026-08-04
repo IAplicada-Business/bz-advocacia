@@ -43,8 +43,8 @@ export function LandingPage({ content }: LandingPageProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-lp-cream via-transparent to-lp-cream/50" />
 
           <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-28 md:px-10 md:pb-20 md:pt-32 lg:px-14">
-            <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)] lg:gap-16 xl:gap-24">
-              {/* Texto puxado à esquerda — sem centralizar o bloco */}
+            <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-center lg:gap-12 xl:gap-16">
+              {/* Texto puxado à esquerda */}
               <div data-reveal className="lp-reveal w-full max-w-[34rem] justify-self-start">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
                   — {content.eyebrow}
@@ -65,56 +65,23 @@ export function LandingPage({ content }: LandingPageProps) {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-8 flex flex-wrap items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={scrollToForm}
-                    className="inline-flex items-center gap-2 rounded-full bg-lp-ink px-6 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-lp-ink/90"
-                  >
-                    {content.formCta.replace(" →", "")}
-                  </button>
-                  <p className="text-xs text-lp-muted">Análise gratuita · retorno em até 1 dia útil</p>
-                </div>
               </div>
 
-              {/* Forbes / qualificação no lugar da foto */}
-              {content.trustPanel && (
-                <div data-reveal className="lp-reveal lp-reveal-delay lg:justify-self-end lg:w-full lg:max-w-md">
-                  <aside className="rounded-2xl border border-lp-ink/10 bg-white/75 p-7 shadow-lp backdrop-blur-md md:p-8">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-lp-gold">
-                      {content.trustPanel.eyebrow}
-                    </p>
-                    <p className="mt-4 font-seasons text-5xl tracking-[0.04em] text-lp-ink md:text-6xl">
-                      {content.trustPanel.brand}
-                    </p>
-                    <div className="mt-3 h-px w-16 bg-lp-gold/70" />
-                    <h2 className="mt-5 font-seasons text-2xl text-lp-ink md:text-[1.7rem]">
-                      {content.trustPanel.title}
-                    </h2>
-                    <ul className="mt-5 space-y-3">
-                      {content.trustPanel.lines.map((line) => (
-                        <li key={line} className="flex items-start gap-3 text-sm leading-relaxed text-lp-muted">
-                          <span className="mt-1 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
-                            <Check className="h-2.5 w-2.5" strokeWidth={2.5} />
-                          </span>
-                          {line}
-                        </li>
-                      ))}
-                    </ul>
-                  </aside>
-                </div>
-              )}
+              {/* Formulário no hero — à direita */}
+              <div
+                ref={formRef}
+                id="analise"
+                data-reveal
+                className="lp-reveal lp-reveal-delay w-full scroll-mt-24 lg:justify-self-end"
+              >
+                <LpLeadForm
+                  title={content.formTitle}
+                  subtitle={content.formSubtitle}
+                  fields={content.formFields}
+                  cta={content.formCta}
+                />
+              </div>
             </div>
-
-            <button
-              type="button"
-              onClick={scrollToForm}
-              className="mt-14 flex flex-col items-start gap-1 text-lp-ink/40 transition hover:text-lp-gold"
-              aria-label="Ir para o formulário"
-            >
-              <span className="text-[10px] uppercase tracking-[0.24em]">Continuar</span>
-              <ChevronDown className="h-5 w-5 animate-bounce" />
-            </button>
           </div>
         </section>
       ) : (
@@ -182,31 +149,33 @@ export function LandingPage({ content }: LandingPageProps) {
         </section>
       )}
 
-      {/* FORM — dobra própria, full contraste */}
-      <section ref={formRef} id="analise" className="scroll-mt-24 bg-white px-5 py-16 md:px-8 md:py-20">
-        <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
-          <div data-reveal className="lp-reveal lg:sticky lg:top-28">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold">
-              — Análise gratuita
-            </p>
-            <h2 className="mt-3 font-seasons text-3xl leading-tight md:text-4xl">
-              Conte o essencial nesse momento. <em>Nós retornamos.</em>
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-lp-muted md:text-base">
-              Sem compromisso. Usamos as respostas só para priorizar e preparar a conversa com a
-              advogada responsável.
-            </p>
+      {/* FORM — dobra própria só quando o form NÃO está no hero */}
+      {content.heroStyle !== "background" && (
+        <section ref={formRef} id="analise" className="scroll-mt-24 bg-white px-5 py-16 md:px-8 md:py-20">
+          <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+            <div data-reveal className="lp-reveal lg:sticky lg:top-28">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold">
+                — Análise gratuita
+              </p>
+              <h2 className="mt-3 font-seasons text-3xl leading-tight md:text-4xl">
+                Conte o essencial nesse momento. <em>Nós retornamos.</em>
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-lp-muted md:text-base">
+                Sem compromisso. Usamos as respostas só para priorizar e preparar a conversa com a
+                advogada responsável.
+              </p>
+            </div>
+            <div data-reveal className="lp-reveal lp-reveal-delay">
+              <LpLeadForm
+                title={content.formTitle}
+                subtitle={content.formSubtitle}
+                fields={content.formFields}
+                cta={content.formCta}
+              />
+            </div>
           </div>
-          <div data-reveal className="lp-reveal lp-reveal-delay">
-            <LpLeadForm
-              title={content.formTitle}
-              subtitle={content.formSubtitle}
-              fields={content.formFields}
-              cta={content.formCta}
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Problem quotes */}
       <section className="bg-lp-stone px-5 py-20 md:px-8 md:py-24">
