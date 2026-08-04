@@ -20,7 +20,7 @@ export function LpLeadForm({ title, subtitle, fields, cta }: LpLeadFormProps) {
 
   if (submitted) {
     return (
-      <div className="flex min-h-[380px] flex-col items-center justify-center rounded-[1.75rem] border border-white/60 bg-white/88 px-6 py-10 text-center shadow-lp backdrop-blur-md">
+      <div className="flex min-h-[380px] flex-col items-center justify-center rounded-[1.75rem] border border-white/70 bg-white/95 px-6 py-10 text-center shadow-lp backdrop-blur-md">
         <p className="font-seasons text-3xl text-lp-ink">Recebemos seu caso.</p>
         <p className="mt-3 max-w-xs text-sm leading-relaxed text-lp-muted">
           Em breve nossa equipe entra em contato pelo WhatsApp para a análise gratuita.
@@ -32,9 +32,9 @@ export function LpLeadForm({ title, subtitle, fields, cta }: LpLeadFormProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-[480px] overflow-hidden rounded-[1.75rem] border border-white/65 bg-white/88 shadow-lp backdrop-blur-md lg:max-w-none"
+      className="w-full max-w-[480px] overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/95 shadow-lp backdrop-blur-md lg:max-w-none"
     >
-      <div className="border-b border-lp-ink/8 bg-white/70 px-5 py-4 md:px-6">
+      <div className="border-b border-lp-ink/8 bg-white/90 px-5 py-4 md:px-6">
         <h2 className="font-seasons text-[1.55rem] leading-tight text-lp-ink md:text-[1.65rem]">{title}</h2>
         <p className="mt-1 text-sm text-lp-muted">{subtitle}</p>
       </div>
@@ -53,7 +53,7 @@ export function LpLeadForm({ title, subtitle, fields, cta }: LpLeadFormProps) {
                 required={field.required}
                 value={values[field.id] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
-                className="w-full rounded-2xl border border-lp-ink/10 bg-white/85 px-3.5 py-2.5 text-sm text-lp-ink outline-none transition focus:border-lp-gold"
+                className="w-full rounded-2xl border border-lp-ink/10 bg-white/95 px-3.5 py-2.5 text-sm text-lp-ink outline-none transition focus:border-lp-gold"
               >
                 <option value="">{field.placeholder ?? "Selecione"}</option>
                 {field.options?.map((opt) => (
@@ -69,7 +69,7 @@ export function LpLeadForm({ title, subtitle, fields, cta }: LpLeadFormProps) {
                 placeholder={field.placeholder}
                 value={values[field.id] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
-                className="w-full rounded-2xl border border-lp-ink/10 bg-white/85 px-3.5 py-2.5 text-sm text-lp-ink outline-none transition focus:border-lp-gold"
+                className="w-full rounded-2xl border border-lp-ink/10 bg-white/95 px-3.5 py-2.5 text-sm text-lp-ink outline-none transition focus:border-lp-gold"
               />
             )}
           </label>
