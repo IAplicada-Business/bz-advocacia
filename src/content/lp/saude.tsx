@@ -4,7 +4,7 @@ export const saudeContent: LpContent = {
   slug: "saude",
   metaTitle: "Cobertura Garantida | Borges & Zembruski Advocacia",
   metaDescription:
-    "Análise gratuita da negativa do plano de saúde. Especialistas em Direito da Saúde com atendimento em todo o Brasil.",
+    "Análise gratuita de negativas de plano de saúde e do SUS. Especialistas em Direito da Saúde com atendimento em todo o Brasil.",
   eyebrow: "COBERTURA GARANTIDA · DIREITO DA SAÚDE",
   headline: (
     <>
@@ -14,11 +14,11 @@ export const saudeContent: LpContent = {
   ),
   headlinePlain: "Garanta o tratamento do seu familiar sem depender da autorização do plano.",
   subheadline:
-    "Quando o plano nega medicamento, cirurgia ou internação, cada dia conta. Atuamos com urgência para destravar a cobertura, com estratégia jurídica clara desde o primeiro contato.",
+    "Quando o plano ou o SUS nega medicamento, cirurgia ou internação, cada dia conta. Atuamos com urgência em negativas de planos de saúde e também do SUS, com estratégia jurídica clara desde o primeiro contato.",
   bullets: [
     "Especialistas em Direito da Saúde",
+    "Negativas de planos de saúde e do SUS",
     "Atendimento em todo o Brasil",
-    "Desde 2019 exclusivamente com planos",
   ],
   heroImage: "/IMG_8379_hero.jpg",
   // Asset landscape com folga acima da cabeça
@@ -38,6 +38,7 @@ export const saudeContent: LpContent = {
         "Plano negou medicamento",
         "Plano negou cirurgia / procedimento",
         "Plano negou internação / UTI",
+        "SUS negou medicamento / procedimento",
         "Demora excessiva na autorização",
         "Outra negativa de cobertura",
       ],
@@ -71,10 +72,10 @@ export const saudeContent: LpContent = {
     },
     {
       id: "plano",
-      label: "Operadora / plano",
+      label: "Plano ou SUS",
       type: "text",
       required: true,
-      placeholder: "Ex.: Unimed, Bradesco, SulAmérica…",
+      placeholder: "Ex.: Unimed, Bradesco, SUS…",
     },
     {
       id: "contato",
