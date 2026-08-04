@@ -109,6 +109,7 @@ export function LandingPage({ content }: LandingPageProps) {
               className="lp-reveal lp-reveal-right lp-reveal-delay order-2 w-full scroll-mt-24 lg:order-none lg:justify-self-end"
             >
               <LpLeadForm
+                slug={content.slug}
                 title={content.formTitle}
                 subtitle={content.formSubtitle}
                 fields={content.formFields}
