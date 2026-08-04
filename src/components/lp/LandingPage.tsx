@@ -62,11 +62,12 @@ export function LandingPage({ content }: LandingPageProps) {
           src={content.heroImage}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.58]"
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.55]"
           style={{ objectPosition: content.heroObjectPosition ?? "center 8%" }}
         />
-        {/* Gradiente só da esquerda; sem véu no topo que esconde a cabeça */}
-        <div className="absolute inset-0 bg-gradient-to-r from-lp-cream from-[0%] via-lp-cream/82 via-[40%] to-transparent to-[75%]" />
+        {/* Esquerda para o texto; topo leve para legibilidade do menu/headline */}
+        <div className="absolute inset-0 bg-gradient-to-r from-lp-cream from-[0%] via-lp-cream/85 via-[42%] to-transparent to-[78%]" />
+        <div className="absolute inset-x-0 top-0 h-[38%] bg-gradient-to-b from-lp-cream/50 via-lp-cream/18 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-lp-cream/45 to-transparent" />
 
         <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-24 md:px-10 md:pb-20 md:pt-28 lg:px-14">
