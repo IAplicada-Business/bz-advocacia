@@ -21,8 +21,8 @@ export const inventarioContent: LpContent = {
     "Mais de 10 anos em família e sucessões",
   ],
   heroImage: "/IMG_8077_hero.jpg",
-  // Asset landscape com folga acima da cabeça (padrão LP Saúde)
-  heroObjectPosition: "center 8%",
+  // Foco um pouco mais baixo: mais folga acima das cabeças
+  heroObjectPosition: "center 18%",
   finalCtaImage: "/IMG_8287.jpg",
   finalCtaObjectPosition: "center 30%",
   formTitle: "Análise gratuita do seu inventário",
