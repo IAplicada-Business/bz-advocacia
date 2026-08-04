@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# B&Z
 
-## Project info
+Lovable, 
 
-**URL**: https://lovable.dev/projects/1a09f2bd-c7b5-40b9-92ec-b2e20089beaa
+estou trabalhando em um projeto de uma cliente de consultoria e preciso do seu suporte para criar uma pagina de gestão da empresa das mesmas, anexo qual a paleta de cores deve ser usada e as logos. 
 
-## How can I edit this code?
 
-There are several ways of editing your application.
+iremos criar inicialmente um:
 
-**Use Lovable**
+Formulário Público de Captação
+URL separada: form.bzadvocacia.com.br
+Elementos:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1a09f2bd-c7b5-40b9-92ec-b2e20089beaa) and start prompting.
+Logo B&Z
+Título: "Fale Conosco"
+Campos obrigatórios:
 
-Changes made via Lovable will be committed automatically to this repo.
+Nome completo
+Email
+Telefone (com máscara)
+Tipo de processo (dropdown)
+Como nos conheceu (dropdown: Google, Instagram, Facebook, Indicação, Outro)
+Mensagem/Dúvida
 
-**Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Campos condicionais por tipo de processo:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Se "Divórcio": Regime de casamento, Tem filhos?, Bens a partilhar?
+Se "Inventário": Valor estimado dos bens, Número de herdeiros
+Se "Pensão Alimentícia": Situação atual, Valor pretendido
 
-Follow these steps:
+
+Upload de documentos (RG, CPF, outros)
+Checkbox LGPD
+Botão "Enviar"
+Página de confirmação: "Recebemos seu contato. Retornaremos em até 24h"
+
+
+use as fotos anexas e logos para criar esse forms em uma só pagina, coloque as fotos como background 
+
+conecte ao cloud e crie as tabelas iniciais para armazenamento das informações
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://bz-advocacia.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/1a09f2bd-c7b5-40b9-92ec-b2e20089beaa).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/1a09f2bd-c7b5-40b9-92ec-b2e20089beaa) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
