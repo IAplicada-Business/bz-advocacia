@@ -21,8 +21,9 @@ export const divorcioContent: LpContent = {
     "Mais de 10 anos de experiência",
     "Atendimento em todo o Brasil",
   ],
-  heroImage: "/IMG_8339.jpg",
-  heroObjectPosition: "center 18%",
+  heroImage: "/IMG_8339_hero.jpg",
+  // Asset landscape com folga acima da cabeça (padrão LP Saúde)
+  heroObjectPosition: "center 8%",
   finalCtaImage: "/IMG_8535.jpg",
   finalCtaObjectPosition: "center 30%",
   formTitle: "Análise gratuita do seu caso",
