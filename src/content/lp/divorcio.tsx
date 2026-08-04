@@ -5,7 +5,7 @@ export const divorcioContent: LpContent = {
   metaTitle: "Partilha Protegida | Borges & Zembruski Advocacia",
   metaDescription:
     "Divórcio com partilha de bens com mapa patrimonial completo. Análise gratuita do seu caso.",
-  eyebrow: "Partilha Protegida · Divórcio com partilha de bens",
+  eyebrow: "PARTILHA PROTEGIDA · DIVÓRCIO COM PARTILHA DE BENS",
   headline: (
     <>
       Saia do casamento em <em>6 meses</em>, com o mapa completo do que{" "}
@@ -15,7 +15,7 @@ export const divorcioContent: LpContent = {
   headlinePlain:
     "Saia do casamento em 6 meses, com o mapa completo do que é seu, sem depender do humor dele.",
   subheadline:
-    "Estratégia centrada no mapeamento patrimonial antes das negociações. Você chega preparada — com números, documentos e postura — não pedindo o que “ele achar justo”.",
+    "Estratégia centrada no mapeamento patrimonial antes das negociações. Você chega preparada, com números, documentos e postura, sem pedir o que “ele achar justo”.",
   bullets: [
     "Formadas pela PUCRS",
     "Mais de 10 anos de experiência",
@@ -24,6 +24,7 @@ export const divorcioContent: LpContent = {
   heroImage: "/IMG_8339.jpg",
   heroObjectPosition: "center 18%",
   finalCtaImage: "/IMG_8535.jpg",
+  finalCtaObjectPosition: "center 30%",
   formTitle: "Análise gratuita do seu caso",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [
@@ -175,7 +176,7 @@ export const divorcioContent: LpContent = {
   testimonials: [
     {
       name: "M.C.",
-      text: "Pela primeira vez alguém me disse o que eu podia exigir — com prova, não com esperança.",
+      text: "Pela primeira vez alguém me disse o que eu podia exigir, com prova, não com esperança.",
     },
     {
       name: "R.S.",
@@ -189,7 +190,7 @@ export const divorcioContent: LpContent = {
   bonusesHeadline: "Bônus empilhados pra quem entra ainda este mês",
   bonuses: [
     {
-      badge: "Limitado — 3 vagas",
+      badge: "Limitado a 3 vagas",
       title: "Auditoria de bens ocultos",
       description: "Varredura aprofundada de indícios patrimoniais não declarados.",
     },
@@ -205,7 +206,7 @@ export const divorcioContent: LpContent = {
     },
   ],
   urgencyBar:
-    "Aceitamos poucos casos por mês para manter qualidade e acompanhamento próximo — fale conosco agora.",
+    "Aceitamos poucos casos por mês para manter qualidade e acompanhamento próximo. Fale conosco agora.",
   finalHeadline: (
     <>
       Chega de esperar <em>ele decidir</em> o que é seu.

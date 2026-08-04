@@ -5,7 +5,7 @@ export const saudeContent: LpContent = {
   metaTitle: "Cobertura Garantida | Borges & Zembruski Advocacia",
   metaDescription:
     "Análise gratuita da negativa do plano de saúde. Especialistas em Direito da Saúde com atendimento em todo o Brasil.",
-  eyebrow: "Cobertura Garantida · Direito da Saúde",
+  eyebrow: "COBERTURA GARANTIDA · DIREITO DA SAÚDE",
   headline: (
     <>
       Garanta o tratamento do seu familiar sem depender da autorização do{" "}
@@ -14,16 +14,16 @@ export const saudeContent: LpContent = {
   ),
   headlinePlain: "Garanta o tratamento do seu familiar sem depender da autorização do plano.",
   subheadline:
-    "Quando o plano nega medicamento, cirurgia ou internação, cada dia conta. Atuamos com urgência para destravar a cobertura — com estratégia jurídica clara desde o primeiro contato.",
+    "Quando o plano nega medicamento, cirurgia ou internação, cada dia conta. Atuamos com urgência para destravar a cobertura, com estratégia jurídica clara desde o primeiro contato.",
   bullets: [
     "Especialistas em Direito da Saúde",
     "Atendimento em todo o Brasil",
-    "Desde 2019 com foco em planos de saúde",
+    "Desde 2019 exclusivamente com planos",
   ],
-  heroImage: "/IMG_8432.jpg",
-  // Foto vertical com motion blur: ancora no meio para mostrar as duas sócias
-  heroObjectPosition: "center 42%",
-  finalCtaImage: "/IMG_8379.jpg",
+  heroImage: "/IMG_8379.jpg",
+  heroObjectPosition: "72% 28%",
+  finalCtaImage: "/IMG_8432.jpg",
+  finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
   formSubtitle: "Resposta em até 1 dia útil · WhatsApp",
   formFields: [
@@ -122,12 +122,12 @@ export const saudeContent: LpContent = {
     {
       number: "3",
       title: "Acompanhamento",
-      conventional: "Ganha a liminar e some — o plano atrasa de novo.",
+      conventional: "Ganha a liminar e some e o plano atrasa de novo.",
       different: "Monitoramos cumprimento e acionamos execução assim que houver atraso.",
     },
   ],
   mechanismCallout:
-    "Cobertura Garantida não é só ganhar a liminar. É fazer o plano cumprir — com estratégia, prazo e pressão.",
+    "Cobertura Garantida não é só ganhar a liminar. É fazer o plano cumprir, com estratégia, prazo e pressão.",
   featuresHeadline: (
     <>
       O que está incluso na <em>Cobertura Garantida</em>
@@ -170,7 +170,7 @@ export const saudeContent: LpContent = {
   resultMetric: "R$ 90k",
   resultLabel: "em tratamento liberado",
   resultStory:
-    "Família com negativa de medicamento de alto custo. Em menos de uma semana após a tutela, o plano autorizou o tratamento sob multa diária — e cumpriu.",
+    "Família com negativa de medicamento de alto custo. Em menos de uma semana após a tutela, o plano autorizou o tratamento sob multa diária, e cumpriu.",
   testimonials: [
     {
       name: "A.M.",
@@ -195,7 +195,7 @@ export const saudeContent: LpContent = {
     {
       badge: "Se entrar esta semana",
       title: "Checklist de documentos",
-      description: "Roteiro pronto do que pedir ao hospital e ao plano — sem retrabalho.",
+      description: "Roteiro pronto do que pedir ao hospital e ao plano, sem retrabalho.",
     },
     {
       badge: "Padrão",
@@ -204,7 +204,7 @@ export const saudeContent: LpContent = {
     },
   ],
   urgencyBar:
-    "Casos de urgência clínica extrema têm prioridade absoluta na triagem — fale conosco hoje.",
+    "Casos de urgência clínica extrema têm prioridade absoluta na triagem. Fale conosco hoje.",
   finalHeadline: (
     <>
       Cada dia sem tratamento é <em>um dia a mais</em> de risco.

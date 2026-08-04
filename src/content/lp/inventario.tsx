@@ -5,14 +5,14 @@ export const inventarioContent: LpContent = {
   metaTitle: "Inventário Otimizado | Borges & Zembruski Advocacia",
   metaDescription:
     "Reduza o imposto do inventário e desatravese a partilha com estratégia. Análise gratuita do seu inventário.",
-  eyebrow: "Inventário Otimizado · Sucessões",
+  eyebrow: "INVENTÁRIO OTIMIZADO · SUCESSÕES",
   headline: (
     <>
-      Reduza o imposto do inventário em <em>até 87%</em> — e destrave a partilha sem guerra na família.
+      Reduza o imposto do inventário em <em>até 87%</em> e destrave a partilha sem guerra na família.
     </>
   ),
   headlinePlain:
-    "Reduza o imposto do inventário em até 87% — e destrave a partilha sem guerra na família.",
+    "Reduza o imposto do inventário em até 87% e destrave a partilha sem guerra na família.",
   subheadline:
     "Inventário travado, imposto alto e herdeiros em conflito não precisam ser o destino. Montamos o mapa patrimonial e a estratégia tributária antes de qualquer passo precipitado.",
   bullets: [
@@ -21,9 +21,9 @@ export const inventarioContent: LpContent = {
     "Mais de 10 anos em família e sucessões",
   ],
   heroImage: "/IMG_8077.jpg",
-  // Sofá: rostos no terço superior — evita corte no topo do frame arredondado
-  heroObjectPosition: "center 12%",
+  heroObjectPosition: "center 14%",
   finalCtaImage: "/IMG_8287.jpg",
+  finalCtaObjectPosition: "center 25%",
   formTitle: "Análise gratuita do seu inventário",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [
@@ -71,8 +71,8 @@ export const inventarioContent: LpContent = {
       placeholder: "Selecione",
       options: [
         "Sim, todos alinhados",
-        "Parcial — há atritos",
-        "Não — conflito aberto",
+        "Parcial, há atritos",
+        "Não, conflito aberto",
         "Prefiro não dizer agora",
       ],
     },
@@ -98,7 +98,7 @@ export const inventarioContent: LpContent = {
   ],
   mechanismHeadline: (
     <>
-      Por que inventário “no automático” <em>custa caro</em> — e o que fazemos diferente.
+      Por que inventário “no automático” <em>custa caro</em> e o que fazemos diferente.
     </>
   ),
   mechanismSteps: [
@@ -122,7 +122,7 @@ export const inventarioContent: LpContent = {
     },
   ],
   mechanismCallout:
-    "Inventário Otimizado é mapa + tributo + condução familiar — não é só “abrir o processo”.",
+    "Inventário Otimizado é mapa + tributo + condução familiar, não é só “abrir o processo”.",
   featuresHeadline: (
     <>
       O que está incluso no <em>Inventário Otimizado</em>
@@ -139,7 +139,7 @@ export const inventarioContent: LpContent = {
     },
     {
       title: "Roteiro de documentos",
-      description: "O que cada herdeiro precisa — sem idas e vindas infinitas.",
+      description: "O que cada herdeiro precisa, sem idas e vindas infinitas.",
     },
     {
       title: "Condução entre herdeiros",
@@ -173,7 +173,7 @@ export const inventarioContent: LpContent = {
     },
     {
       name: "L.F.",
-      text: "Irmãos brigando há anos. Elas trouxeram método e números — saímos do impasse.",
+      text: "Irmãos brigando há anos. Elas trouxeram método e números, e saímos do impasse.",
     },
     {
       name: "P.R.",
@@ -199,7 +199,7 @@ export const inventarioContent: LpContent = {
     },
   ],
   urgencyBar:
-    "Mudanças de alíquota e filas de cartório mudam o jogo — quanto antes o mapa estiver pronto, melhor.",
+    "Mudanças de alíquota e filas de cartório mudam o jogo. Quanto antes o mapa estiver pronto, melhor.",
   finalHeadline: (
     <>
       Descubra <em>quanto você pode economizar</em> no inventário.
