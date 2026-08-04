@@ -21,8 +21,8 @@ export const saudeContent: LpContent = {
     "Desde 2019 exclusivamente com planos",
   ],
   heroImage: "/IMG_8379_hero.jpg",
-  // Asset já recortado com as caras no frame; ancora no topo
-  heroObjectPosition: "center top",
+  // Asset landscape com folga acima da cabeça
+  heroObjectPosition: "center 8%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",

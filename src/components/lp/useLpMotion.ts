@@ -26,7 +26,7 @@ export function useLpMotion(rootSelector = ".lp-theme") {
       if (header) header.dataset.solid = y > 24 ? "true" : "false";
 
       if (heroImg) {
-        heroImg.style.transformOrigin = "center top";
+        heroImg.style.transformOrigin = "center 8%";
         heroImg.style.transform = "none";
       }
 
