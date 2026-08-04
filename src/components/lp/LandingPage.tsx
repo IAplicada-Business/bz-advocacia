@@ -63,11 +63,11 @@ export function LandingPage({ content }: LandingPageProps) {
           alt=""
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover opacity-[0.55]"
-          style={{ objectPosition: content.heroObjectPosition ?? "70% 58%" }}
+          style={{ objectPosition: content.heroObjectPosition ?? "70% 65%" }}
         />
         {/* Gradiente só da esquerda; sem véu no topo */}
         <div className="absolute inset-0 bg-gradient-to-r from-lp-cream from-[0%] via-lp-cream/85 via-[42%] to-transparent to-[78%]" />
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-lp-cream/55 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-lp-cream/50 to-transparent" />
 
         <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-24 md:px-10 md:pb-20 md:pt-28 lg:px-14">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
