@@ -41,12 +41,12 @@ export function LandingPage({ content }: LandingPageProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/80 via-transparent to-lp-cream/40" />
 
         <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-14 pt-28 md:px-10 md:pb-16 md:pt-32 lg:px-14">
-            <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,400px)] lg:gap-12 xl:gap-16">
-            <div data-reveal className="lp-reveal w-full max-w-[36rem] justify-self-start">
+            <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
+            <div data-reveal className="lp-reveal w-full max-w-[40rem] justify-self-start">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
                 {content.eyebrow}
               </p>
-              <h1 className="mt-4 font-seasons text-[2.35rem] font-medium leading-[1.12] text-lp-ink md:text-5xl lg:text-[3.2rem]">
+              <h1 className="mt-4 font-seasons text-[2.65rem] font-medium leading-[1.1] text-lp-ink md:text-[3.25rem] lg:text-[3.7rem]">
                 {content.headline}
               </h1>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-lp-muted md:text-[1.05rem]">
