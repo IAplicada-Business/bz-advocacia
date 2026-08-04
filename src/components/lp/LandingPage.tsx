@@ -28,69 +28,159 @@ export function LandingPage({ content }: LandingPageProps) {
     <div className="lp-theme min-h-screen bg-lp-cream font-sans text-lp-ink antialiased">
       <LpHeader onCtaClick={scrollToForm} />
 
-      {/* HERO — foto nítida à direita, texto escuro à esquerda (ref Drive) */}
-      <section className="relative overflow-hidden px-5 pb-10 pt-24 md:px-8 md:pb-16 md:pt-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(197,160,89,0.14),_transparent_55%)]" />
+      {/* HERO */}
+      {content.heroStyle === "background" ? (
+        <section className="relative min-h-[100svh] overflow-hidden">
+          {/* Foto de fundo com transparência */}
+          <img
+            src={content.heroImage}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full scale-105 object-cover opacity-[0.42]"
+            style={{ objectPosition: content.heroObjectPosition ?? "70% 30%" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-lp-cream via-lp-cream/92 to-lp-cream/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-lp-cream via-transparent to-lp-cream/50" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-          <div data-reveal className="lp-reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
-              — {content.eyebrow}
-            </p>
-            <h1 className="mt-4 font-seasons text-[2.4rem] font-medium leading-[1.12] text-lp-ink md:text-5xl lg:text-[3.25rem]">
-              {content.headline}
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-lp-muted md:text-lg">
-              {content.subheadline}
-            </p>
-            <ul className="mt-7 space-y-3">
-              {content.bullets.map((bullet) => (
-                <li key={bullet} className="flex items-start gap-3 text-sm text-lp-ink/85 md:text-[15px]">
-                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
-                    <Check className="h-3 w-3" strokeWidth={2.5} />
-                  </span>
-                  {bullet}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={scrollToForm}
-                className="inline-flex items-center gap-2 rounded-full bg-lp-ink px-6 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-lp-ink/90"
-              >
-                {content.formCta.replace(" →", "")}
-              </button>
-              <p className="text-xs text-lp-muted">Análise gratuita · retorno em até 1 dia útil</p>
+          <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-28 md:px-10 md:pb-20 md:pt-32 lg:px-14">
+            <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)] lg:gap-16 xl:gap-24">
+              {/* Texto puxado à esquerda — sem centralizar o bloco */}
+              <div data-reveal className="lp-reveal w-full max-w-[34rem] justify-self-start">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
+                  — {content.eyebrow}
+                </p>
+                <h1 className="mt-4 font-seasons text-[2.35rem] font-medium leading-[1.12] text-lp-ink md:text-5xl lg:text-[3.15rem]">
+                  {content.headline}
+                </h1>
+                <p className="mt-5 max-w-lg text-base leading-relaxed text-lp-muted md:text-lg">
+                  {content.subheadline}
+                </p>
+                <ul className="mt-7 space-y-3">
+                  {content.bullets.map((bullet) => (
+                    <li key={bullet} className="flex items-start gap-3 text-sm text-lp-ink/85 md:text-[15px]">
+                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
+                        <Check className="h-3 w-3" strokeWidth={2.5} />
+                      </span>
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={scrollToForm}
+                    className="inline-flex items-center gap-2 rounded-full bg-lp-ink px-6 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-lp-ink/90"
+                  >
+                    {content.formCta.replace(" →", "")}
+                  </button>
+                  <p className="text-xs text-lp-muted">Análise gratuita · retorno em até 1 dia útil</p>
+                </div>
+              </div>
+
+              {/* Forbes / qualificação no lugar da foto */}
+              {content.trustPanel && (
+                <div data-reveal className="lp-reveal lp-reveal-delay lg:justify-self-end lg:w-full lg:max-w-md">
+                  <aside className="rounded-2xl border border-lp-ink/10 bg-white/75 p-7 shadow-lp backdrop-blur-md md:p-8">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-lp-gold">
+                      {content.trustPanel.eyebrow}
+                    </p>
+                    <p className="mt-4 font-seasons text-5xl tracking-[0.04em] text-lp-ink md:text-6xl">
+                      {content.trustPanel.brand}
+                    </p>
+                    <div className="mt-3 h-px w-16 bg-lp-gold/70" />
+                    <h2 className="mt-5 font-seasons text-2xl text-lp-ink md:text-[1.7rem]">
+                      {content.trustPanel.title}
+                    </h2>
+                    <ul className="mt-5 space-y-3">
+                      {content.trustPanel.lines.map((line) => (
+                        <li key={line} className="flex items-start gap-3 text-sm leading-relaxed text-lp-muted">
+                          <span className="mt-1 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
+                            <Check className="h-2.5 w-2.5" strokeWidth={2.5} />
+                          </span>
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                  </aside>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={scrollToForm}
+              className="mt-14 flex flex-col items-start gap-1 text-lp-ink/40 transition hover:text-lp-gold"
+              aria-label="Ir para o formulário"
+            >
+              <span className="text-[10px] uppercase tracking-[0.24em]">Continuar</span>
+              <ChevronDown className="h-5 w-5 animate-bounce" />
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section className="relative overflow-hidden px-5 pb-10 pt-24 md:px-8 md:pb-16 md:pt-28">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(197,160,89,0.14),_transparent_55%)]" />
+
+          <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+            <div data-reveal className="lp-reveal">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
+                — {content.eyebrow}
+              </p>
+              <h1 className="mt-4 font-seasons text-[2.4rem] font-medium leading-[1.12] text-lp-ink md:text-5xl lg:text-[3.25rem]">
+                {content.headline}
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-lp-muted md:text-lg">
+                {content.subheadline}
+              </p>
+              <ul className="mt-7 space-y-3">
+                {content.bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-3 text-sm text-lp-ink/85 md:text-[15px]">
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
+                      <Check className="h-3 w-3" strokeWidth={2.5} />
+                    </span>
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <button
+                  type="button"
+                  onClick={scrollToForm}
+                  className="inline-flex items-center gap-2 rounded-full bg-lp-ink px-6 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-lp-ink/90"
+                >
+                  {content.formCta.replace(" →", "")}
+                </button>
+                <p className="text-xs text-lp-muted">Análise gratuita · retorno em até 1 dia útil</p>
+              </div>
+            </div>
+
+            <div data-reveal className="lp-reveal lp-reveal-delay relative">
+              <div className="lp-hero-frame relative overflow-hidden rounded-[1.75rem] bg-lp-stone shadow-lp">
+                <img
+                  src={content.heroImage}
+                  alt={content.headlinePlain}
+                  className="lp-hero-img aspect-[4/5] w-full object-cover sm:aspect-[5/6] lg:aspect-[4/5]"
+                  style={{ objectPosition: content.heroObjectPosition ?? "center 30%" }}
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-lp-ink/35 to-transparent" />
+              </div>
+              <div className="absolute -bottom-3 left-4 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-lp-ink shadow-sm backdrop-blur md:left-6">
+                Borges & Zembruski
+              </div>
             </div>
           </div>
 
-          <div data-reveal className="lp-reveal lp-reveal-delay relative">
-            <div className="lp-hero-frame relative overflow-hidden rounded-[1.75rem] bg-lp-stone shadow-lp">
-              <img
-                src={content.heroImage}
-                alt={content.headlinePlain}
-                className="lp-hero-img aspect-[4/5] w-full object-cover sm:aspect-[5/6] lg:aspect-[4/5]"
-                style={{ objectPosition: content.heroObjectPosition ?? "center 30%" }}
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-lp-ink/35 to-transparent" />
-            </div>
-            <div className="absolute -bottom-3 left-4 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-lp-ink shadow-sm backdrop-blur md:left-6">
-              Borges & Zembruski
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={scrollToForm}
-          className="mx-auto mt-12 flex flex-col items-center gap-1 text-lp-ink/40 transition hover:text-lp-gold"
-          aria-label="Ir para o formulário"
-        >
-          <span className="text-[10px] uppercase tracking-[0.24em]">Continuar</span>
-          <ChevronDown className="h-5 w-5 animate-bounce" />
-        </button>
-      </section>
+          <button
+            type="button"
+            onClick={scrollToForm}
+            className="mx-auto mt-12 flex flex-col items-center gap-1 text-lp-ink/40 transition hover:text-lp-gold"
+            aria-label="Ir para o formulário"
+          >
+            <span className="text-[10px] uppercase tracking-[0.24em]">Continuar</span>
+            <ChevronDown className="h-5 w-5 animate-bounce" />
+          </button>
+        </section>
+      )}
 
       {/* FORM — dobra própria, full contraste */}
       <section ref={formRef} id="analise" className="scroll-mt-24 bg-white px-5 py-16 md:px-8 md:py-20">

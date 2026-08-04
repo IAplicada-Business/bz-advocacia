@@ -36,6 +36,13 @@ export type LpBonus = {
   description: string;
 };
 
+export type LpTrustPanel = {
+  brand: string;
+  eyebrow: string;
+  title: string;
+  lines: string[];
+};
+
 export type LpContent = {
   slug: "saude" | "inventario" | "divorcio";
   metaTitle: string;
@@ -48,6 +55,13 @@ export type LpContent = {
   heroImage: string;
   /** CSS object-position do hero (ex.: "center 22%") para não cortar rostos */
   heroObjectPosition?: string;
+  /**
+   * photo-panel: foto em frame à direita (padrão)
+   * background: foto atrás com transparência + painel de confiança à direita
+   */
+  heroStyle?: "photo-panel" | "background";
+  /** Qualificação / selo no lugar da foto (ex.: Forbes) */
+  trustPanel?: LpTrustPanel;
   finalCtaImage: string;
   formTitle: string;
   formSubtitle: string;
