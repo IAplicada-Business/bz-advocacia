@@ -208,8 +208,8 @@ export function LandingPage({ content }: LandingPageProps) {
         </div>
       </section>
 
-      {/* 4. INCLUSO */}
-      <section data-fold className="lp-fold bg-lp-ink px-5 text-white md:px-8">
+      {/* 4. INCLUSO — dobra escura: marca-texto invertido (preto + letra dourada) */}
+      <section data-fold data-lp-em="dark" className="lp-fold bg-lp-ink px-5 text-white md:px-8">
         <div className="lp-fold-inner mx-auto w-full max-w-6xl">
           <h2
             data-reveal
@@ -383,8 +383,12 @@ export function LandingPage({ content }: LandingPageProps) {
         </div>
       </section>
 
-      {/* 7. CTA FINAL — faixa curta, texto/botão centralizados (padrão LP Saúde) */}
-      <section data-fold className="relative overflow-hidden px-5 py-16 md:px-8 md:py-20">
+      {/* 7. CTA FINAL — faixa escura: marca-texto invertido (preto + letra dourada) */}
+      <section
+        data-fold
+        data-lp-em="dark"
+        className="relative overflow-hidden px-5 py-16 md:px-8 md:py-20"
+      >
         <img
           src={content.finalCtaImage}
           alt=""

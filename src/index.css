@@ -142,7 +142,7 @@ All colors MUST be HSL.
     --lp-ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Ênfase tipo marca-texto: texto escuro + fundo dourado (legível no hero) */
+  /* Ênfase tipo marca-texto: texto escuro + fundo dourado (hero e dobras claras) */
   .lp-theme em,
   .lp-theme .lp-em {
     font-style: italic;
@@ -159,6 +159,26 @@ All colors MUST be HSL.
     margin: 0 -0.04em;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
+  }
+
+  /*
+   * Dobras escuras: inverte o marca-texto (barra preta + letra dourada).
+   * Hero/header ficam no estilo aprovado acima. Marcar com data-lp-em="dark"
+   * ou usar bg-lp-ink / text-white na seção.
+   */
+  .lp-theme [data-lp-em="dark"] em,
+  .lp-theme [data-lp-em="dark"] .lp-em,
+  .lp-theme .bg-lp-ink em,
+  .lp-theme .bg-lp-ink .lp-em {
+    color: var(--lp-gold);
+    /* Preto opaco o bastante pra ler sobre fundo ink; letra dourada na frente */
+    background-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 52%,
+      rgba(0, 0, 0, 0.78) 52%,
+      rgba(0, 0, 0, 0.78) 100%
+    );
   }
 
   /* Sobre o hero: transparente (não cria “faixa” que corta a foto). Solidifica no scroll. */
