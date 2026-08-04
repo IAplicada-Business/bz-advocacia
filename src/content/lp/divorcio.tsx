@@ -21,10 +21,10 @@ export const divorcioContent: LpContent = {
     "Mais de 10 anos de experiência",
     "Atendimento em todo o Brasil",
   ],
-  heroImage: "/IMG_8339_hero.jpg",
-  // Asset landscape com folga acima da cabeça (padrão LP Saúde)
-  heroObjectPosition: "center 8%",
-  finalCtaImage: "/IMG_8535.jpg",
+  heroImage: "/IMG_8535_hero.jpg",
+  // Sócias com tablet; leve viés à esquerda p/ as duas entrarem no mobile
+  heroObjectPosition: "38% 8%",
+  finalCtaImage: "/IMG_8339.jpg",
   finalCtaObjectPosition: "center 30%",
   formTitle: "Análise gratuita do seu caso",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
