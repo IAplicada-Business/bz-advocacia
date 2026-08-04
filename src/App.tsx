@@ -7,8 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useHasPageAccess } from "@/hooks/usePagePermissions";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AccessDenied } from "@/components/AccessDenied";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import LpSaude from "./pages/lp/LpSaude";
+import LpInventario from "./pages/lp/LpInventario";
+import LpDivorcio from "./pages/lp/LpDivorcio";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import Atendimento from "./pages/Atendimento";
@@ -117,6 +119,12 @@ const App = () => {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/auth" element={<Auth />} />
+
+      {/* Landing pages públicas (antes do login) */}
+      <Route path="/lpsaude" element={<LpSaude />} />
+      <Route path="/lpinventario" element={<LpInventario />} />
+      <Route path="/lpdivorcio" element={<LpDivorcio />} />
+
       <Route
         path="/dashboard"
         element={

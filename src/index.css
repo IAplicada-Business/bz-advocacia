@@ -133,3 +133,36 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Landing pages B&Z — branding premium (mockups LPs) */
+@keyframes lp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  .lp-theme {
+    --lp-ink: #1a1f1a;
+    --lp-gold: #c5a059;
+  }
+
+  .lp-theme .lp-fade-up {
+    animation: lp-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-theme .lp-fade-up-delay {
+    animation-delay: 0.15s;
+  }
+
+  .lp-theme em,
+  .lp-theme .lp-em {
+    font-style: italic;
+    color: #c5a059;
+  }
+}
