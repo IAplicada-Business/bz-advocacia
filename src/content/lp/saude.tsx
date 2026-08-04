@@ -22,7 +22,7 @@ export const saudeContent: LpContent = {
   ],
   heroImage: "/IMG_8379.jpg",
   // Faixa direita + offset de topo no markup: cabeças inteiras com folga
-  heroObjectPosition: "center 12%",
+  heroObjectPosition: "center 8%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
