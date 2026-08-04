@@ -46,18 +46,27 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
         },
       });
 
-      if (fnError) {
-        console.error("[LpLeadForm] invoke error:", fnError);
-        setError("Não foi possível enviar agora. Tente de novo em instantes.");
+      // supabase-js marca error em qualquer non-2xx; o body útil pode vir em data
+      // ou em error.context (Response). Preferimos a mensagem da function.
+      let payload = data as { error?: string; message?: string; ok?: boolean } | null;
+      if (!payload && fnError && "context" in fnError) {
+        try {
+          const ctx = (fnError as { context?: Response }).context;
+          if (ctx && typeof ctx.json === "function") {
+            payload = await ctx.json();
+          }
+        } catch {
+          /* ignore parse */
+        }
+      }
+
+      if (payload?.error === "invalid_contato") {
+        setError(payload.message ?? "Informe nome e WhatsApp com DDD.");
         return;
       }
 
-      if (data?.error === "invalid_contato") {
-        setError(data.message ?? "Informe nome e WhatsApp com DDD.");
-        return;
-      }
-
-      if (data?.error) {
+      if (payload?.error || fnError) {
+        console.error("[LpLeadForm] invoke error:", fnError, payload);
         setError("Não foi possível cadastrar seu caso. Tente novamente.");
         return;
       }
