@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Quote, Star } from "lucide-react";
 import { LpHeader } from "./LpHeader";
 import { LpFooter } from "./LpFooter";
 import { LpLeadForm } from "./LpLeadForm";
 import { useLpMotion } from "./useLpMotion";
+import { lpAvatarUrl } from "./avatar";
 import type { LpContent } from "./types";
 
 type LandingPageProps = {
@@ -12,6 +13,7 @@ type LandingPageProps = {
 
 export function LandingPage({ content }: LandingPageProps) {
   const formRef = useRef<HTMLDivElement>(null);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
   useLpMotion();
 
   useEffect(() => {
@@ -29,6 +31,8 @@ export function LandingPage({ content }: LandingPageProps) {
     folds[1]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const featured = content.testimonials[activeTestimonial] ?? content.testimonials[0];
+
   return (
     <div className="lp-theme min-h-screen bg-lp-cream font-sans text-lp-ink antialiased">
       <LpHeader onCtaClick={scrollToForm} />
@@ -40,11 +44,11 @@ export function LandingPage({ content }: LandingPageProps) {
           src={content.heroImage}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-[0.5]"
-          style={{ objectPosition: content.heroObjectPosition ?? "70% 30%" }}
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-top opacity-[0.5]"
+          style={{ objectPosition: content.heroObjectPosition ?? "70% 8%" }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-lp-cream via-lp-cream/88 to-lp-cream/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/70 via-transparent to-lp-cream/35" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/70 via-transparent to-lp-cream/20" />
 
         <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-20 pt-28 md:px-10 md:pb-24 md:pt-32 lg:px-14">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
@@ -202,88 +206,143 @@ export function LandingPage({ content }: LandingPageProps) {
         </div>
       </section>
 
-      {/* 5. PROVA SOCIAL */}
+      {/* 5. PROVA SOCIAL — interativa com avatares */}
       <section data-fold className="lp-fold bg-lp-cream px-5 md:px-8">
         <div className="lp-fold-inner mx-auto w-full max-w-6xl">
-          <article
-            data-reveal
-            className="lp-reveal lp-reveal-scale grid gap-10 rounded-2xl border border-lp-ink/5 bg-white p-9 shadow-sm md:grid-cols-[0.85fr_1.15fr] md:items-center md:gap-14 md:p-14 lg:p-16"
-          >
-            <div>
-              <p className="font-seasons text-6xl leading-none text-lp-gold md:text-7xl lg:text-8xl">
-                {content.resultMetric}
-              </p>
-              <p className="mt-4 text-xs uppercase tracking-[0.2em] text-lp-muted md:text-sm">
-                {content.resultLabel}
-              </p>
-            </div>
-            <p className="text-base leading-relaxed text-lp-ink/80 md:text-lg lg:text-xl">
-              {content.resultStory}
-            </p>
-          </article>
-
-          <div data-reveal className="lp-reveal mt-12 grid gap-7 md:mt-14 md:grid-cols-3 md:gap-8">
-            {content.testimonials.map((item) => (
-              <article
-                key={item.name}
-                data-stagger
-                className="flex min-h-[250px] flex-col rounded-2xl bg-white px-7 py-9 shadow-sm md:min-h-[280px]"
-              >
-                <div className="flex gap-1 text-lp-gold">
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <Star key={idx} className="h-3.5 w-3.5 fill-current" />
-                  ))}
+          <div className="grid items-stretch gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+            <article
+              data-reveal
+              className="lp-reveal lp-reveal-left flex flex-col justify-between rounded-[1.75rem] border border-lp-ink/5 bg-white p-8 shadow-sm md:p-10"
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={lpAvatarUrl(content.resultAvatarSeed)}
+                  alt=""
+                  className="h-16 w-16 rounded-full bg-lp-stone object-cover ring-2 ring-lp-gold/35"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-lp-ink">{content.resultAuthor}</p>
+                  {content.resultRole ? (
+                    <p className="mt-0.5 text-xs uppercase tracking-[0.16em] text-lp-muted">
+                      {content.resultRole}
+                    </p>
+                  ) : null}
                 </div>
-                <p className="mt-6 flex-1 text-sm leading-relaxed text-lp-ink/80 md:text-[15px]">
-                  “{item.text}”
+              </div>
+
+              <div className="mt-8">
+                <p className="font-seasons text-5xl leading-none text-lp-gold md:text-6xl lg:text-7xl">
+                  {content.resultMetric}
                 </p>
-                <p className="mt-7 text-xs font-medium uppercase tracking-[0.18em] text-lp-muted">
-                  {item.name}
+                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-lp-muted md:text-sm">
+                  {content.resultLabel}
                 </p>
-              </article>
-            ))}
+                <p className="mt-6 text-base leading-relaxed text-lp-ink/80 md:text-lg">
+                  {content.resultStory}
+                </p>
+              </div>
+            </article>
+
+            <div
+              data-reveal
+              className="lp-reveal lp-reveal-right flex flex-col rounded-[1.75rem] border border-lp-ink/5 bg-white p-6 shadow-sm md:p-8"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-lp-gold">
+                O que clientes dizem
+              </p>
+
+              <div className="mt-5 flex gap-3">
+                {content.testimonials.map((item, index) => (
+                  <button
+                    key={item.avatarSeed}
+                    type="button"
+                    onClick={() => setActiveTestimonial(index)}
+                    aria-label={`Ver depoimento de ${item.name}`}
+                    aria-pressed={activeTestimonial === index}
+                    className={`relative overflow-hidden rounded-full transition ${
+                      activeTestimonial === index
+                        ? "ring-2 ring-lp-gold ring-offset-2 ring-offset-white"
+                        : "opacity-55 hover:opacity-90"
+                    }`}
+                  >
+                    <img
+                      src={lpAvatarUrl(item.avatarSeed)}
+                      alt=""
+                      className="h-12 w-12 bg-lp-stone object-cover md:h-14 md:w-14"
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {featured ? (
+                <div key={featured.avatarSeed} className="mt-8 flex flex-1 flex-col">
+                  <div className="flex gap-1 text-lp-gold">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star key={idx} className="h-3.5 w-3.5 fill-current" />
+                    ))}
+                  </div>
+                  <blockquote className="mt-5 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink md:text-[1.55rem]">
+                    “{featured.text}”
+                  </blockquote>
+                  <div className="mt-8 border-t border-lp-ink/8 pt-5">
+                    <p className="text-sm font-semibold text-lp-ink">{featured.name}</p>
+                    {featured.role ? (
+                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-lp-muted">
+                        {featured.role}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 6. BÔNUS */}
+      {/* 6. CUIDADO B&Z — o que você recebe (sem “bônus da semana”) */}
       <section data-fold className="lp-fold bg-white px-5 md:px-8">
-        <div className="lp-fold-inner mx-auto w-full max-w-6xl">
+        <div className="lp-fold-inner mx-auto w-full max-w-5xl">
           <h2
             data-reveal
-            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-center font-seasons text-[2.25rem] leading-tight md:text-4xl lg:text-[3rem]"
+            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-center font-seasons text-[2.25rem] leading-tight md:text-4xl lg:text-[2.85rem]"
           >
-            {content.bonusesHeadline}
+            {content.careHeadline}
           </h2>
-          <div data-reveal className="lp-reveal mt-16 grid gap-7 md:mt-20 md:grid-cols-3 md:gap-8">
-            {content.bonuses.map((bonus) => (
-              <article
-                key={bonus.title}
-                data-stagger
-                className="flex min-h-[250px] flex-col rounded-2xl border border-lp-gold/25 bg-lp-cream/55 px-7 py-9 md:min-h-[290px] md:px-8 md:py-10"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-lp-gold">
-                  {bonus.badge}
-                </p>
-                <h3 className="mt-5 font-seasons text-[1.75rem] md:text-[1.9rem]">{bonus.title}</h3>
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-lp-muted md:text-[15px]">
-                  {bonus.description}
-                </p>
-              </article>
-            ))}
-          </div>
+
           <div
             data-reveal
-            className="lp-reveal mt-12 flex items-start gap-3 rounded-2xl border border-lp-gold/30 bg-lp-ink px-7 py-6 text-sm text-white/85 md:mt-14 md:items-center md:px-10 md:py-7 md:text-[15px]"
+            className="lp-reveal mt-14 divide-y divide-lp-ink/8 border-y border-lp-ink/8 md:mt-16"
           >
-            <span className="mt-0.5 text-lp-gold md:mt-0">✱</span>
-            <p>{content.urgencyBar}</p>
+            {content.careItems.map((item, index) => (
+              <div
+                key={item.title}
+                data-stagger
+                className="grid gap-3 py-7 md:grid-cols-[3.5rem_1fr] md:items-start md:gap-8 md:py-8"
+              >
+                <span className="font-seasons text-2xl text-lp-gold md:text-[1.75rem]">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="font-seasons text-xl text-lp-ink md:text-2xl">{item.title}</h3>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-lp-muted md:text-[15px]">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
+
+          <p
+            data-reveal
+            className="lp-reveal mt-10 text-center text-sm leading-relaxed text-lp-ink/65 md:mt-12 md:text-[15px]"
+          >
+            <span className="text-lp-gold">✱</span> {content.careNote}
+          </p>
         </div>
       </section>
 
-      {/* 7. CTA FINAL */}
-      <section data-fold className="relative min-h-[100svh] overflow-hidden px-5 py-32 md:px-8 md:py-40">
+      {/* 7. CTA FINAL — curto, centralizado */}
+      <section data-fold className="relative overflow-hidden px-5 py-16 md:px-8 md:py-20">
         <img
           src={content.finalCtaImage}
           alt=""
@@ -293,19 +352,19 @@ export function LandingPage({ content }: LandingPageProps) {
               content.finalCtaObjectPosition ?? content.heroObjectPosition ?? "center 30%",
           }}
         />
-        <div className="absolute inset-0 bg-lp-ink/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/75 via-lp-ink/45 to-lp-ink/35" />
+        <div className="absolute inset-0 bg-lp-ink/65" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/70 via-lp-ink/50 to-lp-ink/45" />
         <div
           data-reveal
-          className="lp-reveal lp-reveal-scale relative mx-auto flex min-h-[55svh] max-w-3xl flex-col items-center justify-center text-center text-white"
+          className="lp-reveal lp-reveal-scale relative mx-auto flex max-w-2xl flex-col items-center justify-center py-6 text-center text-white"
         >
-          <h2 className="font-seasons text-3xl leading-tight md:text-5xl lg:text-[3.5rem]">
+          <h2 className="font-seasons text-[1.85rem] leading-tight md:text-3xl lg:text-[2.35rem]">
             {content.finalHeadline}
           </h2>
           <button
             type="button"
             onClick={scrollToForm}
-            className="mt-12 rounded-full bg-lp-gold px-9 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-lp-ink transition hover:bg-lp-gold-soft md:mt-14"
+            className="mt-7 rounded-full bg-lp-gold px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-lp-ink transition hover:bg-lp-gold-soft"
           >
             {content.finalCta}
           </button>

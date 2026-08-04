@@ -21,8 +21,8 @@ export const saudeContent: LpContent = {
     "Desde 2019 exclusivamente com planos",
   ],
   heroImage: "/IMG_8379.jpg",
-  // Ancora à direita e um pouco mais alto para caber a cabeça inteira
-  heroObjectPosition: "82% 22%",
+  // Direita + topo: cabeças inteiras sem empurrar o texto
+  heroObjectPosition: "78% 0%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
@@ -172,40 +172,58 @@ export const saudeContent: LpContent = {
   resultLabel: "em tratamento liberado",
   resultStory:
     "Família com negativa de medicamento de alto custo. Em menos de uma semana após a tutela, o plano autorizou o tratamento sob multa diária, e cumpriu.",
+  resultAuthor: "Ana M.",
+  resultRole: "Filha · medicamento de alto custo",
+  resultAvatarSeed: "bz-saude-ana",
   testimonials: [
     {
-      name: "A.M.",
+      name: "Ana M.",
+      role: "Filha do paciente",
+      avatarSeed: "bz-saude-ana",
       text: "Eu estava desesperada com a negativa. Elas foram diretas, humanas e resolveram o que o plano enrolava há meses.",
     },
     {
-      name: "R.T.",
+      name: "Roberto T.",
+      role: "Esposo · cirurgia autorizada",
+      avatarSeed: "bz-saude-roberto",
       text: "Pela primeira vez senti que alguém lia o laudo de verdade. A liminar saiu e o plano cumpriu.",
     },
     {
-      name: "C.P.",
+      name: "Carla P.",
+      role: "Cuidadora da família",
+      avatarSeed: "bz-saude-carla",
       text: "Atendimento impecável. Explicaram cada passo sem juridiquês e acompanharam até o fim.",
     },
   ],
-  bonusesHeadline: "Bônus empilhados pra quem entra ainda esta semana",
-  bonuses: [
+  careHeadline: (
+    <>
+      O que muda quando a <em>Borges & Zembruski</em> cuida de você
+    </>
+  ),
+  careItems: [
     {
-      badge: "Semana atual",
-      title: "Prioridade na análise",
-      description: "Seu caso entra na fila prioritária de triagem clínica-jurídica.",
+      title: "Uma advogada responsável pelo seu caso",
+      description:
+        "Você fala com quem conduz a estratégia. Sem fila genérica, sem sumiço depois da liminar.",
     },
     {
-      badge: "Se entrar esta semana",
-      title: "Checklist de documentos",
-      description: "Roteiro pronto do que pedir ao hospital e ao plano, sem retrabalho.",
+      title: "Clareza do primeiro ao último passo",
+      description:
+        "Sabe o que estamos pedindo, por quê, e o que acontece se o plano descumprir.",
     },
     {
-      badge: "Padrão",
-      title: "Portal do cliente",
-      description: "Acesso ao acompanhamento digital do caso desde o onboarding.",
+      title: "Pressão até o tratamento sair",
+      description:
+        "Não basta ganhar no papel. Acompanhamos o cumprimento e acionamos execução quando preciso.",
+    },
+    {
+      title: "Familiares e cuidadores no mesmo mapa",
+      description:
+        "Orientação prática do que reunir, o que evitar dizer ao plano e como documentar sem se perder.",
     },
   ],
-  urgencyBar:
-    "Casos de urgência clínica extrema têm prioridade absoluta na triagem. Fale conosco hoje.",
+  careNote:
+    "Urgência clínica extrema tem prioridade na triagem. Se cada dia conta, fale conosco hoje.",
   finalHeadline: (
     <>
       Cada dia sem tratamento é <em>um dia a mais</em> de risco.
