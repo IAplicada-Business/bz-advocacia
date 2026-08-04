@@ -6,7 +6,7 @@ export function LpFooter() {
       <div className="mx-auto mt-6 max-w-xl space-y-2 text-sm leading-relaxed">
         <p>© {new Date().getFullYear()} Borges & Zembruski Advocacia. Todos os direitos reservados.</p>
         <p>Porto Alegre / RS · Atendimento em todo o Brasil</p>
-        <p className="text-white/40">OAB/RS — Juliana Borges · Eliziane Zembruski</p>
+        <p className="text-white/40">OAB/RS · Juliana Borges · Eliziane Zembruski</p>
       </div>
     </footer>
   );
