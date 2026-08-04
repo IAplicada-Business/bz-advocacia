@@ -32,7 +32,7 @@ export function LpLeadForm({ title, subtitle, fields, cta }: LpLeadFormProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-[420px] overflow-hidden rounded-[1.75rem] border border-white/55 bg-white/72 shadow-lp backdrop-blur-md lg:max-w-none"
+      className="w-full max-w-[480px] overflow-hidden rounded-[1.75rem] border border-white/55 bg-white/72 shadow-lp backdrop-blur-md lg:max-w-none"
     >
       <div className="border-b border-lp-ink/8 bg-white/45 px-5 py-4 md:px-6">
         <h2 className="font-seasons text-[1.55rem] leading-tight text-lp-ink md:text-[1.65rem]">{title}</h2>

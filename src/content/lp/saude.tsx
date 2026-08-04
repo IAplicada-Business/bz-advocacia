@@ -21,7 +21,8 @@ export const saudeContent: LpContent = {
     "Desde 2019 exclusivamente com planos",
   ],
   heroImage: "/IMG_8379.jpg",
-  heroObjectPosition: "72% 28%",
+  // Ancora à direita e um pouco mais alto para caber a cabeça inteira
+  heroObjectPosition: "82% 22%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
