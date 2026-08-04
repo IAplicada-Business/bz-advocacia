@@ -188,6 +188,12 @@ export const inventarioContent: LpContent = {
       avatarSeed: "bz-inv-paula",
       text: "Clareza do início ao fim. Eu sabia exatamente o que faltava e o porquê de cada passo.",
     },
+    {
+      name: "Helena M.",
+      role: "Herdeira · espólio familiar",
+      avatarSeed: "bz-inv-helena",
+      text: "A simulação de ITCMD mudou a conversa na família. Economizamos e o inventário saiu do limbo.",
+    },
   ],
   careHeadline: (
     <>

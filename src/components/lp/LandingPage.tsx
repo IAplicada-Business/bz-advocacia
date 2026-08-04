@@ -14,6 +14,7 @@ type LandingPageProps = {
 export function LandingPage({ content }: LandingPageProps) {
   const formRef = useRef<HTMLDivElement>(null);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [carouselPaused, setCarouselPaused] = useState(false);
   useLpMotion();
 
   useEffect(() => {
@@ -22,6 +23,16 @@ export function LandingPage({ content }: LandingPageProps) {
     if (meta) meta.setAttribute("content", content.metaDescription);
   }, [content]);
 
+  // Carrossel automático dos depoimentos
+  useEffect(() => {
+    const total = content.testimonials.length;
+    if (total < 2 || carouselPaused) return;
+    const id = window.setInterval(() => {
+      setActiveTestimonial((current) => (current + 1) % total);
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, [content.testimonials.length, carouselPaused]);
+
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -29,6 +40,13 @@ export function LandingPage({ content }: LandingPageProps) {
   const scrollToNext = () => {
     const folds = document.querySelectorAll<HTMLElement>("[data-fold]");
     folds[1]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const selectTestimonial = (index: number) => {
+    setActiveTestimonial(index);
+    // Pausa breve após clique manual, depois o auto retomará
+    setCarouselPaused(true);
+    window.setTimeout(() => setCarouselPaused(false), 7000);
   };
 
   const featured = content.testimonials[activeTestimonial] ?? content.testimonials[0];
@@ -246,17 +264,19 @@ export function LandingPage({ content }: LandingPageProps) {
             <div
               data-reveal
               className="lp-reveal lp-reveal-right flex flex-col rounded-[1.75rem] border border-lp-ink/5 bg-white p-6 shadow-sm md:p-8"
+              onMouseEnter={() => setCarouselPaused(true)}
+              onMouseLeave={() => setCarouselPaused(false)}
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-lp-gold">
                 O que clientes dizem
               </p>
 
-              <div className="mt-5 flex gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 {content.testimonials.map((item, index) => (
                   <button
                     key={item.avatarSeed}
                     type="button"
-                    onClick={() => setActiveTestimonial(index)}
+                    onClick={() => selectTestimonial(index)}
                     aria-label={`Ver depoimento de ${item.name}`}
                     aria-pressed={activeTestimonial === index}
                     className={`relative overflow-hidden rounded-full transition ${
@@ -267,7 +287,7 @@ export function LandingPage({ content }: LandingPageProps) {
                   >
                     <img
                       src={lpAvatarUrl(item.avatarSeed)}
-                      alt=""
+                      alt={item.name}
                       className="h-12 w-12 bg-lp-stone object-cover md:h-14 md:w-14"
                     />
                   </button>
@@ -281,7 +301,7 @@ export function LandingPage({ content }: LandingPageProps) {
                       <Star key={idx} className="h-3.5 w-3.5 fill-current" />
                     ))}
                   </div>
-                  <blockquote className="mt-5 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink md:text-[1.55rem]">
+                  <blockquote className="mt-5 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink transition-opacity duration-500 md:text-[1.55rem]">
                     “{featured.text}”
                   </blockquote>
                   <div className="mt-8 border-t border-lp-ink/8 pt-5">
@@ -291,6 +311,17 @@ export function LandingPage({ content }: LandingPageProps) {
                         {featured.role}
                       </p>
                     ) : null}
+                  </div>
+
+                  <div className="mt-5 flex gap-1.5" aria-hidden>
+                    {content.testimonials.map((item, index) => (
+                      <span
+                        key={`dot-${item.avatarSeed}`}
+                        className={`h-1 rounded-full transition-all duration-500 ${
+                          activeTestimonial === index ? "w-6 bg-lp-gold" : "w-1.5 bg-lp-ink/15"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
               ) : null}

@@ -195,6 +195,12 @@ export const divorcioContent: LpContent = {
       avatarSeed: "bz-div-fernanda",
       text: "Processo organizado, humanas e firmes. Saí do casamento com clareza e dignidade.",
     },
+    {
+      name: "Beatriz N.",
+      role: "Partilha com bens ocultos",
+      avatarSeed: "bz-div-beatriz",
+      text: "Descobrimos o que não estava na mesa. Cheguei preparada e a partilha foi nos meus termos.",
+    },
   ],
   careHeadline: (
     <>

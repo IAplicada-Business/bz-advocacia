@@ -194,6 +194,12 @@ export const saudeContent: LpContent = {
       avatarSeed: "bz-saude-carla",
       text: "Atendimento impecável. Explicaram cada passo sem juridiquês e acompanharam até o fim.",
     },
+    {
+      name: "Juliana S.",
+      role: "Mãe · internação liberada",
+      avatarSeed: "bz-saude-juliana",
+      text: "Em 48 horas já tínhamos caminho claro. O plano liberou a internação e eu voltei a dormir.",
+    },
   ],
   careHeadline: (
     <>
