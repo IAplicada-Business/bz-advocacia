@@ -166,39 +166,57 @@ export const inventarioContent: LpContent = {
   resultLabel: "de redução no imposto",
   resultStory:
     "Espólio com avaliação inflada e inventário parado. Reorganizamos a base, alinhamos os herdeiros e a família concluiu a partilha com economia relevante de ITCMD.",
+  resultAuthor: "Marina S.",
+  resultRole: "Herdeira · inventário familiar",
+  resultAvatarSeed: "bz-inv-marina",
   testimonials: [
     {
-      name: "M.S.",
+      name: "Marina S.",
+      role: "Herdeira",
+      avatarSeed: "bz-inv-marina",
       text: "Acharam caminho no imposto que nenhum contador tinha me mostrado. Processo finalmente andou.",
     },
     {
-      name: "L.F.",
+      name: "Lucas F.",
+      role: "Co-herdeiro",
+      avatarSeed: "bz-inv-lucas",
       text: "Irmãos brigando há anos. Elas trouxeram método e números, e saímos do impasse.",
     },
     {
-      name: "P.R.",
+      name: "Paula R.",
+      role: "Inventariante",
+      avatarSeed: "bz-inv-paula",
       text: "Clareza do início ao fim. Eu sabia exatamente o que faltava e o porquê de cada passo.",
     },
   ],
-  bonusesHeadline: "Bônus empilhados pra quem fecha ainda este mês",
-  bonuses: [
+  careHeadline: (
+    <>
+      O que muda quando a <em>Borges & Zembruski</em> cuida de você
+    </>
+  ),
+  careItems: [
     {
-      badge: "Exclusivo",
-      title: "Simulação de ITCMD",
-      description: "Cenários comparativos antes de protocolar qualquer coisa.",
+      title: "Mapa patrimonial antes de qualquer protocolo",
+      description:
+        "Você enxerga bens, riscos e caminhos de economia de imposto antes de gastar energia no cartório.",
     },
     {
-      badge: "Se fechar no mês",
-      title: "Sessão familiar guiada",
-      description: "Uma reunião estruturada com os herdeiros para alinhar expectativas.",
+      title: "Condução entre herdeiros com método",
+      description:
+        "Menos atrito, mais decisão. Facilitamos o alinhamento com números e próximos passos claros.",
     },
     {
-      badge: "Padrão",
-      title: "Portal do cliente",
-      description: "Visibilidade total de prazos, documentos e próximos atos.",
+      title: "Estratégia tributária sob medida",
+      description:
+        "Simulações e escolhas que cabem no seu espólio, não um modelo genérico de inventário.",
+    },
+    {
+      title: "Acompanhamento até a partilha fechar",
+      description:
+        "Status, documentos e atos no mesmo ritmo. Você sabe o que falta e quem precisa agir.",
     },
   ],
-  urgencyBar:
+  careNote:
     "Mudanças de alíquota e filas de cartório mudam o jogo. Quanto antes o mapa estiver pronto, melhor.",
   finalHeadline: (
     <>

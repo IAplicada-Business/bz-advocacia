@@ -173,40 +173,58 @@ export const divorcioContent: LpContent = {
   resultLabel: "do patrimônio mapeado",
   resultStory:
     "Cliente descobriu contas e participação societária que não haviam sido mencionadas. Com o mapa completo, a partilha saiu do “achismo” e foi para números.",
+  resultAuthor: "Mariana C.",
+  resultRole: "Cliente · partilha com mapa completo",
+  resultAvatarSeed: "bz-div-mariana",
   testimonials: [
     {
-      name: "M.C.",
+      name: "Mariana C.",
+      role: "Partilha com mapa",
+      avatarSeed: "bz-div-mariana",
       text: "Pela primeira vez alguém me disse o que eu podia exigir, com prova, não com esperança.",
     },
     {
-      name: "R.S.",
+      name: "Renata S.",
+      role: "Divórcio litigioso",
+      avatarSeed: "bz-div-renata",
       text: "Eu achava que não tinha direito a nada. O mapa mudou completamente a conversa.",
     },
     {
-      name: "F.L.",
+      name: "Fernanda L.",
+      role: "Partilha consensual",
+      avatarSeed: "bz-div-fernanda",
       text: "Processo organizado, humanas e firmes. Saí do casamento com clareza e dignidade.",
     },
   ],
-  bonusesHeadline: "Bônus empilhados pra quem entra ainda este mês",
-  bonuses: [
+  careHeadline: (
+    <>
+      O que muda quando a <em>Borges & Zembruski</em> cuida de você
+    </>
+  ),
+  careItems: [
     {
-      badge: "Limitado a 3 vagas",
-      title: "Auditoria de bens ocultos",
-      description: "Varredura aprofundada de indícios patrimoniais não declarados.",
+      title: "Mapa do que é seu antes de negociar",
+      description:
+        "Você chega à conversa com números e documentos, não pedindo o que “ele achar justo”.",
     },
     {
-      badge: "Se fechar no mês",
-      title: "Consulta pós-divórcio",
-      description: "Uma sessão para organizar próximos passos financeiros e documentais.",
+      title: "Olho em indícios de ocultação",
+      description:
+        "Varremos sinais de bens e valores que não aparecem na narrativa do outro lado.",
     },
     {
-      badge: "Padrão",
-      title: "Portal do cliente",
-      description: "Status do caso e documentos centralizados desde o início.",
+      title: "Estratégia firme, tom humano",
+      description:
+        "Postura clara do que exigir, do que não assinar e de como se proteger no processo.",
+    },
+    {
+      title: "Acompanhamento próximo até a partilha",
+      description:
+        "Uma advogada responsável, status visível e próximos passos sem você precisar cobrar.",
     },
   ],
-  urgencyBar:
-    "Aceitamos poucos casos por mês para manter qualidade e acompanhamento próximo. Fale conosco agora.",
+  careNote:
+    "Aceitamos poucos casos por mês para manter qualidade e acompanhamento próximo.",
   finalHeadline: (
     <>
       Chega de esperar <em>ele decidir</em> o que é seu.

@@ -28,10 +28,12 @@ export type LpFeature = {
 export type LpTestimonial = {
   name: string;
   text: string;
+  role?: string;
+  /** Seed estável para avatar fictício (DiceBear) */
+  avatarSeed: string;
 };
 
-export type LpBonus = {
-  badge: string;
+export type LpCareItem = {
   title: string;
   description: string;
 };
@@ -65,10 +67,13 @@ export type LpContent = {
   resultMetric: string;
   resultLabel: string;
   resultStory: string;
+  resultAuthor: string;
+  resultRole?: string;
+  resultAvatarSeed: string;
   testimonials: LpTestimonial[];
-  bonusesHeadline: string;
-  bonuses: LpBonus[];
-  urgencyBar: string;
+  careHeadline: ReactNode;
+  careItems: LpCareItem[];
+  careNote: string;
   finalHeadline: ReactNode;
   finalCta: string;
 };
