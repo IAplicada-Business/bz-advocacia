@@ -60,8 +60,8 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
         }
       }
 
-      if (payload?.error === "invalid_contato") {
-        setError(payload.message ?? "Informe nome e WhatsApp com DDD.");
+      if (payload?.error === "invalid_contato" || payload?.error === "missing_fields") {
+        setError(payload.message ?? "Preencha todos os campos obrigatórios.");
         return;
       }
 
