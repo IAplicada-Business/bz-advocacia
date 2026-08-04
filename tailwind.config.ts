@@ -18,6 +18,14 @@ export default {
         'sans': ['DM Sans', 'sans-serif'],
       },
       colors: {
+        lp: {
+          ink: "#1A1F1A",
+          gold: "#C5A059",
+          "gold-soft": "#D4B57A",
+          cream: "#F9F5F1",
+          stone: "#F1EDE7",
+          muted: "#6B6560",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -67,6 +75,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        lp: "0 24px 60px -28px rgba(26, 31, 26, 0.45)",
+      },
       keyframes: {
         "accordion-down": {
           from: {
@@ -84,10 +95,15 @@ export default {
             height: "0",
           },
         },
+        "lp-fade-up": {
+          from: { opacity: "0", transform: "translateY(18px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "lp-fade-up": "lp-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },
