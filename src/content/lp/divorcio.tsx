@@ -22,8 +22,8 @@ export const divorcioContent: LpContent = {
     "Atendimento em todo o Brasil",
   ],
   heroImage: "/IMG_8535_hero.jpg",
-  // Recorte mais baixo no original: sócia de baixo entra; topo pode cortar um pouco
-  heroObjectPosition: "38% 55%",
+  // Desceu o foco: rostos das duas sócias visíveis
+  heroObjectPosition: "38% 28%",
   // Anexo 3 — mesmo enquadramento do CTA final da LP Saúde
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
