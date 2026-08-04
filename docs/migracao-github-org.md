@@ -29,13 +29,23 @@ Esses serviços não dependem do owner do repo e continuam apontando para os mes
 | App Lovable | https://bz-advocacia.lovable.app — projeto `1a09f2bd-c7b5-40b9-92ec-b2e20089beaa` |
 | Z-API (WhatsApp) | Webhooks apontam para Edge Functions, não para o GitHub |
 
+## Fluxo de trabalho pós-migração
+
+| Tipo de mudança | Onde fazer | Onde NÃO fazer |
+|---|---|---|
+| Schema, SQL, RLS, seeds, dados | Supabase (SQL / migrations / MCP) | Lovable |
+| Código frontend / Edge Functions / docs | GitHub via Cursor/Claude Code | Lovable |
+| Painel CRM (uso operacional) | App publicado Lovable | — |
+
+**Por que o commit “dá problema” no Lovable:** depois da transferência para `IAplicada-Business`, o sync GitHub do Lovable costuma perder OAuth/permissão de escrita. Não reautorizar para “voltar a editar pelo Lovable” — o fluxo canônico passa a ser **Supabase + GitHub direto**.
+
 ## Checklist pós-transferência (ações manuais)
 
 - [x] Código + histórico no org `IAplicada-Business`
 - [x] Branches remotas com os mesmos SHAs
 - [x] Referências internas atualizadas (`CLAUDE.md`, `README.md`, `README_SDR.md`)
+- [x] Regra documentada: banco só via Supabase; nunca editar pelo Lovable
 - [ ] Em cada máquina local: `git remote set-url origin https://github.com/IAplicada-Business/bz-advocacia.git`
-- [ ] Lovable → Settings → GitHub: confirmar que o sync aponta para `IAplicada-Business/bz-advocacia` (após transfer, às vezes pede reautorização OAuth)
 - [ ] Times/colaboradores da org: garantir acesso de quem precisa (hoje o collaborator listado via API inclui `mmarques30`)
 - [ ] Secrets de GitHub Actions / Deploy keys: revalidar se algum workflow externo usava o path antigo (neste repo não há workflows em `.github/`)
 - [ ] Comunicar o novo URL ao time; o redirect do GitHub cobre clones antigos por um tempo, mas o canônico é a org

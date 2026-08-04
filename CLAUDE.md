@@ -17,12 +17,17 @@ Bot SDR de WhatsApp da **Borges & Zembruski Advocacia** (cliente IAplicada).
 - **NÃO atende** em: grupos, clientes existentes (telefone em `processos`), leads com `bot_pausado=true`, ou leads em status diferente de `novo`/`em_atendimento_bot`.
 
 ## Stack
-- Claude Code (desenvolvimento)
+- Claude Code / Cursor (desenvolvimento e commits no GitHub)
 - GitHub `IAplicada-Business/bz-advocacia` (versionamento; transferido de `mmarques30/bz-advocacia`)
 - Supabase `nvkxblrwblhvggndlfax` (DB + Edge Functions)
-- Lovable (painel CRM existente)
+- Lovable (somente painel CRM em produção — **não usar para editar código nem schema**)
 - Z-API (gateway WhatsApp)
 - Claude Haiku (classificador)
+
+## Como alterar (obrigatório)
+1. **Banco / schema / dados / RLS / seeds** → sempre via Supabase (SQL Editor, migrations em `supabase/migrations`, CLI ou MCP). Nunca pelo Lovable.
+2. **Código (frontend, Edge Functions, docs)** → editar no repo GitHub (`IAplicada-Business/bz-advocacia`) via Cursor/Claude Code, commit + push + PR.
+3. **Nunca** pedir alteração ao agente Lovable nem usar o editor Lovable para “aplicar mudanças”. O app Lovable serve só como CRM já publicado.
 
 ## Schema
 
@@ -74,6 +79,8 @@ supabase functions logs whatsapp-inbound --tail
 3. **Sempre marcar `bot_pausado = true`** quando humano assumir.
 4. **Tabelas do CRM atual não são alteradas** — só `leads_geral` recebe colunas adicionais via `ADD COLUMN IF NOT EXISTS`.
 5. **Link de pagamento de saúde** está em `servicos_sdr.link_pagamento` (genérico `https://borgesezembruski.com/` por enquanto). Depois trocar pelo link real.
+6. **Alterações de banco só no Supabase** — nunca via Lovable.
+7. **Não editar pelo Lovable** — commits e sync pelo Lovable quebram/conflitam após a transferência do repo para a org.
 
 ## Decisões pendentes (perguntar à Mariana)
 - Link de pagamento real (Asaas/Stripe/Mercado Pago) pra saúde.
