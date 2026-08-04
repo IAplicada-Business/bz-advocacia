@@ -23,8 +23,9 @@ export const inventarioContent: LpContent = {
   heroImage: "/IMG_8077_hero.jpg",
   // Foco um pouco mais baixo: mais folga acima das cabeças
   heroObjectPosition: "center 18%",
-  finalCtaImage: "/IMG_8287.jpg",
-  finalCtaObjectPosition: "center 30%",
+  // Anexo 3 — motion blur das sócias (CTA final inventário + divórcio)
+  finalCtaImage: "/IMG_8432.jpg",
+  finalCtaObjectPosition: "center 55%",
   formTitle: "Análise gratuita do seu inventário",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [

@@ -24,8 +24,9 @@ export const divorcioContent: LpContent = {
   heroImage: "/IMG_8535_hero.jpg",
   // Sócias com tablet; leve viés à esquerda p/ as duas entrarem no mobile
   heroObjectPosition: "38% 8%",
-  finalCtaImage: "/IMG_8339.jpg",
-  finalCtaObjectPosition: "center 30%",
+  // Anexo 3 — motion blur das sócias (CTA final inventário + divórcio)
+  finalCtaImage: "/IMG_8432.jpg",
+  finalCtaObjectPosition: "center 55%",
   formTitle: "Análise gratuita do seu caso",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [
