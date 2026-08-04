@@ -14,6 +14,7 @@ type LandingPageProps = {
 export function LandingPage({ content }: LandingPageProps) {
   const formRef = useRef<HTMLDivElement>(null);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [carouselPaused, setCarouselPaused] = useState(false);
   useLpMotion();
 
   useEffect(() => {
@@ -21,6 +22,16 @@ export function LandingPage({ content }: LandingPageProps) {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", content.metaDescription);
   }, [content]);
+
+  // Carrossel automático dos depoimentos
+  useEffect(() => {
+    const total = content.testimonials.length;
+    if (total < 2 || carouselPaused) return;
+    const id = window.setInterval(() => {
+      setActiveTestimonial((current) => (current + 1) % total);
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, [content.testimonials.length, carouselPaused]);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -31,29 +42,33 @@ export function LandingPage({ content }: LandingPageProps) {
     folds[1]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const selectTestimonial = (index: number) => {
+    setActiveTestimonial(index);
+    // Pausa breve após clique manual, depois o auto retomará
+    setCarouselPaused(true);
+    window.setTimeout(() => setCarouselPaused(false), 7000);
+  };
+
   const featured = content.testimonials[activeTestimonial] ?? content.testimonials[0];
 
   return (
     <div className="lp-theme min-h-screen bg-lp-cream font-sans text-lp-ink antialiased">
       <LpHeader onCtaClick={scrollToForm} />
 
-      {/* 1. HERO */}
-      <section data-fold className="relative min-h-[100svh] overflow-hidden bg-lp-cream">
-        {/* Foto só na faixa direita: folga no topo para a cabeça não colar/cortar */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-full overflow-hidden sm:w-[72%] lg:w-[60%]">
-          <img
-            data-lp-hero-img
-            src={content.heroImage}
-            alt=""
-            aria-hidden
-            className="absolute left-0 right-0 top-[14%] h-[100%] w-full object-cover opacity-[0.62]"
-            style={{ objectPosition: content.heroObjectPosition ?? "center 8%" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-lp-cream from-[8%] via-lp-cream/50 via-[35%] to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/45 via-transparent to-transparent" />
-        </div>
+      {/* 1. HERO — foto full-bleed; só object-position mexe o enquadramento */}
+      <section data-fold className="relative min-h-[100svh] overflow-hidden">
+        <img
+          data-lp-hero-img
+          src={content.heroImage}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.5]"
+          style={{ objectPosition: content.heroObjectPosition ?? "68% 26%" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-lp-cream via-lp-cream/88 to-lp-cream/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/65 via-transparent to-lp-cream/20" />
 
-        <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-20 pt-28 md:px-10 md:pb-24 md:pt-32 lg:px-14">
+        <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-24 md:px-10 md:pb-20 md:pt-28 lg:px-14">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
             <div data-reveal className="lp-reveal lp-reveal-left w-full max-w-[40rem] justify-self-start">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
@@ -249,17 +264,19 @@ export function LandingPage({ content }: LandingPageProps) {
             <div
               data-reveal
               className="lp-reveal lp-reveal-right flex flex-col rounded-[1.75rem] border border-lp-ink/5 bg-white p-6 shadow-sm md:p-8"
+              onMouseEnter={() => setCarouselPaused(true)}
+              onMouseLeave={() => setCarouselPaused(false)}
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-lp-gold">
                 O que clientes dizem
               </p>
 
-              <div className="mt-5 flex gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 {content.testimonials.map((item, index) => (
                   <button
                     key={item.avatarSeed}
                     type="button"
-                    onClick={() => setActiveTestimonial(index)}
+                    onClick={() => selectTestimonial(index)}
                     aria-label={`Ver depoimento de ${item.name}`}
                     aria-pressed={activeTestimonial === index}
                     className={`relative overflow-hidden rounded-full transition ${
@@ -270,7 +287,7 @@ export function LandingPage({ content }: LandingPageProps) {
                   >
                     <img
                       src={lpAvatarUrl(item.avatarSeed)}
-                      alt=""
+                      alt={item.name}
                       className="h-12 w-12 bg-lp-stone object-cover md:h-14 md:w-14"
                     />
                   </button>
@@ -284,7 +301,7 @@ export function LandingPage({ content }: LandingPageProps) {
                       <Star key={idx} className="h-3.5 w-3.5 fill-current" />
                     ))}
                   </div>
-                  <blockquote className="mt-5 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink md:text-[1.55rem]">
+                  <blockquote className="mt-5 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink transition-opacity duration-500 md:text-[1.55rem]">
                     “{featured.text}”
                   </blockquote>
                   <div className="mt-8 border-t border-lp-ink/8 pt-5">
@@ -294,6 +311,17 @@ export function LandingPage({ content }: LandingPageProps) {
                         {featured.role}
                       </p>
                     ) : null}
+                  </div>
+
+                  <div className="mt-5 flex gap-1.5" aria-hidden>
+                    {content.testimonials.map((item, index) => (
+                      <span
+                        key={`dot-${item.avatarSeed}`}
+                        className={`h-1 rounded-full transition-all duration-500 ${
+                          activeTestimonial === index ? "w-6 bg-lp-gold" : "w-1.5 bg-lp-ink/15"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
               ) : null}

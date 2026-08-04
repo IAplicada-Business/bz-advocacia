@@ -12,7 +12,7 @@ export function LpHeader({ onCtaClick }: LpHeaderProps) {
       data-solid="false"
       className="lp-header fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300"
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 md:px-8 md:py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 md:px-8 md:py-3.5">
         <Link to="/" className="flex items-center gap-3" aria-label="Borges & Zembruski Advocacia">
           <img
             src={logoBZ}

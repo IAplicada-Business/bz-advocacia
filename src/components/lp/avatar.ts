@@ -1,4 +1,4 @@
-/** Avatar fictício local (SVG gerado, sem CDN em runtime). */
+/** Foto real local (retrato stock) usada nos depoimentos da LP. */
 export function lpAvatarUrl(seed: string) {
-  return `/lp-avatars/${seed}.svg`;
+  return `/lp-avatars/${seed}.jpg`;
 }
