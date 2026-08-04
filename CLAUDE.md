@@ -18,7 +18,7 @@ Bot SDR de WhatsApp da **Borges & Zembruski Advocacia** (cliente IAplicada).
 
 ## Stack
 - Claude Code (desenvolvimento)
-- GitHub `mmarques30/bz-advocacia` (versionamento)
+- GitHub `IAplicada-Business/bz-advocacia` (versionamento; transferido de `mmarques30/bz-advocacia`)
 - Supabase `nvkxblrwblhvggndlfax` (DB + Edge Functions)
 - Lovable (painel CRM existente)
 - Z-API (gateway WhatsApp)

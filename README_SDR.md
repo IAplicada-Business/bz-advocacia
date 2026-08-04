@@ -43,17 +43,15 @@
 
 ## Setup (uma vez só)
 
-### 1) Subir essa pasta como repo no GitHub
+### 1) Repo no GitHub (já migrado)
 
-Crie um repo privado no GitHub chamado `sdr-advocacia` e dentro desta pasta rode:
+O código vive em [`IAplicada-Business/bz-advocacia`](https://github.com/IAplicada-Business/bz-advocacia) (transferido de `mmarques30/bz-advocacia` com histórico, branches e PRs preservados). Em clones locais antigos, atualize o remote:
 
 ```bash
-git init
-git add .
-git commit -m "feat: SDR advocacia inicial"
-git branch -M main
-git remote add origin git@github.com:SEU_USUARIO/sdr-advocacia.git
-git push -u origin main
+git remote set-url origin https://github.com/IAplicada-Business/bz-advocacia.git
+git fetch origin
+git checkout main
+git pull origin main
 ```
 
 ### 2) Abrir o repo no Claude Code
@@ -61,8 +59,8 @@ git push -u origin main
 Clone localmente e abra o Claude Code apontando pra essa pasta. O arquivo `CLAUDE.md` na raiz já está preparado pra dar contexto automático ao Claude Code (stack, convenções, comandos úteis e regras do projeto).
 
 ```bash
-git clone git@github.com:SEU_USUARIO/sdr-advocacia.git
-cd sdr-advocacia
+git clone https://github.com/IAplicada-Business/bz-advocacia.git
+cd bz-advocacia
 claude
 ```
 

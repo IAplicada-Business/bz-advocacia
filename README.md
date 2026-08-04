@@ -57,8 +57,8 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+git clone https://github.com/IAplicada-Business/bz-advocacia.git
+cd bz-advocacia
 npm i
 npm run dev
 ```
