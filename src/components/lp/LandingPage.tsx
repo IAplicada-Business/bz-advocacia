@@ -62,12 +62,12 @@ export function LandingPage({ content }: LandingPageProps) {
           src={content.heroImage}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.58]"
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.52]"
           style={{ objectPosition: content.heroObjectPosition ?? "center 8%" }}
         />
-        {/* Véu uniforme: texto legível + foto ainda visível (sem contraste L→R) */}
-        <div className="absolute inset-0 bg-lp-cream/45" />
-        <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-lp-cream/40 to-transparent" />
+        {/* Véu uniforme mais forte: prioriza leitura do texto, foto ainda aparece */}
+        <div className="absolute inset-0 bg-lp-cream/60" />
+        <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-lp-cream/45 to-transparent" />
 
         <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-24 md:px-10 md:pb-20 md:pt-28 lg:px-14">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
