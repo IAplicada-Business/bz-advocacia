@@ -22,8 +22,8 @@ export const divorcioContent: LpContent = {
     "Atendimento em todo o Brasil",
   ],
   heroImage: "/IMG_8535_hero.jpg",
-  // Sócias com tablet; leve viés à esquerda p/ as duas entrarem no mobile
-  heroObjectPosition: "38% 8%",
+  // Sócias com tablet; viés à esquerda no mobile; foco um pouco mais alto
+  heroObjectPosition: "38% 20%",
   // Anexo 3 — motion blur das sócias (CTA final inventário + divórcio)
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 55%",
