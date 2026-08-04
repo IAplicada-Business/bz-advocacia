@@ -22,6 +22,7 @@ export const divorcioContent: LpContent = {
     "Atendimento em todo o Brasil",
   ],
   heroImage: "/IMG_8339.jpg",
+  heroObjectPosition: "center 18%",
   finalCtaImage: "/IMG_8535.jpg",
   formTitle: "Análise gratuita do seu caso",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
