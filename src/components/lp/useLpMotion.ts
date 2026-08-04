@@ -26,10 +26,9 @@ export function useLpMotion(rootSelector = ".lp-theme") {
       if (header) header.dataset.solid = y > 24 ? "true" : "false";
 
       if (heroImg) {
-        // Origem no topo: o scale do parallax não come a cabeça das sócias
-        heroImg.style.transformOrigin = "78% 12%";
-        const shift = Math.min(y * 0.1, 48);
-        heroImg.style.transform = `scale(1.04) translate3d(0, ${shift}px, 0)`;
+        heroImg.style.transformOrigin = "center top";
+        const shift = Math.min(y * 0.04, 20);
+        heroImg.style.transform = `translate3d(0, ${shift}px, 0)`;
       }
 
       let bestFold: HTMLElement | null = null;
