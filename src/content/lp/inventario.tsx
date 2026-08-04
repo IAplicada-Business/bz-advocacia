@@ -20,10 +20,11 @@ export const inventarioContent: LpContent = {
     "Atendimento em todo o Brasil",
     "Mais de 10 anos em família e sucessões",
   ],
-  heroImage: "/IMG_8077.jpg",
-  heroObjectPosition: "center 14%",
+  heroImage: "/IMG_8077_hero.jpg",
+  // Asset landscape com folga acima da cabeça (padrão LP Saúde)
+  heroObjectPosition: "center 8%",
   finalCtaImage: "/IMG_8287.jpg",
-  finalCtaObjectPosition: "center 25%",
+  finalCtaObjectPosition: "center 30%",
   formTitle: "Análise gratuita do seu inventário",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [

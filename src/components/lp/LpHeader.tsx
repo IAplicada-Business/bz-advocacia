@@ -12,12 +12,13 @@ export function LpHeader({ onCtaClick }: LpHeaderProps) {
       data-solid="false"
       className="lp-header fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300"
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 md:px-8 md:py-3.5">
+      {/* Mesmo eixo horizontal do hero (max-w 1400 + paddings) para alinhar logo ao texto esquerdo */}
+      <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4 px-5 py-3 md:px-10 md:py-3.5 lg:px-14">
         <Link to="/" className="flex items-center gap-3" aria-label="Borges & Zembruski Advocacia">
           <img
             src={logoBZ}
             alt="B&Z"
-            className="h-9 w-9 rounded-sm object-cover ring-1 ring-lp-gold/50 md:h-10 md:w-10"
+            className="h-9 w-9 shrink-0 rounded-sm object-cover ring-1 ring-lp-gold/50 md:h-10 md:w-10"
           />
           <div className="leading-tight">
             <p className="font-seasons text-sm tracking-[0.16em] text-lp-ink md:text-[15px]">
