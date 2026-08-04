@@ -78,13 +78,16 @@ export function LandingPage({ content }: LandingPageProps) {
               <h1 className="mt-5 font-seasons text-[2.65rem] font-medium leading-[1.1] text-lp-ink md:text-[3.25rem] lg:text-[3.7rem]">
                 {content.headline}
               </h1>
-              <p className="mt-6 max-w-lg text-base leading-relaxed text-lp-muted md:text-[1.08rem]">
+              <p className="mt-6 max-w-lg text-base font-medium leading-relaxed text-lp-ink [text-shadow:0_1px_12px_rgba(249,245,241,0.9),0_0_24px_rgba(249,245,241,0.75)] md:text-[1.08rem]">
                 {content.subheadline}
               </p>
               <ul className="mt-8 space-y-3.5">
                 {content.bullets.map((bullet) => (
-                  <li key={bullet} className="flex items-start gap-3 text-sm text-lp-ink/85 md:text-[15px]">
-                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
+                  <li
+                    key={bullet}
+                    className="flex items-start gap-3 text-sm font-medium text-lp-ink [text-shadow:0_1px_10px_rgba(249,245,241,0.9)] md:text-[15px]"
+                  >
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/25 text-lp-gold">
                       <Check className="h-3 w-3" strokeWidth={2.5} />
                     </span>
                     {bullet}
