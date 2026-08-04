@@ -34,11 +34,11 @@ export function LandingPage({ content }: LandingPageProps) {
           src={content.heroImage}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-[0.38]"
+          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-[0.5]"
           style={{ objectPosition: content.heroObjectPosition ?? "70% 30%" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-lp-cream via-lp-cream/90 to-lp-cream/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/80 via-transparent to-lp-cream/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-lp-cream via-lp-cream/88 to-lp-cream/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/70 via-transparent to-lp-cream/35" />
 
         <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-14 pt-28 md:px-10 md:pb-16 md:pt-32 lg:px-14">
             <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
