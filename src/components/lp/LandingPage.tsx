@@ -149,7 +149,7 @@ export function LandingPage({ content }: LandingPageProps) {
               <article
                 key={quote.text}
                 data-stagger
-                className="flex min-h-[240px] flex-col rounded-2xl border border-lp-ink/5 bg-white px-7 py-9 shadow-sm md:min-h-[280px] md:px-8 md:py-10"
+                className="flex min-h-0 flex-col rounded-2xl border border-lp-ink/5 bg-white px-6 py-7 shadow-sm sm:min-h-[240px] sm:px-7 sm:py-9 md:min-h-[280px] md:px-8 md:py-10"
               >
                 <Quote className="h-7 w-7 text-lp-gold" strokeWidth={1.5} />
                 <p className="mt-6 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink/90 md:text-[1.5rem]">
