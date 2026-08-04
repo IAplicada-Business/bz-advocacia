@@ -134,11 +134,12 @@ All colors MUST be HSL.
   }
 }
 
-/* Landing pages B&Z — contraste alto + motion entre dobras */
+/* Landing pages B&Z — dobras amplas + motion entre seções */
 @layer components {
   .lp-theme {
     --lp-ink: #1a1f1a;
     --lp-gold: #c5a059;
+    --lp-ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-theme em,
@@ -152,6 +153,10 @@ All colors MUST be HSL.
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid transparent;
+    transition:
+      background 0.45s var(--lp-ease),
+      border-color 0.45s var(--lp-ease),
+      box-shadow 0.45s var(--lp-ease);
   }
 
   .lp-header[data-solid="true"] {
@@ -160,38 +165,155 @@ All colors MUST be HSL.
     box-shadow: 0 10px 30px -24px rgba(26, 31, 26, 0.45);
   }
 
+  /*
+   * Dobra generosa: quase viewport inteira, conteúdo centralizado,
+   * preenchimento atmosférico ao entrar (progress + active).
+   */
+  .lp-fold {
+    --lp-fold-progress: 0;
+    position: relative;
+    isolation: isolate;
+    min-height: min(100svh, 1040px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(5.5rem, 12vh, 9.5rem);
+    overflow: clip;
+  }
+
+  .lp-fold::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(
+        ellipse 70% 55% at 50% 42%,
+        rgba(197, 160, 89, calc(0.04 + var(--lp-fold-progress) * 0.07)),
+        transparent 70%
+      );
+    opacity: 0;
+    transition: opacity 0.7s var(--lp-ease);
+  }
+
+  .lp-fold.is-active-fold::after {
+    opacity: 1;
+  }
+
+  .lp-fold.is-active-fold::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: clamp(1.25rem, 3vh, 2.25rem);
+    z-index: 2;
+    width: min(8rem, 34vw);
+    height: 2px;
+    transform: translateX(-50%) scaleX(1);
+    background: linear-gradient(90deg, transparent, #c5a059, transparent);
+    opacity: 0.9;
+    animation: lp-fold-rule 0.95s var(--lp-ease) both;
+  }
+
+  @keyframes lp-fold-rule {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) scaleX(0.28);
+    }
+    to {
+      opacity: 0.9;
+      transform: translateX(-50%) scaleX(1);
+    }
+  }
+
+  /* Conteúdo sobe levemente com o progresso da dobra */
+  .lp-fold-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    transform: translate3d(
+      0,
+      calc((1 - var(--lp-fold-progress)) * 18px),
+      0
+    );
+    transition: transform 0.45s var(--lp-ease);
+  }
+
+  .lp-fold.is-active-fold .lp-fold-inner {
+    transform: translate3d(0, 0, 0);
+  }
+
   .lp-reveal {
     opacity: 0;
-    transform: translateY(28px);
+    transform: translateY(48px);
+    filter: blur(2.5px);
     transition:
-      opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: opacity, transform;
+      opacity 1.05s var(--lp-ease),
+      transform 1.05s var(--lp-ease),
+      filter 1.05s var(--lp-ease);
+    will-change: opacity, transform, filter;
   }
 
   .lp-reveal.lp-reveal-delay {
-    transition-delay: 0.12s;
+    transition-delay: 0.16s;
+  }
+
+  .lp-reveal.lp-reveal-left {
+    transform: translateX(-44px) translateY(16px);
+  }
+
+  .lp-reveal.lp-reveal-right {
+    transform: translateX(44px) translateY(16px);
+  }
+
+  .lp-reveal.lp-reveal-scale {
+    transform: translateY(28px) scale(0.94);
   }
 
   .lp-reveal.is-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+    filter: blur(0);
   }
 
-  .lp-hero-img {
-    transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  [data-stagger] {
+    opacity: 0;
+    transform: translateY(36px);
+    filter: blur(2px);
+    transition:
+      opacity 0.95s var(--lp-ease),
+      transform 0.95s var(--lp-ease),
+      filter 0.95s var(--lp-ease);
+    transition-delay: calc(var(--lp-stagger, 0) * 110ms + 60ms);
   }
 
-  .lp-hero-frame:hover .lp-hero-img {
-    transform: scale(1.03);
+  [data-stagger].is-visible {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+
+  [data-lp-hero-img] {
+    will-change: transform;
+    transition: transform 0.12s linear;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .lp-reveal,
-    .lp-hero-img {
+    [data-stagger],
+    [data-lp-hero-img],
+    .lp-fold-inner,
+    .lp-fold::after,
+    .lp-fold.is-active-fold::before {
       transition: none !important;
+      animation: none !important;
       opacity: 1 !important;
       transform: none !important;
+      filter: none !important;
+    }
+
+    .lp-fold::after {
+      opacity: 0 !important;
     }
   }
 }
