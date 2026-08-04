@@ -21,8 +21,8 @@ export const saudeContent: LpContent = {
     "Desde 2019 exclusivamente com planos",
   ],
   heroImage: "/IMG_8379.jpg",
-  // Ancora no topo: sobe o enquadramento para a cabeça não cortar
-  heroObjectPosition: "70% 0%",
+  // Rostos estão na metade de baixo do arquivo: Y alto sobe as caras no hero
+  heroObjectPosition: "70% 58%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",

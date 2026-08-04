@@ -26,14 +26,8 @@ export function useLpMotion(rootSelector = ".lp-theme") {
       if (header) header.dataset.solid = y > 24 ? "true" : "false";
 
       if (heroImg) {
-        // Sem scale/shift no topo: não empurra a cabeça para fora do frame
-        heroImg.style.transformOrigin = "70% 0%";
-        if (y < 8) {
-          heroImg.style.transform = "none";
-        } else {
-          const shift = Math.min(y * 0.05, 28);
-          heroImg.style.transform = `translate3d(0, ${shift}px, 0)`;
-        }
+        heroImg.style.transformOrigin = "70% 58%";
+        heroImg.style.transform = "none";
       }
 
       let bestFold: HTMLElement | null = null;
