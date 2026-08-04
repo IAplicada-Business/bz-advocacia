@@ -55,8 +55,8 @@ export function LandingPage({ content }: LandingPageProps) {
     <div className="lp-theme min-h-screen bg-lp-cream font-sans text-lp-ink antialiased">
       <LpHeader onCtaClick={scrollToForm} />
 
-      {/* 1. HERO — foto full-bleed; só object-position mexe o enquadramento */}
-      <section data-fold className="relative min-h-[100svh] overflow-hidden">
+      {/* 1. HERO — desktop: copy | form; mobile: headline → form → bullets */}
+      <section data-fold className="relative overflow-x-hidden lg:min-h-[100svh]">
         <img
           data-lp-hero-img
           src={content.heroImage}
@@ -69,38 +69,44 @@ export function LandingPage({ content }: LandingPageProps) {
         <div className="absolute inset-0 bg-lp-cream/60" />
         <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-lp-cream/45 to-transparent" />
 
-        <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-24 md:px-10 md:pb-20 md:pt-28 lg:px-14">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
-            <div data-reveal className="lp-reveal lp-reveal-left w-full max-w-[40rem] justify-self-start">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
-                {content.eyebrow}
-              </p>
-              <h1 className="mt-5 font-seasons text-[2.65rem] font-medium leading-[1.1] text-lp-ink md:text-[3.25rem] lg:text-[3.7rem]">
-                {content.headline}
-              </h1>
-              <p className="mt-6 max-w-lg text-base font-medium leading-relaxed text-lp-ink [text-shadow:0_1px_12px_rgba(249,245,241,0.9),0_0_24px_rgba(249,245,241,0.75)] md:text-[1.08rem]">
-                {content.subheadline}
-              </p>
-              <ul className="mt-8 space-y-3.5">
-                {content.bullets.map((bullet) => (
-                  <li
-                    key={bullet}
-                    className="flex items-start gap-3 text-sm font-medium text-lp-ink [text-shadow:0_1px_10px_rgba(249,245,241,0.9)] md:text-[15px]"
-                  >
-                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/25 text-lp-gold">
-                      <Check className="h-3 w-3" strokeWidth={2.5} />
-                    </span>
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
+        <div className="relative mx-auto flex w-full max-w-[1400px] flex-col justify-center px-5 pb-10 pt-20 md:px-10 md:pb-16 md:pt-24 lg:min-h-[100svh] lg:px-14 lg:pb-20 lg:pt-28">
+          <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:items-center lg:gap-10 xl:gap-14">
+            {/* contents no mobile permite reordenar; no lg vira coluna única à esquerda */}
+            <div className="contents lg:flex lg:max-w-[40rem] lg:flex-col lg:justify-self-start">
+              <div data-reveal className="lp-reveal lp-reveal-left order-1 w-full lg:order-none">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-lp-gold sm:text-[11px] sm:tracking-[0.28em] md:text-xs">
+                  {content.eyebrow}
+                </p>
+                <h1 className="mt-4 break-words font-seasons text-[1.85rem] font-medium leading-[1.15] text-lp-ink sm:text-[2.15rem] md:mt-5 md:text-[3.25rem] md:leading-[1.1] lg:text-[3.7rem]">
+                  {content.headline}
+                </h1>
+              </div>
+
+              <div data-reveal className="lp-reveal lp-reveal-left order-3 w-full lg:order-none">
+                <p className="mt-1 max-w-lg text-[15px] font-medium leading-relaxed text-lp-ink [text-shadow:0_1px_12px_rgba(249,245,241,0.9),0_0_24px_rgba(249,245,241,0.75)] md:mt-6 md:text-base md:text-[1.08rem] lg:mt-6">
+                  {content.subheadline}
+                </p>
+                <ul className="mt-6 space-y-3 md:mt-8 md:space-y-3.5">
+                  {content.bullets.map((bullet) => (
+                    <li
+                      key={bullet}
+                      className="flex items-start gap-3 text-sm font-medium text-lp-ink [text-shadow:0_1px_10px_rgba(249,245,241,0.9)] md:text-[15px]"
+                    >
+                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-lp-gold/25 text-lp-gold">
+                        <Check className="h-3 w-3" strokeWidth={2.5} />
+                      </span>
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             <div
               ref={formRef}
               id="analise"
               data-reveal
-              className="lp-reveal lp-reveal-right lp-reveal-delay w-full scroll-mt-28 lg:justify-self-end"
+              className="lp-reveal lp-reveal-right lp-reveal-delay order-2 w-full scroll-mt-24 lg:order-none lg:justify-self-end"
             >
               <LpLeadForm
                 title={content.formTitle}
@@ -114,7 +120,7 @@ export function LandingPage({ content }: LandingPageProps) {
           <button
             type="button"
             onClick={scrollToNext}
-            className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 text-lp-ink/35 transition hover:text-lp-gold md:bottom-8"
+            className="mx-auto mt-10 flex flex-col items-center gap-1 text-lp-ink/35 transition hover:text-lp-gold lg:absolute lg:bottom-8 lg:left-1/2 lg:mt-0 lg:-translate-x-1/2"
             aria-label="Ir para a próxima seção"
           >
             <span className="text-[10px] uppercase tracking-[0.24em]">Continuar</span>
@@ -134,16 +140,16 @@ export function LandingPage({ content }: LandingPageProps) {
           </p>
           <h2
             data-reveal
-            className="lp-reveal lp-reveal-scale mx-auto mt-6 max-w-3xl text-center font-seasons text-[2.25rem] leading-tight md:text-4xl lg:text-[3rem]"
+            className="lp-reveal lp-reveal-scale mx-auto mt-5 max-w-3xl text-balance text-center font-seasons text-[1.75rem] leading-tight sm:mt-6 sm:text-[2.25rem] md:text-4xl lg:text-[3rem]"
           >
             {content.problemHeadline}
           </h2>
-          <div data-reveal className="lp-reveal mt-16 grid gap-7 md:mt-20 md:grid-cols-3 md:gap-8">
+          <div data-reveal className="lp-reveal mt-10 grid gap-5 sm:mt-16 sm:gap-7 md:mt-20 md:grid-cols-3 md:gap-8">
             {content.quotes.map((quote) => (
               <article
                 key={quote.text}
                 data-stagger
-                className="flex min-h-[240px] flex-col rounded-2xl border border-lp-ink/5 bg-white px-7 py-9 shadow-sm md:min-h-[280px] md:px-8 md:py-10"
+                className="flex min-h-0 flex-col rounded-2xl border border-lp-ink/5 bg-white px-6 py-7 shadow-sm sm:min-h-[240px] sm:px-7 sm:py-9 md:min-h-[280px] md:px-8 md:py-10"
               >
                 <Quote className="h-7 w-7 text-lp-gold" strokeWidth={1.5} />
                 <p className="mt-6 flex-1 font-seasons text-[1.35rem] leading-snug text-lp-ink/90 md:text-[1.5rem]">
@@ -160,16 +166,16 @@ export function LandingPage({ content }: LandingPageProps) {
         <div className="lp-fold-inner mx-auto w-full max-w-6xl">
           <h2
             data-reveal
-            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-center font-seasons text-[2.25rem] leading-tight md:text-4xl lg:text-[3rem]"
+            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-balance text-center font-seasons text-[1.75rem] leading-tight sm:text-[2.25rem] md:text-4xl lg:text-[3rem]"
           >
             {content.mechanismHeadline}
           </h2>
-          <div data-reveal className="lp-reveal mt-16 grid gap-7 md:mt-20 md:grid-cols-3 md:gap-8">
+          <div data-reveal className="lp-reveal mt-10 grid gap-5 sm:mt-16 sm:gap-7 md:mt-20 md:grid-cols-3 md:gap-8">
             {content.mechanismSteps.map((step) => (
               <article
                 key={step.number}
                 data-stagger
-                className="flex min-h-[320px] flex-col rounded-2xl border border-lp-ink/8 bg-lp-cream/55 p-7 md:min-h-[380px] md:p-9"
+                className="flex min-h-0 flex-col rounded-2xl border border-lp-ink/8 bg-lp-cream/55 p-6 sm:min-h-[320px] sm:p-7 md:min-h-[380px] md:p-9"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-lp-gold/55 font-seasons text-2xl text-lp-gold">
                   {step.number}
@@ -206,11 +212,11 @@ export function LandingPage({ content }: LandingPageProps) {
         <div className="lp-fold-inner mx-auto w-full max-w-6xl">
           <h2
             data-reveal
-            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-center font-seasons text-[2.25rem] leading-tight md:text-4xl lg:text-[3rem]"
+            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-balance text-center font-seasons text-[1.75rem] leading-tight sm:text-[2.25rem] md:text-4xl lg:text-[3rem]"
           >
             {content.featuresHeadline}
           </h2>
-          <div data-reveal className="lp-reveal mt-16 grid gap-x-14 gap-y-12 md:mt-20 md:grid-cols-2">
+          <div data-reveal className="lp-reveal mt-10 grid gap-x-14 gap-y-8 sm:mt-16 sm:gap-y-12 md:mt-20 md:grid-cols-2">
             {content.features.map((feature) => (
               <div key={feature.title} data-stagger className="flex gap-5">
                 <span className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-lp-gold/15 text-lp-gold">
@@ -339,7 +345,7 @@ export function LandingPage({ content }: LandingPageProps) {
         <div className="lp-fold-inner mx-auto w-full max-w-5xl">
           <h2
             data-reveal
-            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-center font-seasons text-[2.25rem] leading-tight md:text-4xl lg:text-[2.85rem]"
+            className="lp-reveal lp-reveal-scale mx-auto max-w-3xl text-balance text-center font-seasons text-[1.75rem] leading-tight sm:text-[2.25rem] md:text-4xl lg:text-[2.85rem]"
           >
             {content.careHeadline}
           </h2>
@@ -390,15 +396,15 @@ export function LandingPage({ content }: LandingPageProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/70 via-lp-ink/50 to-lp-ink/45" />
         <div
           data-reveal
-          className="lp-reveal lp-reveal-scale relative mx-auto flex max-w-2xl flex-col items-center justify-center py-6 text-center text-white"
+          className="lp-reveal lp-reveal-scale relative mx-auto flex max-w-2xl flex-col items-center justify-center px-1 py-6 text-center text-white"
         >
-          <h2 className="font-seasons text-[1.85rem] leading-tight md:text-3xl lg:text-[2.35rem]">
+          <h2 className="text-balance font-seasons text-[1.55rem] leading-tight sm:text-[1.85rem] md:text-3xl lg:text-[2.35rem]">
             {content.finalHeadline}
           </h2>
           <button
             type="button"
             onClick={scrollToForm}
-            className="mt-7 rounded-full bg-lp-gold px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-lp-ink transition hover:bg-lp-gold-soft"
+            className="mt-7 max-w-full rounded-full bg-lp-gold px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-lp-ink transition hover:bg-lp-gold-soft sm:px-8 sm:text-xs sm:tracking-[0.18em]"
           >
             {content.finalCta}
           </button>

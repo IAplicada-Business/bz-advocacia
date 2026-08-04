@@ -190,12 +190,20 @@ All colors MUST be HSL.
     --lp-fold-progress: 0;
     position: relative;
     isolation: isolate;
-    min-height: min(100svh, 1040px);
+    /* Mobile: altura natural; desktop: dobra generosa (inalterada) */
+    min-height: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-block: clamp(5.5rem, 12vh, 9.5rem);
+    padding-block: clamp(3.25rem, 7vh, 4.75rem);
     overflow: clip;
+  }
+
+  @media (min-width: 768px) {
+    .lp-fold {
+      min-height: min(100svh, 1040px);
+      padding-block: clamp(5.5rem, 12vh, 9.5rem);
+    }
   }
 
   .lp-fold::after {
