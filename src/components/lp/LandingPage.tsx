@@ -31,7 +31,8 @@ export function LandingPage({ content }: LandingPageProps) {
         <img
           src={content.heroImage}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: content.heroObjectPosition ?? "center center" }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-lp-ink/92 via-lp-ink/78 to-lp-ink/45" />
         <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/50 via-transparent to-lp-ink/30" />

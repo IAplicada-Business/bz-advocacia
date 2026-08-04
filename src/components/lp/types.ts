@@ -46,6 +46,8 @@ export type LpContent = {
   subheadline: string;
   bullets: string[];
   heroImage: string;
+  /** CSS object-position do hero (ex.: "center 22%") para não cortar rostos */
+  heroObjectPosition?: string;
   finalCtaImage: string;
   formTitle: string;
   formSubtitle: string;

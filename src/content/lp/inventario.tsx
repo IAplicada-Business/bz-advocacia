@@ -21,7 +21,9 @@ export const inventarioContent: LpContent = {
     "Mais de 10 anos em família e sucessões",
   ],
   heroImage: "/IMG_8077.jpg",
-  finalCtaImage: "/IMG_8432.jpg",
+  // Foto vertical das sócias: ancora no topo para não cortar o rosto no object-cover
+  heroObjectPosition: "center 18%",
+  finalCtaImage: "/IMG_8287.jpg",
   formTitle: "Análise gratuita do seu inventário",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [
