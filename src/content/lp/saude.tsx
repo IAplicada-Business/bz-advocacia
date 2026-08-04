@@ -21,8 +21,8 @@ export const saudeContent: LpContent = {
     "Desde 2019 exclusivamente com planos",
   ],
   heroImage: "/IMG_8379.jpg",
-  // Faixa direita + offset de topo no markup: cabeças inteiras com folga
-  heroObjectPosition: "center 8%",
+  // Rosto das sócias centralizado atrás do form (header transparente não corta mais)
+  heroObjectPosition: "68% 26%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",

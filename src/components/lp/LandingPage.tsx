@@ -37,23 +37,20 @@ export function LandingPage({ content }: LandingPageProps) {
     <div className="lp-theme min-h-screen bg-lp-cream font-sans text-lp-ink antialiased">
       <LpHeader onCtaClick={scrollToForm} />
 
-      {/* 1. HERO */}
-      <section data-fold className="relative min-h-[100svh] overflow-hidden bg-lp-cream">
-        {/* Foto só na faixa direita: folga no topo para a cabeça não colar/cortar */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-full overflow-hidden sm:w-[72%] lg:w-[60%]">
-          <img
-            data-lp-hero-img
-            src={content.heroImage}
-            alt=""
-            aria-hidden
-            className="absolute left-0 right-0 top-[14%] h-[100%] w-full object-cover opacity-[0.62]"
-            style={{ objectPosition: content.heroObjectPosition ?? "center 8%" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-lp-cream from-[8%] via-lp-cream/50 via-[35%] to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/45 via-transparent to-transparent" />
-        </div>
+      {/* 1. HERO — foto full-bleed; só object-position mexe o enquadramento */}
+      <section data-fold className="relative min-h-[100svh] overflow-hidden">
+        <img
+          data-lp-hero-img
+          src={content.heroImage}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.5]"
+          style={{ objectPosition: content.heroObjectPosition ?? "68% 26%" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-lp-cream via-lp-cream/88 to-lp-cream/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-lp-cream/65 via-transparent to-lp-cream/20" />
 
-        <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-20 pt-28 md:px-10 md:pb-24 md:pt-32 lg:px-14">
+        <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1400px] flex-col justify-center px-5 pb-16 pt-24 md:px-10 md:pb-20 md:pt-28 lg:px-14">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:gap-10 xl:gap-14">
             <div data-reveal className="lp-reveal lp-reveal-left w-full max-w-[40rem] justify-self-start">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-lp-gold md:text-xs">
