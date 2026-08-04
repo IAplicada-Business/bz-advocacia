@@ -73,6 +73,10 @@ verify_jwt = false
 [functions.on-new-lead]
 verify_jwt = false
 
+# Form público das LPs → auto-cadastro no pipeline (Mídia Paga) + dispara M0
+[functions.lp-lead-submit]
+verify_jwt = false
+
 [functions.assumir-conversa]
 verify_jwt = true
 

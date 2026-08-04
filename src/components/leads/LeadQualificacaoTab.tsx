@@ -22,10 +22,14 @@ const FIELD_LABEL: Record<string, string> = {
   subtipo: "Subtipo",
   tipo: "Tipo",
   urgencia: "Urgência",
+  urgencia_raw: "Urgência (form)",
   medicamento: "Medicamento",
   tratamento: "Tratamento",
   plano: "Plano de saúde",
   operadora: "Operadora",
+  cobertura: "Tipo de cobertura",
+  situacao: "Situação",
+  consenso: "Consenso na família",
   valor_estimado: "Valor estimado",
   valor: "Valor",
   bens: "Bens",
@@ -38,6 +42,12 @@ const FIELD_LABEL: Record<string, string> = {
   cidade: "Cidade",
   estado: "Estado",
   motivo: "Motivo",
+  source: "Origem do dado",
+  slug: "LP",
+  utm_source: "UTM source",
+  utm_medium: "UTM medium",
+  utm_campaign: "UTM campaign",
+  page_url: "Página",
 };
 
 function formatValue(v: unknown): string {
@@ -95,7 +105,13 @@ export function LeadQualificacaoTab({
   }
 
   const dados = dadosCapturados ?? {};
-  const entries = Object.entries(dados).filter(([k]) => k !== "area");
+  // Esconde metadados internos / blobs aninhados; mostra respostas úteis do form/bot
+  const entries = Object.entries(dados).filter(([k, v]) => {
+    if (k === "area" || k === "form" || k === "utm" || k === "pageUrl") return false;
+    if (k.startsWith("form_reenvio")) return false;
+    if (v !== null && typeof v === "object") return false;
+    return true;
+  });
 
   return (
     <div className="space-y-5">

@@ -172,6 +172,9 @@ function mapPlatformToOrigem(platform: string | null | undefined): string {
   if (p === "instagram_ads") return "instagram";
   if (p === "facebook_ads") return "facebook";
   if (p === "meta_ads") return "meta";
+  if (p === "google_ads") return "google";
+  if (p === "tiktok_ads") return "tiktok";
+  if (p === "linkedin_ads") return "linkedin";
   // whatsapp_organico, teste_manual, humano_iniciou etc. → cai em "Orgânicos"
   return "whatsapp_organico";
 }
