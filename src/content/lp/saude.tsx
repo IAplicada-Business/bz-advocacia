@@ -20,9 +20,9 @@ export const saudeContent: LpContent = {
     "Atendimento em todo o Brasil",
     "Desde 2019 exclusivamente com planos",
   ],
-  heroImage: "/IMG_8379.jpg",
-  // Rosto das sócias centralizado atrás do form (header transparente não corta mais)
-  heroObjectPosition: "68% 26%",
+  heroImage: "/IMG_8379_hero.jpg",
+  // Asset landscape com folga acima da cabeça
+  heroObjectPosition: "center 8%",
   finalCtaImage: "/IMG_8432.jpg",
   finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita da negativa",
