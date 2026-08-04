@@ -26,10 +26,14 @@ export function useLpMotion(rootSelector = ".lp-theme") {
       if (header) header.dataset.solid = y > 24 ? "true" : "false";
 
       if (heroImg) {
-        // Parallax leve sem scale (scale cortava a cabeça no topo)
-        heroImg.style.transformOrigin = "68% 26%";
-        const shift = Math.min(y * 0.07, 36);
-        heroImg.style.transform = `translate3d(0, ${shift}px, 0)`;
+        // Sem scale/shift no topo: não empurra a cabeça para fora do frame
+        heroImg.style.transformOrigin = "70% 0%";
+        if (y < 8) {
+          heroImg.style.transform = "none";
+        } else {
+          const shift = Math.min(y * 0.05, 28);
+          heroImg.style.transform = `translate3d(0, ${shift}px, 0)`;
+        }
       }
 
       let bestFold: HTMLElement | null = null;
