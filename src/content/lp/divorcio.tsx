@@ -24,9 +24,9 @@ export const divorcioContent: LpContent = {
   heroImage: "/IMG_8535_hero.jpg",
   // Sócias com tablet; viés à esquerda no mobile; foco um pouco mais alto
   heroObjectPosition: "38% 20%",
-  // Anexo 3 — motion blur das sócias (CTA final inventário + divórcio)
+  // Anexo 3 — mesmo enquadramento do CTA final da LP Saúde
   finalCtaImage: "/IMG_8432.jpg",
-  finalCtaObjectPosition: "center 55%",
+  finalCtaObjectPosition: "center 40%",
   formTitle: "Análise gratuita do seu caso",
   formSubtitle: "Retorno em até 1 dia útil · WhatsApp",
   formFields: [

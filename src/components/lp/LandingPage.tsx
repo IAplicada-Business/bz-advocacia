@@ -373,15 +373,14 @@ export function LandingPage({ content }: LandingPageProps) {
         </div>
       </section>
 
-      {/* 7. CTA FINAL — curto, centralizado */}
+      {/* 7. CTA FINAL — faixa curta, texto/botão centralizados (padrão LP Saúde) */}
       <section data-fold className="relative overflow-hidden px-5 py-16 md:px-8 md:py-20">
         <img
           src={content.finalCtaImage}
           alt=""
           className="absolute inset-0 h-full w-full scale-105 object-cover"
           style={{
-            objectPosition:
-              content.finalCtaObjectPosition ?? content.heroObjectPosition ?? "center 30%",
+            objectPosition: content.finalCtaObjectPosition ?? "center 40%",
           }}
         />
         <div className="absolute inset-0 bg-lp-ink/65" />
