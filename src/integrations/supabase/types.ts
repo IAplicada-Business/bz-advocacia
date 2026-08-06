@@ -1669,6 +1669,7 @@ export type Database = {
           dados_capturados: Json
           dias_sem_contato: number
           etapa_qualificacao: string | null
+          flags_qualificacao: string[]
           fluxo_sdr: string | null
           form_id: string | null
           form_name: string | null
@@ -1717,6 +1718,7 @@ export type Database = {
           dados_capturados?: Json
           dias_sem_contato?: number
           etapa_qualificacao?: string | null
+          flags_qualificacao?: string[]
           fluxo_sdr?: string | null
           form_id?: string | null
           form_name?: string | null
@@ -1765,6 +1767,7 @@ export type Database = {
           dados_capturados?: Json
           dias_sem_contato?: number
           etapa_qualificacao?: string | null
+          flags_qualificacao?: string[]
           fluxo_sdr?: string | null
           form_id?: string | null
           form_name?: string | null
