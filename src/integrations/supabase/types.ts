@@ -72,6 +72,20 @@ export type Database = {
             foreignKeyName: "acordos_financeiros_cliente_id_fkey"
             columns: ["cliente_id"]
             isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "acordos_financeiros_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acordos_financeiros_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
           },
@@ -271,6 +285,20 @@ export type Database = {
             foreignKeyName: "backlog_triagem_contact_submission_id_fkey"
             columns: ["contact_submission_id"]
             isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "backlog_triagem_contact_submission_id_fkey"
+            columns: ["contact_submission_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "backlog_triagem_contact_submission_id_fkey"
+            columns: ["contact_submission_id"]
+            isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
           },
@@ -331,6 +359,20 @@ export type Database = {
             columns: ["contact_submission_id"]
             isOneToOne: false
             referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campanhas_envio_contact_submission_id_fkey"
+            columns: ["contact_submission_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "campanhas_envio_contact_submission_id_fkey"
+            columns: ["contact_submission_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
             referencedColumns: ["id"]
           },
           {
@@ -623,11 +665,16 @@ export type Database = {
       }
       contact_submissions: {
         Row: {
+          advogada_responsavel_id: string | null
+          area_juridica: string | null
           bens_partilhar: string | null
           bot_finalizado: boolean | null
           canal_especifico: string | null
           como_conheceu: string
+          contrato_assinado: boolean | null
+          contrato_id: string | null
           conversa_bot_completa: Json | null
+          converted_at: string | null
           cpf: string | null
           created_at: string
           data_nascimento: string | null
@@ -656,11 +703,15 @@ export type Database = {
           primeiro_contato_em: string | null
           prioridade: string | null
           profissao: string | null
+          proposta_id: string | null
           regime_casamento: string | null
           responsavel_id: string | null
+          reuniao_data: string | null
+          reuniao_notas: string | null
           rg: string | null
           situacao_atual: string | null
           stage: Database["public"]["Enums"]["lead_stage"]
+          stage_entered_at: string | null
           status: string
           status_cliente: string | null
           tags: string[] | null
@@ -672,17 +723,24 @@ export type Database = {
           utm_campaign: string | null
           utm_medium: string | null
           utm_source: string | null
+          valor_estimado: number | null
           valor_estimado_bens: string | null
+          valor_fechamento: number | null
           valor_pretendido: string | null
           valor_proposta: number | null
           whatsapp_id: string | null
         }
         Insert: {
+          advogada_responsavel_id?: string | null
+          area_juridica?: string | null
           bens_partilhar?: string | null
           bot_finalizado?: boolean | null
           canal_especifico?: string | null
           como_conheceu: string
+          contrato_assinado?: boolean | null
+          contrato_id?: string | null
           conversa_bot_completa?: Json | null
+          converted_at?: string | null
           cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
@@ -711,11 +769,15 @@ export type Database = {
           primeiro_contato_em?: string | null
           prioridade?: string | null
           profissao?: string | null
+          proposta_id?: string | null
           regime_casamento?: string | null
           responsavel_id?: string | null
+          reuniao_data?: string | null
+          reuniao_notas?: string | null
           rg?: string | null
           situacao_atual?: string | null
           stage?: Database["public"]["Enums"]["lead_stage"]
+          stage_entered_at?: string | null
           status?: string
           status_cliente?: string | null
           tags?: string[] | null
@@ -727,17 +789,24 @@ export type Database = {
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          valor_estimado?: number | null
           valor_estimado_bens?: string | null
+          valor_fechamento?: number | null
           valor_pretendido?: string | null
           valor_proposta?: number | null
           whatsapp_id?: string | null
         }
         Update: {
+          advogada_responsavel_id?: string | null
+          area_juridica?: string | null
           bens_partilhar?: string | null
           bot_finalizado?: boolean | null
           canal_especifico?: string | null
           como_conheceu?: string
+          contrato_assinado?: boolean | null
+          contrato_id?: string | null
           conversa_bot_completa?: Json | null
+          converted_at?: string | null
           cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
@@ -766,11 +835,15 @@ export type Database = {
           primeiro_contato_em?: string | null
           prioridade?: string | null
           profissao?: string | null
+          proposta_id?: string | null
           regime_casamento?: string | null
           responsavel_id?: string | null
+          reuniao_data?: string | null
+          reuniao_notas?: string | null
           rg?: string | null
           situacao_atual?: string | null
           stage?: Database["public"]["Enums"]["lead_stage"]
+          stage_entered_at?: string | null
           status?: string
           status_cliente?: string | null
           tags?: string[] | null
@@ -782,12 +855,36 @@ export type Database = {
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          valor_estimado?: number | null
           valor_estimado_bens?: string | null
+          valor_fechamento?: number | null
           valor_pretendido?: string | null
           valor_proposta?: number | null
           whatsapp_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contact_submissions_advogada_responsavel_id_fkey"
+            columns: ["advogada_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "advogados_sdr"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_submissions_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_gerados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_submissions_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_gerados"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contratos_gerados: {
         Row: {
@@ -847,6 +944,20 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_gerados_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "contratos_gerados_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
             referencedColumns: ["id"]
           },
           {
@@ -993,6 +1104,20 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_internas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "demandas_internas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
             referencedColumns: ["id"]
           },
           {
@@ -1424,6 +1549,20 @@ export type Database = {
             foreignKeyName: "lead_acquisition_events_contact_submission_id_fkey"
             columns: ["contact_submission_id"]
             isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "lead_acquisition_events_contact_submission_id_fkey"
+            columns: ["contact_submission_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_acquisition_events_contact_submission_id_fkey"
+            columns: ["contact_submission_id"]
+            isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
           },
@@ -1466,6 +1605,20 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_comunicacoes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "lead_comunicacoes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
             referencedColumns: ["id"]
           },
           {
@@ -1520,6 +1673,20 @@ export type Database = {
             foreignKeyName: "lead_interacoes_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "lead_interacoes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_interacoes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
           },
@@ -1556,6 +1723,20 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_notas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "lead_notas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
             referencedColumns: ["id"]
           },
           {
@@ -1639,6 +1820,8 @@ export type Database = {
           ad_name: string | null
           adset_id: string | null
           adset_name: string | null
+          advogada_responsavel_id: string | null
+          area_juridica: string | null
           area_normalizada: string | null
           assumido_em: string | null
           bem_inventariar: string | null
@@ -1646,9 +1829,15 @@ export type Database = {
           call_agendada_em: string | null
           campaign_id: string | null
           campaign_name: string | null
+          caso_forte: boolean | null
           contato_whatsapp: string | null
+          contrato_assinado: boolean | null
+          contrato_id: string | null
+          converted_at: string | null
           created_time: string | null
           dados_capturados: Json
+          desqualificado_em: string | null
+          desqualificado_motivo: string | null
           dias_sem_contato: number
           etapa_qualificacao: string | null
           flags_qualificacao: string[]
@@ -1671,11 +1860,19 @@ export type Database = {
           phone_number: string | null
           platform: string | null
           preferencia_contato: string | null
+          primeiro_contato_em: string | null
+          prioridade_max: boolean | null
+          produto_diferente: boolean | null
+          proposta_id: string | null
+          reuniao_data: string | null
+          reuniao_notas: string | null
           score: number | null
           stage: Database["public"]["Enums"]["lead_stage"]
+          stage_entered_at: string | null
           status_sdr: string | null
           telefone_digits: string | null
           tentativas_etapa: number
+          ticket_minimo: boolean | null
           tipo_contato: string
           tipo_servico: string | null
           ultima_leitura_humano: string | null
@@ -1683,12 +1880,16 @@ export type Database = {
           ultima_msg_cliente_em: string | null
           updated_at: string | null
           urgencia: string | null
+          valor_estimado: number | null
+          valor_fechamento: number | null
         }
         Insert: {
           ad_id?: string | null
           ad_name?: string | null
           adset_id?: string | null
           adset_name?: string | null
+          advogada_responsavel_id?: string | null
+          area_juridica?: string | null
           area_normalizada?: string | null
           assumido_em?: string | null
           bem_inventariar?: string | null
@@ -1696,9 +1897,15 @@ export type Database = {
           call_agendada_em?: string | null
           campaign_id?: string | null
           campaign_name?: string | null
+          caso_forte?: boolean | null
           contato_whatsapp?: string | null
+          contrato_assinado?: boolean | null
+          contrato_id?: string | null
+          converted_at?: string | null
           created_time?: string | null
           dados_capturados?: Json
+          desqualificado_em?: string | null
+          desqualificado_motivo?: string | null
           dias_sem_contato?: number
           etapa_qualificacao?: string | null
           flags_qualificacao?: string[]
@@ -1721,11 +1928,19 @@ export type Database = {
           phone_number?: string | null
           platform?: string | null
           preferencia_contato?: string | null
+          primeiro_contato_em?: string | null
+          prioridade_max?: boolean | null
+          produto_diferente?: boolean | null
+          proposta_id?: string | null
+          reuniao_data?: string | null
+          reuniao_notas?: string | null
           score?: number | null
           stage?: Database["public"]["Enums"]["lead_stage"]
+          stage_entered_at?: string | null
           status_sdr?: string | null
           telefone_digits?: string | null
           tentativas_etapa?: number
+          ticket_minimo?: boolean | null
           tipo_contato?: string
           tipo_servico?: string | null
           ultima_leitura_humano?: string | null
@@ -1733,12 +1948,16 @@ export type Database = {
           ultima_msg_cliente_em?: string | null
           updated_at?: string | null
           urgencia?: string | null
+          valor_estimado?: number | null
+          valor_fechamento?: number | null
         }
         Update: {
           ad_id?: string | null
           ad_name?: string | null
           adset_id?: string | null
           adset_name?: string | null
+          advogada_responsavel_id?: string | null
+          area_juridica?: string | null
           area_normalizada?: string | null
           assumido_em?: string | null
           bem_inventariar?: string | null
@@ -1746,9 +1965,15 @@ export type Database = {
           call_agendada_em?: string | null
           campaign_id?: string | null
           campaign_name?: string | null
+          caso_forte?: boolean | null
           contato_whatsapp?: string | null
+          contrato_assinado?: boolean | null
+          contrato_id?: string | null
+          converted_at?: string | null
           created_time?: string | null
           dados_capturados?: Json
+          desqualificado_em?: string | null
+          desqualificado_motivo?: string | null
           dias_sem_contato?: number
           etapa_qualificacao?: string | null
           flags_qualificacao?: string[]
@@ -1771,11 +1996,19 @@ export type Database = {
           phone_number?: string | null
           platform?: string | null
           preferencia_contato?: string | null
+          primeiro_contato_em?: string | null
+          prioridade_max?: boolean | null
+          produto_diferente?: boolean | null
+          proposta_id?: string | null
+          reuniao_data?: string | null
+          reuniao_notas?: string | null
           score?: number | null
           stage?: Database["public"]["Enums"]["lead_stage"]
+          stage_entered_at?: string | null
           status_sdr?: string | null
           telefone_digits?: string | null
           tentativas_etapa?: number
+          ticket_minimo?: boolean | null
           tipo_contato?: string
           tipo_servico?: string | null
           ultima_leitura_humano?: string | null
@@ -1783,13 +2016,36 @@ export type Database = {
           ultima_msg_cliente_em?: string | null
           updated_at?: string | null
           urgencia?: string | null
+          valor_estimado?: number | null
+          valor_fechamento?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_geral_advogada_responsavel_id_fkey"
+            columns: ["advogada_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "advogados_sdr"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_geral_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_gerados"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_geral_humano_responsavel_fkey"
             columns: ["humano_responsavel"]
             isOneToOne: false
             referencedRelation: "advogados_sdr"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_geral_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_gerados"
             referencedColumns: ["id"]
           },
         ]
@@ -2801,6 +3057,20 @@ export type Database = {
             foreignKeyName: "processos_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "processos_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processos_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
           },
@@ -3049,6 +3319,54 @@ export type Database = {
         }
         Relationships: []
       }
+      qualificacao_estruturada_sdr: {
+        Row: {
+          completa_em: string | null
+          created_at: string
+          id: string
+          lead_id: string
+          respostas_familia: Json | null
+          respostas_inventario: Json | null
+          respostas_saude: Json | null
+          updated_at: string
+        }
+        Insert: {
+          completa_em?: string | null
+          created_at?: string
+          id?: string
+          lead_id: string
+          respostas_familia?: Json | null
+          respostas_inventario?: Json | null
+          respostas_saude?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          completa_em?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string
+          respostas_familia?: Json | null
+          respostas_inventario?: Json | null
+          respostas_saude?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualificacao_estruturada_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads_geral"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualificacao_estruturada_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "v_meta_lead_funnel"
+            referencedColumns: ["lead_id"]
+          },
+        ]
+      }
       qualificacoes_sdr: {
         Row: {
           created_at: string | null
@@ -3131,6 +3449,20 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relatorios_compartilhados_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "relatorios_compartilhados_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
             referencedColumns: ["id"]
           },
           {
@@ -3459,6 +3791,39 @@ export type Database = {
           source_hash?: string | null
           synced_at?: string
           tipo_servico?: string | null
+        }
+        Relationships: []
+      }
+      stage_transitions_override: {
+        Row: {
+          created_at: string
+          from_stage: Database["public"]["Enums"]["lead_stage"] | null
+          id: string
+          lead_id: string
+          lead_source: string
+          missing_fields: Json
+          to_stage: Database["public"]["Enums"]["lead_stage"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          from_stage?: Database["public"]["Enums"]["lead_stage"] | null
+          id?: string
+          lead_id: string
+          lead_source?: string
+          missing_fields?: Json
+          to_stage: Database["public"]["Enums"]["lead_stage"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          from_stage?: Database["public"]["Enums"]["lead_stage"] | null
+          id?: string
+          lead_id?: string
+          lead_source?: string
+          missing_fields?: Json
+          to_stage?: Database["public"]["Enums"]["lead_stage"]
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4072,6 +4437,20 @@ export type Database = {
             foreignKeyName: "whatsapp_historico_cliente_id_fkey"
             columns: ["cliente_id"]
             isOneToOne: false
+            referencedRelation: "vw_clientes_ativos"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "whatsapp_historico_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kanban_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_historico_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
           },
@@ -4262,6 +4641,148 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_clientes_ativos: {
+        Row: {
+          converted_at: string | null
+          created_at: string | null
+          email: string | null
+          lead_id: string | null
+          nome: string | null
+          responsavel_id: string | null
+          stage: Database["public"]["Enums"]["lead_stage"] | null
+          status_cliente: string | null
+          telefone: string | null
+          tipo_processo: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string | null
+          email?: string | null
+          lead_id?: string | null
+          nome?: string | null
+          responsavel_id?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"] | null
+          status_cliente?: string | null
+          telefone?: string | null
+          tipo_processo?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string | null
+          email?: string | null
+          lead_id?: string | null
+          nome?: string | null
+          responsavel_id?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"] | null
+          status_cliente?: string | null
+          telefone?: string | null
+          tipo_processo?: string | null
+        }
+        Relationships: []
+      }
+      vw_kanban_leads: {
+        Row: {
+          advogada_responsavel_id: string | null
+          area_juridica: string | null
+          bens_partilhar: string | null
+          bot_area_normalizada: string | null
+          bot_bot_pausado: boolean | null
+          bot_dados_capturados: Json | null
+          bot_etapa_qualificacao: string | null
+          bot_finalizado: boolean | null
+          bot_fluxo_sdr: string | null
+          bot_is_organic: boolean | null
+          bot_origem_sdr: string | null
+          bot_score: number | null
+          bot_status_sdr: string | null
+          bot_tipo_contato: string | null
+          bot_tipo_servico: string | null
+          bot_ultima_mensagem_em: string | null
+          bot_urgencia: string | null
+          canal_especifico: string | null
+          como_conheceu: string | null
+          contrato_assinado: boolean | null
+          contrato_id: string | null
+          conversa_bot_completa: Json | null
+          converted_at: string | null
+          cpf: string | null
+          created_at: string | null
+          data_nascimento: string | null
+          data_ultima_atividade: string | null
+          documentos: string[] | null
+          email: string | null
+          endereco_cep: string | null
+          endereco_cidade: string | null
+          endereco_completo: string | null
+          endereco_estado: string | null
+          estado_civil: string | null
+          estagio: string | null
+          id: string | null
+          lead_geral_id: string | null
+          lgpd_consent: boolean | null
+          mensagem: string | null
+          nacionalidade: string | null
+          nome_completo: string | null
+          notas_internas: string | null
+          numero_herdeiros: number | null
+          origem: string | null
+          outro_como_conheceu: string | null
+          outro_tipo_processo: string | null
+          pasta_drive_url: string | null
+          perguntas_respondidas: number | null
+          primeiro_contato_em: string | null
+          prioridade: string | null
+          profissao: string | null
+          proposta_id: string | null
+          regime_casamento: string | null
+          responsavel_id: string | null
+          reuniao_data: string | null
+          reuniao_notas: string | null
+          rg: string | null
+          situacao_atual: string | null
+          stage: Database["public"]["Enums"]["lead_stage"] | null
+          status: string | null
+          status_cliente: string | null
+          tags: string[] | null
+          telefone: string | null
+          telefone_digits: string | null
+          tem_filhos: boolean | null
+          tipo_processo: string | null
+          ultimo_contato_em: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          valor_estimado: number | null
+          valor_estimado_bens: string | null
+          valor_fechamento: number | null
+          valor_pretendido: string | null
+          valor_proposta: number | null
+          whatsapp_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_submissions_advogada_responsavel_id_fkey"
+            columns: ["advogada_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "advogados_sdr"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_submissions_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_gerados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_submissions_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "contratos_gerados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_pipeline_b_z: {
         Row: {
           area_normalizada: string | null
@@ -4288,6 +4809,13 @@ export type Database = {
       }
     }
     Functions: {
+      advogadas_lead_count_30d: {
+        Args: never
+        Returns: {
+          advogada_id: string
+          cnt: number
+        }[]
+      }
       auto_bloquear_telefone_bot: {
         Args: { p_motivo: string; p_nome?: string; p_telefone: string }
         Returns: undefined
@@ -4322,6 +4850,7 @@ export type Database = {
         | "contrato"
         | "ganho"
         | "perdido"
+        | "desqualificado"
       tipo_melhoria: "correcao" | "melhoria" | "nova_funcionalidade"
     }
     CompositeTypes: {
@@ -4461,6 +4990,7 @@ export const Constants = {
         "contrato",
         "ganho",
         "perdido",
+        "desqualificado",
       ],
       tipo_melhoria: ["correcao", "melhoria", "nova_funcionalidade"],
     },
