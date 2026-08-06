@@ -13,6 +13,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Lead } from "@/types/leads";
 import { LeadCard } from "./LeadCard";
+import { StageGuardDialog } from "./StageGuardDialog";
 import { useDeleteLead, useUpdateLeadStage } from "@/hooks/useLeads";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +33,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  LEAD_STAGES,
+  LEAD_STAGE_PERDIDO,
+  LEAD_STAGE_COLORS,
+  inferStageFromLegacy,
+  type LeadStage,
+} from "@/lib/leadStages";
+import { checkStageGuards, type StageGuard } from "@/lib/leadStageGuards";
 
 interface LeadsKanbanProps {
   leads: Lead[] | undefined;
@@ -40,12 +49,9 @@ interface LeadsKanbanProps {
   onAssumed?: (lead: Lead) => void;
 }
 
-type ColunaId = "novo" | "enviado" | "qualificado" | "proposta" | "convertido" | "perdido";
+type ColunaId = LeadStage;
 
-// Persistência das colunas recolhidas do pipeline (mesmo padrão de
-// localStorage usado em DespesasTable). Permite ocultar etapas para
-// dimensionar melhor a visão e dar mais espaço às colunas em foco.
-const COLLAPSED_STORAGE_KEY = "leads-kanban-colunas-v1";
+const COLLAPSED_STORAGE_KEY = "leads-kanban-colunas-v2";
 
 function loadCollapsed(): Record<string, boolean> {
   if (typeof window === "undefined") return {};
@@ -58,83 +64,20 @@ function loadCollapsed(): Record<string, boolean> {
 }
 
 const columns: { id: ColunaId; titulo: string; color: string }[] = [
-  { id: "novo", titulo: "Novo", color: "border-t-blue-500" },
-  { id: "enviado", titulo: "Enviado", color: "border-t-green-500" },
-  { id: "qualificado", titulo: "Qualificado", color: "border-t-purple-500" },
-  // Alimentada pelo `leadStatusAutomation` (lib): ao gerar proposta ou
-  // contrato pra um lead em fase anterior, ele entra aqui automaticamente.
-  { id: "proposta", titulo: "Em Proposta", color: "border-t-amber-500" },
-  { id: "convertido", titulo: "Convertido", color: "border-t-emerald-500" },
-  { id: "perdido", titulo: "Perdido", color: "border-t-red-500" },
+  ...LEAD_STAGES.map((s) => ({
+    id: s.key as ColunaId,
+    titulo: s.label,
+    color: LEAD_STAGE_COLORS[s.key],
+  })),
+  {
+    id: LEAD_STAGE_PERDIDO.key,
+    titulo: LEAD_STAGE_PERDIDO.label,
+    color: LEAD_STAGE_COLORS.perdido,
+  },
 ];
 
-// Mapeamento drop -> estado salvo no DB.
-// Pra cada coluna alvo, define `estagio` (contact_submissions) e
-// `status_sdr` (leads_geral, se o lead estiver vinculado).
-// O `status_sdr` so e atualizado quando ele eh essencial pra fazer o lead
-// aparecer na coluna alvo (porque resolveColuna prioriza status_sdr quando
-// o estagio nao e pos-bot — fechado/proposta_enviada/perdido).
-const DROP_TARGET: Record<ColunaId, { estagio: string; status_sdr: string | null }> = {
-  novo: { estagio: "novo", status_sdr: "novo" },
-  // enviado: nao da pra forcar via status_sdr sem etapa_qualificacao
-  // (ver resolveColuna). So atualiza estagio; pra leads nao vinculados ao
-  // bot vai cair em "enviado" pelo fallback.
-  enviado: { estagio: "contato_inicial", status_sdr: null },
-  qualificado: { estagio: "em_analise", status_sdr: "qualificacao_iniciada" },
-  // proposta / convertido / perdido: estagio pos-bot vence sozinho.
-  // Atualiza status_sdr pra coerencia onde fizer sentido.
-  proposta: { estagio: "proposta_enviada", status_sdr: null },
-  convertido: { estagio: "fechado", status_sdr: "cliente" },
-  perdido: { estagio: "perdido", status_sdr: "perdido" },
-};
-
-// Deriva coluna do kanban a partir do estado do lead.
-// Estados pos-bot (proposta_enviada / fechado / perdido) tem prioridade
-// sobre o status_sdr — porque indicam progresso explicitamente registrado
-// (proposta gerada, contrato emitido, perda marcada) e ja sairam do fluxo
-// automatico do bot. Caso contrario, status_sdr e a fonte da verdade.
 function resolveColuna(lead: Lead): ColunaId {
-  // 1) Estados pos-bot tem prioridade
-  if (lead.estagio === "fechado") return "convertido";
-  if (lead.estagio === "proposta_enviada") return "proposta";
-  if (lead.estagio === "perdido") return "perdido";
-
-  // 2) status_sdr (fonte da verdade enquanto o lead esta no fluxo do bot)
-  const s = lead.status_sdr;
-  if (s) {
-    switch (s) {
-      case "novo":
-        return "novo";
-      case "em_atendimento_bot":
-        // "Enviado" = campanha aguardando resposta. Resto = bot conversando → "Qualificado".
-        if (lead.etapa_qualificacao === "aguardando_resposta_campanha") return "enviado";
-        return "qualificado";
-      case "qualificacao_iniciada":
-      case "aguardando_triagem":
-      case "sql_aguardando_humano":
-      case "assumido_humano":
-      case "agendado":
-        return "qualificado";
-      case "cliente":
-        return "convertido";
-      case "perdido":
-      case "perdido_recuperacao":
-      case "mql_frio":
-        return "perdido";
-    }
-  }
-
-  // 3) Fallback p/ leads sem vinculo com bot e sem estagio pos-bot
-  switch (lead.estagio) {
-    case "novo":
-      return "novo";
-    case "contato_inicial":
-      return "enviado";
-    case "em_analise":
-      return "qualificado";
-    default:
-      return "novo";
-  }
+  return inferStageFromLegacy(lead);
 }
 
 function SortableLeadCard({
@@ -188,8 +131,6 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
   );
 }
 
-// Coluna recolhida: faixa estreita que continua sendo alvo de drop (para
-// não quebrar o arrastar-e-soltar) e expande ao clicar.
 function CollapsedColumn({
   id,
   titulo,
@@ -212,9 +153,7 @@ function CollapsedColumn({
       title={`Expandir ${titulo}`}
       className={cn(
         "flex shrink-0 items-center gap-2 rounded-lg border border-t-4 bg-muted/30 transition-colors hover:bg-accent",
-        // Mobile (colunas empilhadas): barra horizontal de largura total.
         "w-full justify-between px-3 py-2",
-        // Desktop: faixa estreita vertical.
         "md:w-12 md:flex-col md:justify-start md:px-0 md:py-3",
         color,
         isOver && "bg-accent/50 ring-2 ring-primary/30",
@@ -241,6 +180,11 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
   const [tipoNaoLead, setTipoNaoLead] = useState<string>("institucional");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [collapsedColumns, setCollapsedColumns] = useState<Record<string, boolean>>(loadCollapsed);
+  const [guardState, setGuardState] = useState<{
+    lead: Lead;
+    targetStage: LeadStage;
+    missing: StageGuard[];
+  } | null>(null);
 
   useEffect(() => {
     try {
@@ -253,14 +197,10 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
   const toggleColuna = (id: ColunaId) =>
     setCollapsedColumns((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  // activationConstraint.distance: so inicia drag depois de mover 8px,
-  // permitindo que clicks simples no card propaguem pra abrir o detalhe
-  // (e os botoes do card funcionem).
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
-  // Realtime: assim que o bot mudar status_sdr em leads_geral, refaz a query.
   useEffect(() => {
     const ch = supabase
       .channel("leads-kanban-realtime")
@@ -286,14 +226,10 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
   }, [queryClient]);
 
   const leadsGrouped = useMemo(() => {
-    const acc: Record<ColunaId, Lead[]> = {
-      novo: [],
-      enviado: [],
-      qualificado: [],
-      proposta: [],
-      convertido: [],
-      perdido: [],
-    };
+    const acc = Object.fromEntries(columns.map((c) => [c.id, [] as Lead[]])) as Record<
+      ColunaId,
+      Lead[]
+    >;
     (leads || []).forEach((lead) => {
       acc[resolveColuna(lead)].push(lead);
     });
@@ -304,6 +240,28 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
     setActiveId(event.active.id as string);
   };
 
+  const commitMove = async (
+    lead: Lead,
+    targetStage: LeadStage,
+    overrideMissing?: StageGuard[],
+  ) => {
+    try {
+      await updateStage.mutateAsync({
+        id: lead.id,
+        stage: targetStage,
+        leadGeralId: lead.lead_geral_id,
+        overrideMissing: overrideMissing?.map((g) => ({ field: g.field, label: g.label })),
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast({
+        title: "Erro ao mover lead",
+        description: message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
@@ -312,7 +270,6 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
     const leadId = active.id as string;
     const overId = over.id as string;
 
-    // Resolve a coluna alvo: drop direto na coluna ou em outro card.
     let targetCol: ColunaId | null = null;
     if (columns.some((c) => c.id === overId)) {
       targetCol = overId as ColunaId;
@@ -328,35 +285,18 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
     const currentCol = resolveColuna(lead);
     if (currentCol === targetCol) return;
 
-    // Drop em "perdido" pede confirmacao (acao destrutiva — encerra o bot).
     if (targetCol === "perdido") {
       setLeadToLose(lead);
       return;
     }
 
-    const target = DROP_TARGET[targetCol];
-
-    try {
-      // Atualiza estagio no contact_submissions
-      await updateStage.mutateAsync({ id: lead.id, estagio: target.estagio });
-
-      // E status_sdr no leads_geral, quando faz sentido e o lead esta vinculado.
-      // Sem isso, o resolveColuna pode trazer o card de volta pra coluna
-      // antiga (pq status_sdr prioritario sobre estagio em estados pre-bot).
-      if (target.status_sdr && lead.lead_geral_id) {
-        const { error } = await supabase
-          .from("leads_geral")
-          .update({ status_sdr: target.status_sdr })
-          .eq("id", lead.lead_geral_id);
-        if (error) throw error;
-      }
-    } catch (err: any) {
-      toast({
-        title: "Erro ao mover lead",
-        description: err?.message ?? String(err),
-        variant: "destructive",
-      });
+    const missing = checkStageGuards(lead, targetCol);
+    if (missing.length > 0) {
+      setGuardState({ lead, targetStage: targetCol, missing });
+      return;
     }
+
+    await commitMove(lead, targetCol);
   };
 
   const handleConfirmLost = async () => {
@@ -364,21 +304,17 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
     const lead = leadToLose;
     setLeadToLose(null);
     try {
-      // Atualiza status do bot (se vinculado) — fonte da verdade do kanban
-      if (lead.lead_geral_id) {
-        const { error: e1 } = await supabase
-          .from("leads_geral")
-          .update({ status_sdr: "perdido" })
-          .eq("id", lead.lead_geral_id);
-        if (e1) throw e1;
-      }
-      // Mantém contact_submissions.estagio coerente
-      await updateStage.mutateAsync({ id: lead.id, estagio: "perdido" });
+      await updateStage.mutateAsync({
+        id: lead.id,
+        stage: "perdido",
+        leadGeralId: lead.lead_geral_id,
+      });
       toast({ title: "Lead marcado como perdido" });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       toast({
         title: "Erro ao marcar como perdido",
-        description: err?.message ?? String(err),
+        description: message,
         variant: "destructive",
       });
     }
@@ -386,8 +322,8 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-6 gap-4 min-h-[600px]">
-        {columns.map((col) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4 min-h-[600px]">
+        {columns.filter((c) => c.id !== "perdido").map((col) => (
           <div key={col.id}>
             <Skeleton className="h-8 w-full mb-3" />
             <div className="space-y-2">
@@ -425,7 +361,7 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
           return (
             <div
               key={coluna.id}
-              className={`flex-1 md:min-w-[240px] border rounded-lg ${coluna.color} border-t-4 bg-muted/30`}
+              className={`flex-1 md:min-w-[200px] md:max-w-[280px] border rounded-lg ${coluna.color} border-t-4 bg-muted/30`}
             >
               <div className="flex items-start justify-between gap-2 p-3 border-b">
                 <div>
@@ -451,9 +387,12 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
                     onViewDetails={onViewDetails}
                     onAssumed={onAssumed}
                     onDelete={setLeadToDelete}
-                    onMarkNaoLead={(l) => { setLeadNaoLead(l); setTipoNaoLead("institucional"); }}
+                    onMarkNaoLead={(l) => {
+                      setLeadNaoLead(l);
+                      setTipoNaoLead("institucional");
+                    }}
                     onMarkLost={
-                      coluna.id !== "perdido" && coluna.id !== "convertido"
+                      coluna.id !== "perdido" && coluna.id !== "ganho"
                         ? setLeadToLose
                         : undefined
                     }
@@ -471,6 +410,21 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
       <DragOverlay>
         {activeLead ? <LeadCard lead={activeLead} onClick={() => {}} /> : null}
       </DragOverlay>
+
+      <StageGuardDialog
+        open={!!guardState}
+        onOpenChange={(open) => !open && setGuardState(null)}
+        leadName={guardState?.lead.nome_completo ?? ""}
+        targetStage={guardState?.targetStage ?? "mql"}
+        missing={guardState?.missing ?? []}
+        onCancel={() => setGuardState(null)}
+        onConfirmOverride={async () => {
+          if (!guardState) return;
+          const { lead, targetStage, missing } = guardState;
+          setGuardState(null);
+          await commitMove(lead, targetStage, missing);
+        }}
+      />
 
       <AlertDialog open={!!leadToDelete} onOpenChange={(open) => !open && setLeadToDelete(null)}>
         <AlertDialogContent>
@@ -505,7 +459,7 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
             <AlertDialogTitle>Marcar como perdido</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza que deseja marcar <strong>{leadToLose?.nome_completo}</strong> como
-              perdido? O lead será movido para a coluna "Perdido" e o bot encerra o atendimento.
+              perdido? O lead será movido para a coluna &quot;Perdido&quot; e o bot encerra o atendimento.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -520,7 +474,6 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Marcar como nao-lead (fornecedor/parceiro/institucional/pessoal) */}
       <AlertDialog open={!!leadNaoLead} onOpenChange={(open) => !open && setLeadNaoLead(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -547,18 +500,16 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
               onClick={async () => {
                 if (!leadNaoLead) return;
                 try {
-                  // Garante lead_geral pra qualquer registro — inclusive os
-                  // antigos do formulario do site que nao tem vinculo com o bot.
                   let leadGeralId = leadNaoLead.lead_geral_id;
                   if (!leadGeralId) {
-                    const { data: novoId, error: rpcErr } = await (supabase as any).rpc(
+                    const { data: novoId, error: rpcErr } = await supabase.rpc(
                       "garantir_lead_geral_para_contact",
                       { p_contact_submission_id: leadNaoLead.id },
                     );
                     if (rpcErr) throw rpcErr;
                     leadGeralId = novoId as string;
                   }
-                  const { error: updErr } = await (supabase as any)
+                  const { error: updErr } = await supabase
                     .from("leads_geral")
                     .update({ tipo_contato: tipoNaoLead, bot_pausado: true })
                     .eq("id", leadGeralId);
@@ -566,8 +517,9 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
                   queryClient.invalidateQueries({ queryKey: ["leads"] });
                   queryClient.invalidateQueries({ queryKey: ["leads-kanban"] });
                   toast({ title: `Marcado como ${tipoNaoLead}` });
-                } catch (err: any) {
-                  toast({ title: "Erro ao marcar", description: err?.message, variant: "destructive" });
+                } catch (err: unknown) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  toast({ title: "Erro ao marcar", description: message, variant: "destructive" });
                 } finally {
                   setLeadNaoLead(null);
                 }

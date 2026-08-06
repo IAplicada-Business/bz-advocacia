@@ -227,6 +227,10 @@ function LeadsTab({
       (filteredLeads || []).filter(
         (l) =>
           l.status_sdr === "sql_aguardando_humano" &&
+          l.stage !== "ganho" &&
+          l.stage !== "proposta" &&
+          l.stage !== "contrato" &&
+          l.stage !== "perdido" &&
           l.estagio !== "fechado" &&
           l.estagio !== "proposta_enviada" &&
           l.estagio !== "perdido",

@@ -13,7 +13,7 @@ export function useAdvogadosSdr() {
   return useQuery({
     queryKey: ["advogados-sdr-ativos"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("advogados_sdr")
         .select("id, nome, user_id, ativo")
         .eq("ativo", true)
@@ -32,13 +32,13 @@ export function useMeuAdvogadoId() {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("advogados_sdr")
         .select("id")
         .eq("user_id", user.id)
         .eq("ativo", true)
         .maybeSingle();
-      return (data?.id as string) ?? null;
+      return data?.id ?? null;
     },
     staleTime: 1000 * 60 * 5,
   });
