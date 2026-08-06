@@ -10,6 +10,7 @@ import {
   type Lead,
 } from "../_shared/db.ts";
 import { normalizarTelefone } from "../_shared/zapi.ts";
+import { buildMetaAttribution } from "../_shared/metaAttribution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
