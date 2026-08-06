@@ -10,9 +10,10 @@ export function useClientesAtivos(search?: string) {
   return useQuery({
     queryKey: ["clientes-ativos", search],
     queryFn: async () => {
-      const { data: viewRows, error: viewError } = await supabase
+      const { data: viewRows, error: viewError } = await (supabase as any)
         .from("vw_clientes_ativos")
         .select("*");
+
 
       if (viewError) {
         // Fallback: ganhos/fechados na tabela crua
