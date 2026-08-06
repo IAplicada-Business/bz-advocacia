@@ -213,10 +213,31 @@ Deno.serve(async (req) => {
   const telefone = normalizarTelefone(payload.phone);
 
   // ============================================================
+  // WHITELIST DE TESTE — sobrepõe TODOS os guards (camadas 1-4,
+  // bot_pausado, status, humano ativo). Uso exclusivo de testes.
+  // ============================================================
+  let modoTeste = false;
+  {
+    const tel8 = telefone.replace(/\D/g, "").slice(-8);
+    const { data: whitelist } = await supabase
+      .from("whitelist_teste_bot")
+      .select("telefone_8")
+      .eq("telefone_8", tel8)
+      .limit(1);
+    if (whitelist?.length) {
+      modoTeste = true;
+      await registrarEvento(supabase, null, "bot_whitelist_teste_ignorou_guards", {
+        telefone_8: tel8,
+        telefone,
+      });
+    }
+  }
+
+  // ============================================================
   // GUARD: números bloqueados (advogados, equipe, parceiros).
   // Bot fica fora — não cria lead, não responde, não classifica.
   // ============================================================
-  {
+  if (!modoTeste) {
     const { data: bloqueado } = await supabase
       .from("numeros_bloqueados_bot")
       .select("telefone, nome, motivo")
@@ -244,7 +265,7 @@ Deno.serve(async (req) => {
   //   - 'novo' antigo / 'perdido' → bot adota (segue o fluxo;
   //     espelhamento linka o registro existente em vez de duplicar)
   // ============================================================
-  {
+  if (!modoTeste) {
     const ultimos8 = telefone.slice(-8);
     const { data: csExisting } = await supabase
       .from("contact_submissions")
@@ -458,6 +479,7 @@ Deno.serve(async (req) => {
   // `bot_pausado` ou `status_sdr` indicar handoff.
 
   if (!lead) {
+    if (!modoTeste)
     // ============================================================
     // CROSS-CHECK ANTES DE CRIAR LEAD NOVO
     // (b) leads_geral com últimos 8 dígitos + status ativo
@@ -664,7 +686,7 @@ Deno.serve(async (req) => {
         lead.bot_pausado === true ||
         ["assumido_humano", "agendado", "cliente"].includes((lead.status_sdr ?? "").toString());
 
-      if (humanoAtivo) {
+      if (humanoAtivo && !modoTeste) {
         await supabase
           .from("campanhas_envio")
           .update({ status: "respondida", respondida_em: minhaMsgTs })
@@ -781,7 +803,7 @@ Deno.serve(async (req) => {
   //   ultima_mensagem_em >= 7 dias  →  reabre, reseta etapa, envia
   //   mensagem de reativação
   // ============================================================
-  {
+  if (!modoTeste) {
     const STATUS_REABRIVEIS = ["perdido", "mql_frio", "assumido_humano", "sql_aguardando_humano"];
     const status = (lead.status_sdr ?? "").toString();
 
@@ -857,7 +879,7 @@ Deno.serve(async (req) => {
   // de responder. Cobre o caso "advogada assumiu no CRM mas o bot
   // não sabe" (status_sdr desatualizado).
   // ============================================================
-  {
+  if (!modoTeste) {
     const { data: csLinked } = await supabase
       .from("contact_submissions")
       .select("id, estagio, status, responsavel_id, nome_completo")
@@ -917,14 +939,14 @@ Deno.serve(async (req) => {
   }
 
   // Bot pausado → humano vai responder
-  if (lead.bot_pausado) {
+  if (lead.bot_pausado && !modoTeste) {
     await registrarEvento(supabase, lead.id, "msg_recebida_bot_pausado", { texto });
     return new Response(JSON.stringify({ acao: "bot_pausado_humano_assume" }), { status: 200 });
   }
 
   // Status que não devem disparar bot (cliente, perdido, etc.)
   const statusOk = ["novo", "em_atendimento_bot", "qualificacao_iniciada", null];
-  if (!statusOk.includes(lead.status_sdr)) {
+  if (!statusOk.includes(lead.status_sdr) && !modoTeste) {
     await registrarEvento(supabase, lead.id, "msg_recebida_status_bloqueia", { status: lead.status_sdr });
     return new Response(JSON.stringify({ acao: "status_bloqueia" }), { status: 200 });
   }
@@ -932,7 +954,7 @@ Deno.serve(async (req) => {
   // Camada 3 — rede de segurança contra fromMe intermitente.
   // Se QUALQUER humano (painel ou fromMe) interagiu nas últimas 24h,
   // bot fica fora pra não atropelar o atendimento humano.
-  {
+  if (!modoTeste) {
     const desde = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count: humanoCount } = await supabase
       .from("mensagens_sdr")
