@@ -355,10 +355,13 @@ Deno.serve(async (req) => {
   const mensagem = buildMensagem(area, values, body.utm, body.pageUrl);
   const { contact: formContact, leadExtras, capturados } = mapFormToPersistence(area, values);
 
-  if (body.utm?.source) capturados.utm_source = body.utm.source;
-  if (body.utm?.medium) capturados.utm_medium = body.utm.medium;
-  if (body.utm?.campaign) capturados.utm_campaign = body.utm.campaign;
-  if (body.pageUrl) capturados.page_url = body.pageUrl;
+  const attribution = buildMetaAttribution({
+    utm: body.utm,
+    ads: body.ads,
+    pageUrl: body.pageUrl,
+  });
+  Object.assign(capturados, attribution.capturados);
+
 
   const origemCrm =
     platform === "instagram_ads"
