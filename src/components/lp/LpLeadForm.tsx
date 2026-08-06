@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackMetaLead } from "@/lib/metaPixel";
 import type { LpFormField } from "./types";
 
 type LpLeadFormProps = {
@@ -71,6 +72,7 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
         return;
       }
 
+      trackMetaLead();
       setSubmitted(true);
     } catch (err) {
       console.error("[LpLeadForm] submit failed:", err);

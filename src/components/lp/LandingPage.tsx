@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Quote, Star } from "lucide-react";
+import { META_PIXEL_ID, trackMetaPageView } from "@/lib/metaPixel";
 import { LpHeader } from "./LpHeader";
 import { LpFooter } from "./LpFooter";
 import { LpLeadForm } from "./LpLeadForm";
@@ -22,6 +23,11 @@ export function LandingPage({ content }: LandingPageProps) {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", content.metaDescription);
   }, [content]);
+
+  // Meta Pixel só nas LPs (não no CRM)
+  useEffect(() => {
+    trackMetaPageView();
+  }, [content.slug]);
 
   // Carrossel automático dos depoimentos
   useEffect(() => {
@@ -53,6 +59,15 @@ export function LandingPage({ content }: LandingPageProps) {
 
   return (
     <div className="lp-theme min-h-screen bg-lp-cream font-sans text-lp-ink antialiased">
+      <noscript>
+        <img
+          height="1"
+          width="1"
+          style={{ display: "none" }}
+          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          alt=""
+        />
+      </noscript>
       <LpHeader onCtaClick={scrollToForm} />
 
       {/* 1. HERO — desktop: copy | form; mobile: headline → form → bullets */}
