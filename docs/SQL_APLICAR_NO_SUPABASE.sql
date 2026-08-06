@@ -1,10 +1,11 @@
 -- ============================================================
--- B&Z — SQL consolidado pra colar no SUPABASE SQL EDITOR
--- Projeto: nvkxblrwblhvggndlfax
--- NÃO rodar no Lovable. Abrir: https://supabase.com/dashboard/project/nvkxblrwblhvggndlfax/sql/new
+-- B&Z — SQL consolidado pra colar no SQL EDITOR
+-- Banco deste projeto: Lovable Cloud (Cloud → SQL editor)
+-- (Se usar Supabase dashboard: project-ref nvkxblrwblhvggndlfax)
 --
 -- Inclui Bloco 2 (funil MQL→Ganho) + Bloco 3 (bot desqualificado/qualificação)
 -- Idempotente o máximo possível (IF NOT EXISTS / IF EXISTS).
+-- Já inclui DROP das views vw_kanban_leads / vw_clientes_ativos.
 -- ============================================================
 
 BEGIN;
