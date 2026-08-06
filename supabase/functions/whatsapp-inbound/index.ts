@@ -712,6 +712,7 @@ Deno.serve(async (req) => {
       });
 
       const msgM0 = mensagemM0Recuperacao(nomePrimeiro(lead));
+      await cadencia();
       const envio = await zapiSendText(telefone, msgM0);
       await registrarMensagem(supabase, lead.id, "bot", msgM0, {
         zapi: envio,
@@ -827,6 +828,7 @@ Deno.serve(async (req) => {
 
         const nomeReab = nomePrimeiro(lead);
         const msgReab = mensagemReabertura(nomeReab);
+        await cadencia();
         const envioReab = await zapiSendText(telefone, msgReab);
         await registrarMensagem(supabase, lead.id, "bot", msgReab, {
           zapi: envioReab, acao: "reabertura_7dias",
