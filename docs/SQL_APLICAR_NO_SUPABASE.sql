@@ -328,9 +328,24 @@ ALTER TABLE public.leads_geral
   ADD COLUMN IF NOT EXISTS ticket_minimo boolean DEFAULT false,
   ADD COLUMN IF NOT EXISTS produto_diferente boolean DEFAULT false;
 
+-- Se sobrou tentativa anterior com lead_id uuid, recria
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'qualificacao_estruturada_sdr'
+      AND column_name = 'lead_id'
+      AND udt_name = 'uuid'
+  ) THEN
+    DROP TABLE public.qualificacao_estruturada_sdr CASCADE;
+  END IF;
+END$$;
+
+-- lead_id é TEXT: leads_geral.id é text (não uuid) neste banco
 CREATE TABLE IF NOT EXISTS public.qualificacao_estruturada_sdr (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  lead_id uuid NOT NULL UNIQUE REFERENCES public.leads_geral(id) ON DELETE CASCADE,
+  lead_id text NOT NULL UNIQUE REFERENCES public.leads_geral(id) ON DELETE CASCADE,
   respostas_familia jsonb,
   respostas_inventario jsonb,
   respostas_saude jsonb,
