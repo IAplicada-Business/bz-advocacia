@@ -4637,9 +4637,13 @@ export type Database = {
           campaign_name: string | null
           campaign_status: string | null
           converted: boolean | null
+          em_pipeline: boolean | null
+          form_id: string | null
           lead_at: string | null
           lead_id: string | null
           objective: string | null
+          origem_sdr: string | null
+          platform: string | null
           status_sdr: string | null
         }
         Relationships: []
