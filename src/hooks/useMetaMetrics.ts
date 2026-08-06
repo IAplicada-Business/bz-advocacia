@@ -6,13 +6,11 @@ import { subDays, format } from "date-fns";
 /**
  * Pega KPIs e chart data agregados das tabelas do Meta Ads:
  * - meta_insights_daily (level=ad) → gasto, impressoes, cliques, ctr, cpc.
- * - v_meta_lead_funnel → count de leads que entraram pelo bot a partir
- *   de anuncio (lead.ad_id IS NOT NULL OR lead.campaign_id IS NOT NULL),
- *   e quantos viraram cliente/agendado/assumido/sql_aguardando.
+ * - v_meta_lead_funnel → leads Meta: CTWA (ad_id), campanha, ou LP paga
+ *   (platform facebook/instagram/meta_ads + form_id lp_* / meta_lead_ads).
  *
- * Custo por lead usa o `leads` REAL do funil (que entrou pelo bot) — nao
- * o `actions.lead` do Meta — porque o que importa pra B&Z e o lead que
- * deu retorno via WhatsApp.
+ * Custo por lead usa leads reais do CRM (WhatsApp + LP), nao o
+ * `actions.lead` do Meta.
  */
 export function useMetaMetrics(periodo: PeriodoFiltro = "30d") {
   const dias = periodo === "7d" ? 7 : periodo === "90d" ? 90 : 30;

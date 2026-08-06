@@ -5,7 +5,7 @@
 -- - App ID:           1046556887799244
 -- - Ad Account:       act_1077194864075798
 -- - Page ID:          454173584453480
--- - Pixel ID:         511652845204065 (nao usado hoje, salvo p/ futuro)
+-- - Pixel ID:         1035698672653512 (LPs + Ads — alinhado em 20260806200000)
 --
 -- ON CONFLICT DO NOTHING: ad_account_id e UNIQUE; rodar de novo nao quebra
 -- (mas tambem nao atualiza valores). Pra atualizar, mexer manualmente.
@@ -17,6 +17,6 @@ VALUES
    '918894670181107',
    'act_1077194864075798',
    '454173584453480',
-   '511652845204065',
+   '1035698672653512',
    true)
 ON CONFLICT (ad_account_id) DO NOTHING;

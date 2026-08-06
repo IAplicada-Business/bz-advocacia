@@ -60,12 +60,19 @@ export function trackMetaPageView() {
 }
 
 /** Dispara Lead após formulário da LP enviar com sucesso. */
-export function trackMetaLead() {
+export function trackMetaLead(opts?: { contentName?: string; contentCategory?: string }) {
   const fbq = ensureFbq();
   if (!fbq) return;
   if (!initialized) {
     fbq("init", META_PIXEL_ID);
     initialized = true;
   }
-  fbq("track", "Lead");
+  const payload: Record<string, string> = {};
+  if (opts?.contentName) payload.content_name = opts.contentName;
+  if (opts?.contentCategory) payload.content_category = opts.contentCategory;
+  if (Object.keys(payload).length > 0) {
+    fbq("track", "Lead", payload);
+  } else {
+    fbq("track", "Lead");
+  }
 }
