@@ -56,8 +56,10 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
           slug,
           values,
           utm: readUtms(),
+          ads: readAdParams(),
           pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
         },
+
       });
 
       // supabase-js marca error em qualquer non-2xx; o body útil pode vir em data
