@@ -331,6 +331,13 @@ const App = () => {
       <Route path="/dashboard/pesquisas/cnpj" element={<Navigate to="/dashboard/pesquisas" replace />} />
       <Route path="/dashboard/pesquisas/cpf" element={<Navigate to="/dashboard/pesquisas" replace />} />
       <Route path="/dashboard/pesquisas/processos" element={<Navigate to="/dashboard/pesquisas" replace />} />
+      {/* TODO: reativar quando BigDataCorp for contratada (páginas stub / mock) */}
+      {/* <Route path="/dashboard/pesquisas/imovel" element={<ImovelPage />} /> */}
+      {/* <Route path="/dashboard/pesquisas/veiculo" element={<VeiculoPage />} /> */}
+      {/* <Route path="/dashboard/pesquisas/api" element={<ConsultasApiPage />} /> */}
+      <Route path="/dashboard/pesquisas/imovel" element={<Navigate to="/dashboard/pesquisas" replace />} />
+      <Route path="/dashboard/pesquisas/veiculo" element={<Navigate to="/dashboard/pesquisas" replace />} />
+      <Route path="/dashboard/pesquisas/api" element={<Navigate to="/dashboard/pesquisas" replace />} />
       
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
