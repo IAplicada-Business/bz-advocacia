@@ -62,7 +62,7 @@ export function LeadInfoPanel({ leadId }: Props) {
   const { data: reatribuicoes = [] } = useQuery({
     queryKey: ["lead-reatribuicoes", leadId],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("eventos_sdr")
         .select("id, payload, created_at")
         .eq("lead_id", leadId)
@@ -75,7 +75,7 @@ export function LeadInfoPanel({ leadId }: Props) {
   const { data: lead, isLoading } = useQuery({
     queryKey: ["lead-info", leadId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("leads_geral")
         .select("id, full_name, phone_number, contato_whatsapp, tipo_servico, area_normalizada, origem_sdr, platform, ad_name, score, status_sdr, etapa_qualificacao, humano_responsavel, bot_pausado, tipo_contato")
         .eq("id", leadId)
@@ -88,9 +88,9 @@ export function LeadInfoPanel({ leadId }: Props) {
   const { data: cs } = useQuery({
     queryKey: ["lead-info-cs", leadId],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("contact_submissions")
-        .select("id, estagio, status, status_cliente")
+        .select("id, estagio, status, status_cliente, stage")
         .eq("lead_geral_id", leadId)
         .maybeSingle();
       return data;
@@ -100,7 +100,7 @@ export function LeadInfoPanel({ leadId }: Props) {
   const { data: qualif = [] } = useQuery({
     queryKey: ["lead-info-qualif", leadId],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("qualificacoes_sdr")
         .select("pergunta_codigo, pergunta_texto, resposta_texto, resposta_estruturada, created_at")
         .eq("lead_id", leadId)
@@ -134,7 +134,7 @@ export function LeadInfoPanel({ leadId }: Props) {
   }
 
   async function updateLead(patch: Record<string, unknown>) {
-    const { error } = await (supabase as any).from("leads_geral").update(patch).eq("id", leadId);
+    const { error } = await supabase.from("leads_geral").update(patch).eq("id", leadId);
     if (error) { toast.error(error.message); return false; }
     qc.invalidateQueries({ queryKey: ["lead-info", leadId] });
     qc.invalidateQueries({ queryKey: ["atendimento-lead", leadId] });
@@ -144,7 +144,7 @@ export function LeadInfoPanel({ leadId }: Props) {
 
   async function updateCs(patch: Record<string, unknown>) {
     if (!cs?.id) return true;
-    const { error } = await (supabase as any).from("contact_submissions").update(patch).eq("id", cs.id);
+    const { error } = await supabase.from("contact_submissions").update(patch).eq("id", cs.id);
     if (error) { toast.error(error.message); return false; }
     qc.invalidateQueries({ queryKey: ["lead-info-cs", leadId] });
     return true;

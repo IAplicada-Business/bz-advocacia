@@ -1,4 +1,4 @@
-import { Clock, Briefcase, MessageSquare, Trash2, XCircle, UserX, MessageCircle } from "lucide-react";
+import { Clock, Briefcase, MessageSquare, Trash2, XCircle, UserX, MessageCircle, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Lead } from "@/types/leads";
@@ -12,6 +12,12 @@ import { Button } from "@/components/ui/button";
 import { LeadBotBadge } from "./LeadBotBadge";
 import { LeadCampanhaBadge } from "./LeadCampanhaBadge";
 import { AtenderAgoraButton } from "./AtenderAgoraButton";
+import {
+  daysInStage,
+  getStageSlaDays,
+  inferStageFromLegacy,
+  isOverSla,
+} from "@/lib/leadStages";
 
 interface LeadCardProps {
   lead: Lead;
@@ -32,6 +38,10 @@ function calcDiasDesdeContato(createdAt: string): number {
 export function LeadCard({ lead, onClick, onAssumed, onDelete, onMarkLost, onMarkNaoLead }: LeadCardProps) {
   const navigate = useNavigate();
   const dias = calcDiasDesdeContato(lead.created_at);
+  const stage = inferStageFromLegacy(lead);
+  const diasEtapa = daysInStage(lead.stage_entered_at);
+  const slaDays = getStageSlaDays(stage);
+  const overSla = isOverSla(stage, lead.stage_entered_at);
   const tipoServico = lead.tipo_processo === 'Outro' && lead.outro_tipo_processo
     ? lead.outro_tipo_processo
     : lead.tipo_processo;
@@ -101,9 +111,10 @@ export function LeadCard({ lead, onClick, onAssumed, onDelete, onMarkLost, onMar
   // entao a checagem aqui precisa olhar os dois.
   const isHot =
     lead.status_sdr === "sql_aguardando_humano" &&
-    lead.estagio !== "fechado" &&
-    lead.estagio !== "proposta_enviada" &&
-    lead.estagio !== "perdido";
+    stage !== "ganho" &&
+    stage !== "proposta" &&
+    stage !== "contrato" &&
+    stage !== "perdido";
   return (
     <Card
       className={cn(
@@ -128,7 +139,7 @@ export function LeadCard({ lead, onClick, onAssumed, onDelete, onMarkLost, onMar
             <p className="font-medium text-sm line-clamp-1">{lead.nome_completo}</p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            {lead.estagio === 'novo' && (
+            {stage === 'mql' && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -189,6 +200,19 @@ export function LeadCard({ lead, onClick, onAssumed, onDelete, onMarkLost, onMar
         </div>
 
         <div className="flex flex-wrap gap-1">
+          {overSla && (
+            <span
+              className="inline-flex items-center gap-0.5 rounded border border-yellow-300 bg-yellow-100 px-1.5 py-0.5 text-[10px] font-medium text-yellow-900"
+              title={
+                slaDays != null
+                  ? `SLA: ${slaDays}d · nesta etapa há ${diasEtapa}d`
+                  : `Nesta etapa há ${diasEtapa}d`
+              }
+            >
+              <AlertTriangle className="h-3 w-3" />
+              SLA
+            </span>
+          )}
           <LeadCampanhaBadge lead={lead} />
           <LeadBotBadge lead={lead} />
           {lead.area_normalizada && (

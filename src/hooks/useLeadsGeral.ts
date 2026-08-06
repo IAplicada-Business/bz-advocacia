@@ -36,6 +36,23 @@ export function useLeadsGeral(search?: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["leads-geral"] }),
   });
 
+  const updateStage = useMutation({
+    mutationFn: async ({
+      id,
+      stage,
+    }: {
+      id: string;
+      stage: Database["public"]["Enums"]["lead_stage"];
+    }) => {
+      const { error } = await supabase
+        .from("leads_geral")
+        .update({ stage })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["leads-geral"] }),
+  });
+
   const updateObservacoes = useMutation({
     mutationFn: async ({ id, observacoes }: { id: string; observacoes: string }) => {
       const { error } = await supabase
@@ -47,5 +64,5 @@ export function useLeadsGeral(search?: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["leads-geral"] }),
   });
 
-  return { ...query, updateStatus, updateObservacoes };
+  return { ...query, updateStatus, updateStage, updateObservacoes };
 }

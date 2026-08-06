@@ -1,60 +1,48 @@
-# B&Z
+# B&Z — CRM Borges & Zembruski Advocacia
 
-Lovable, 
+CRM jurídico + bot SDR (Cláudia) no WhatsApp.
 
-estou trabalhando em um projeto de uma cliente de consultoria e preciso do seu suporte para criar uma pagina de gestão da empresa das mesmas, anexo qual a paleta de cores deve ser usada e as logos. 
+**Live app**: https://gestao.borgesezembruski.com  
+**Repo**: https://github.com/IAplicada-Business/bz-advocacia  
+**Supabase**: `nvkxblrwblhvggndlfax`
 
+## Stack
 
-iremos criar inicialmente um:
+- Frontend: Vite + React 18 + TypeScript + Tailwind + shadcn/ui + TanStack Query
+- Backend: Supabase (Postgres + RLS + Edge Functions Deno)
+- WhatsApp: Z-API
+- Classificador: Claude Haiku
 
-Formulário Público de Captação
-URL separada: form.bzadvocacia.com.br
-Elementos:
+## Setup local
 
-Logo B&Z
-Título: "Fale Conosco"
-Campos obrigatórios:
+1. `cp .env.example .env`
+2. Preencher variáveis do Supabase (URL e ANON/PUBLISHABLE KEY do painel)
+3. `npm install`
+4. `npm run dev`
 
-Nome completo
-Email
-Telefone (com máscara)
-Tipo de processo (dropdown)
-Como nos conheceu (dropdown: Google, Instagram, Facebook, Indicação, Outro)
-Mensagem/Dúvida
+Secrets de Edge Functions **não** vão no `.env` do front — use:
 
+```bash
+supabase link --project-ref nvkxblrwblhvggndlfax
+supabase secrets set --env-file ./.env
+```
 
-Campos condicionais por tipo de processo:
+## Migrations
 
-Se "Divórcio": Regime de casamento, Tem filhos?, Bens a partilhar?
-Se "Inventário": Valor estimado dos bens, Número de herdeiros
-Se "Pensão Alimentícia": Situação atual, Valor pretendido
+Arquivos em `supabase/migrations/*.sql`, aplicados por ordem cronológica no nome.
 
+```bash
+supabase db push
+supabase gen types typescript --linked > src/integrations/supabase/types.ts
+```
 
-Upload de documentos (RG, CPF, outros)
-Checkbox LGPD
-Botão "Enviar"
-Página de confirmação: "Recebemos seu contato. Retornaremos em até 24h"
+## Documentação útil
 
+- `CLAUDE.md` — regras do projeto e do bot SDR
+- `README_SDR.md` — overview do SDR V3
+- `docs/SLA_FUNIL_COMERCIAL.md` — SLA por etapa do funil
 
-use as fotos anexas e logos para criar esse forms em uma só pagina, coloque as fotos como background 
-
-conecte ao cloud e crie as tabelas iniciais para armazenamento das informações
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://bz-advocacia.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/1a09f2bd-c7b5-40b9-92ec-b2e20089beaa).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Desenvolvimento
 
 ```sh
 git clone https://github.com/IAplicada-Business/bz-advocacia.git
@@ -62,3 +50,5 @@ cd bz-advocacia
 npm i
 npm run dev
 ```
+
+> O painel Lovable em produção é só CRM publicado. **Não** editar código nem schema pelo Lovable — commits e sync pelo Lovable conflitam após a transferência do repo para a org.

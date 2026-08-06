@@ -11,6 +11,14 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // TODO: reativar quando BigDataCorp for contratada
+  if (!Deno.env.get('BIGDATACORP_TOKEN')) {
+    return new Response(JSON.stringify({
+      error: 'INTEGRATION_NOT_CONFIGURED',
+      message: 'Esta consulta depende da integração com BigDataCorp, ainda não contratada.',
+    }), { status: 501, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

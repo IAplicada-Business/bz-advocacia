@@ -1,6 +1,10 @@
+import type { LeadStage } from "@/lib/leadStages";
+
+/** @deprecated Prefer LeadStage / stage. Mantido 1 sprint para rollback. */
 export type LeadStatus = 'novo' | 'contato_inicial' | 'em_analise' | 'proposta_enviada' | 'fechado' | 'perdido';
 export type LeadOrigem = 'google' | 'facebook' | 'instagram' | 'tiktok' | 'linkedin' | 'meta' | 'indicacao' | 'site' | 'whatsapp_bot' | 'outro';
 export type LeadPrioridade = 'alta' | 'media' | 'baixa';
+export type { LeadStage };
 
 export interface Lead {
   id: string;
@@ -10,7 +14,22 @@ export interface Lead {
   tipo_processo: string;
   outro_tipo_processo: string | null;
   status: string;
+  /** @deprecated Prefer `stage`. */
   estagio: LeadStatus;
+  /** Funil comercial (MQL → Ganho). Fonte da verdade do kanban. */
+  stage?: LeadStage | null;
+  stage_entered_at?: string | null;
+  converted_at?: string | null;
+  primeiro_contato_em?: string | null;
+  valor_estimado?: number | null;
+  area_juridica?: string | null;
+  reuniao_data?: string | null;
+  reuniao_notas?: string | null;
+  advogada_responsavel_id?: string | null;
+  proposta_id?: string | null;
+  contrato_id?: string | null;
+  valor_fechamento?: number | null;
+  contrato_assinado?: boolean | null;
   origem: LeadOrigem;
   created_at: string;
   data_ultima_atividade: string;
@@ -136,6 +155,7 @@ export const STATUS_CLIENTE_LABELS: Record<StatusCliente, string> = {
   inativo: 'Inativo',
 };
 
+/** @deprecated Prefer LEAD_STAGE_LABELS de @/lib/leadStages */
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   novo: 'Novo',
   contato_inicial: 'Enviado',

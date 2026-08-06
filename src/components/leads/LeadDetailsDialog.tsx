@@ -138,16 +138,16 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
       // nao faz nada e o lead continua no pipeline.
       let leadGeralId = lead.lead_geral_id;
       if (!leadGeralId) {
-        const { data: novoId, error: rpcErr } = await (supabase as any).rpc(
+        const { data: novoId, error: rpcErr } = await supabase.rpc(
           "garantir_lead_geral_para_contact",
           { p_contact_submission_id: lead.id },
         );
         if (rpcErr) throw rpcErr;
         leadGeralId = novoId as string;
       }
-      const patch: Record<string, unknown> = { tipo_contato: value };
+      const patch: { tipo_contato: string; bot_pausado?: boolean } = { tipo_contato: value };
       if (value !== "lead") patch.bot_pausado = true;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("leads_geral")
         .update(patch)
         .eq("id", leadGeralId);
@@ -207,13 +207,13 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
   const { data: atendente } = useQuery({
     queryKey: ["lead-atendente", lead?.lead_geral_id],
     queryFn: async () => {
-      const { data: lg } = await (supabase as any)
+      const { data: lg } = await supabase
         .from("leads_geral")
         .select("humano_responsavel, assumido_em")
         .eq("id", lead!.lead_geral_id!)
         .maybeSingle();
       if (!lg?.humano_responsavel) return null;
-      const { data: adv } = await (supabase as any)
+      const { data: adv } = await supabase
         .from("advogados_sdr")
         .select("id, nome, email, user_id")
         .eq("id", lg.humano_responsavel)

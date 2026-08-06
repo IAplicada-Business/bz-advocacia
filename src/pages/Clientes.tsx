@@ -11,9 +11,9 @@ import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailsDialog } from "@/components/leads/LeadDetailsDialog";
 import { ImportLeadsDialog } from "@/components/leads/ImportLeadsDialog";
 import { ImportClientesPlanilhaDialog } from "@/components/leads/ImportClientesPlanilhaDialog";
-import { useLeads } from "@/hooks/useLeads";
+import { useClientesAtivos } from "@/hooks/useClientesAtivos";
 import { supabase } from "@/integrations/supabase/client";
-import { LeadsFilters as LeadsFiltersType, Lead } from "@/types/leads";
+import { Lead } from "@/types/leads";
 
 export default function Clientes() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -53,18 +53,7 @@ export default function Clientes() {
     }
   }, []);
 
-  const leadsFilters: LeadsFiltersType = {
-    search: clientesFilters.search,
-    status: ['fechado'],
-    origem: clientesFilters.origem as any[],
-    tipoProcesso: clientesFilters.tipoProcesso,
-    dateRange: { start: null, end: null },
-    diasParado: { min: 0, max: null },
-    responsavel: null,
-    statusCliente: clientesFilters.statusCliente,
-  };
-
-  const { data: leads, isLoading } = useLeads(leadsFilters);
+  const { data: leads, isLoading } = useClientesAtivos(clientesFilters.search);
 
   const { data: leadIdsComProcesso } = useQuery({
     queryKey: ["lead-ids-com-processo"],
@@ -79,6 +68,17 @@ export default function Clientes() {
     let result = clienteFilterId
       ? leads?.filter((l) => l.id === clienteFilterId)
       : leads;
+    if (clientesFilters.origem.length > 0 && result) {
+      result = result.filter((l) => clientesFilters.origem.includes(l.origem));
+    }
+    if (clientesFilters.tipoProcesso.length > 0 && result) {
+      result = result.filter((l) => clientesFilters.tipoProcesso.includes(l.tipo_processo));
+    }
+    if (clientesFilters.statusCliente.length > 0 && result) {
+      result = result.filter(
+        (l) => l.status_cliente && clientesFilters.statusCliente.includes(l.status_cliente),
+      );
+    }
     if (clientesFilters.semWhatsapp && result) {
       result = result.filter((l) => !l.telefone || l.telefone.trim() === '');
     }
