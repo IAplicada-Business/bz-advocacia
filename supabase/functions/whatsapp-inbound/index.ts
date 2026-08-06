@@ -33,6 +33,18 @@ import {
 } from "../_shared/prompts.ts";
 import { pickAdvogada, type AreaHandoff } from "../_shared/roundRobin.ts";
 import {
+  CHAVE_POR_ETAPA,
+  IDS_DESQUALIFICA,
+  IDS_HANDOFF,
+  PERGUNTA_TEXTO_V1,
+  SEQUENCIA,
+  SYSTEM_PROMPT_ROTEIRO_V1,
+  aplicarRegrasV1,
+  cadencia,
+  templateV1,
+  type ClassificacaoV1,
+} from "../_shared/roteiro-v1.ts";
+import {
   MSG_PENSAO_GUARDA,
   avaliarFamilia,
   avaliarInventario,
@@ -700,6 +712,7 @@ Deno.serve(async (req) => {
       });
 
       const msgM0 = mensagemM0Recuperacao(nomePrimeiro(lead));
+      await cadencia();
       const envio = await zapiSendText(telefone, msgM0);
       await registrarMensagem(supabase, lead.id, "bot", msgM0, {
         zapi: envio,
@@ -815,6 +828,7 @@ Deno.serve(async (req) => {
 
         const nomeReab = nomePrimeiro(lead);
         const msgReab = mensagemReabertura(nomeReab);
+        await cadencia();
         const envioReab = await zapiSendText(telefone, msgReab);
         await registrarMensagem(supabase, lead.id, "bot", msgReab, {
           zapi: envioReab, acao: "reabertura_7dias",
@@ -994,10 +1008,10 @@ ${historico.map((m) => `[${m.origem}] ${m.conteudo}`).join("\n")}
 
 Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
 
-  const classificacao = await claudeJson<ClaudeResponse>(
-    SYSTEM_PROMPT_CLASSIFICADOR,
+  const classificacao = await claudeJson<ClassificacaoV1>(
+    SYSTEM_PROMPT_ROTEIRO_V1,
     [{ role: "user", content: userPrompt }],
-    { maxTokens: 1024, temperature: 0.3 },
+    { maxTokens: 1024, temperature: 0.2 },
   );
 
   if (!classificacao.ok || !classificacao.data) {
@@ -1009,300 +1023,131 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
   }
 
   const r = classificacao.data;
-  const etapaAnterior = lead.etapa_qualificacao ?? "M0";
+  const etapaAnterior = (lead.etapa_qualificacao ?? "M0").toString();
+  const nome = nomePrimeiro(lead);
 
-  // --- Override deterministico por NUMERO (1, 2 ou 3) ---
-  // Mantido como fallback escondido. O bot nao oferece menu numerado, mas
-  // alguns leads antigos ainda podem mandar "1", "2", "3" achando que
-  // existe menu. Captura silenciosa, sem reforcar nem corrigir.
-  // O "4" foi removido junto com a area "Outros" — agora qualquer area
-  // fora do escopo cai em fora_escopo via interpretacao do Haiku.
-  let numeroLead: number | null = null;
-  if (etapaAnterior === "M0") {
-    numeroLead = extrairNumero(texto, 3);
-    if (numeroLead) {
-      const areaFixa = AREA_NUM_TO_KEY[String(numeroLead)];
-      if (areaFixa) {
-        r.area = areaFixa;
-        if (!r.etapa_proxima || r.etapa_proxima === "M0") r.etapa_proxima = "M1";
-      }
-    }
-  }
+  const AREAS_QUALIF = ["familia", "inventario", "saude"];
+  const areaBruta = (r.area ?? "nao_claro").toString().toLowerCase();
+  const areaPrevia = (lead.area_normalizada ?? "").toString().toLowerCase();
+  const areaAtual = AREAS_QUALIF.includes(areaBruta)
+    ? areaBruta
+    : (AREAS_QUALIF.includes(areaPrevia) ? areaPrevia : areaBruta);
 
-  const areaLowerRaw = (r.area ?? "").toLowerCase();
-
-  // 2.1 · Pensão/Guarda isolados → desqualifica sem handoff
-  if (areaLowerRaw === "pensao_guarda_only") {
-    const msgPolitica = MSG_PENSAO_GUARDA;
-    const envioPol = await zapiSendText(telefone, msgPolitica);
-    await registrarMensagem(supabase, lead.id, "bot", msgPolitica, {
-      zapi: envioPol,
-      acao: "desqualificado_pensao_guarda",
-    });
-    await supabase.from("leads_geral").update({
-      area_normalizada: "familia",
-      stage: "desqualificado",
-      desqualificado_motivo: "pensao_guarda_only",
-      desqualificado_em: new Date().toISOString(),
-      status_sdr: "perdido",
-      bot_pausado: true,
-      etapa_qualificacao: "finalizado",
-      motivo_qualificacao: r.motivo || "pensao_guarda_only",
-    }).eq("id", lead.id);
-    await supabase.from("qualificacoes_sdr").upsert({
-      lead_id: lead.id,
-      pergunta_codigo: "pensao_guarda_only",
-      pergunta_texto: PERGUNTA_TEXTO_POR_CODIGO.pensao_guarda_only,
-      resposta_texto: textoAgrupado,
-      resposta_estruturada: { area: "pensao_guarda_only" },
-    }, { onConflict: "lead_id,pergunta_codigo" });
-    await registrarEvento(supabase, lead.id, "lead_desqualificado", {
-      motivo: "pensao_guarda_only",
-    });
-    return new Response(
-      JSON.stringify({ ok: true, acao: "desqualificado_pensao_guarda", lead_id: lead.id }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  }
-
-  const areaValida = ["familia", "inventario", "saude", "fora_escopo"].includes(areaLowerRaw);
-  const areaParaPersistir = areaValida ? r.area : (lead.area_normalizada ?? null);
-
-  // Normaliza dados capturados nesta rodada
-  const capturadosAgora: Record<string, unknown> = { ...(r.dados_capturados ?? {}) };
-  const subtipoAgora = (capturadosAgora.subtipo ?? capturadosAgora.tipo ?? null) as string | null;
-  const urgenciaBruta = String(capturadosAgora.urgencia ?? "").toLowerCase().trim();
-  const urgenciaAgora = ["alta", "media", "média", "baixa"].includes(urgenciaBruta)
-    ? (urgenciaBruta === "média" ? "media" : urgenciaBruta)
-    : null;
-
-  // Merge acumulativo com o que ja tinha em leads_geral.dados_capturados
+  // ---------- Acumula respostas ----------
   const { data: leadAtual } = await supabase
     .from("leads_geral")
-    .select("dados_capturados, tipo_servico, urgencia")
+    .select("dados_capturados, flags_qualificacao, tipo_servico")
     .eq("id", lead.id)
     .maybeSingle();
-  const dadosMerge = {
-    ...((leadAtual as any)?.dados_capturados ?? {}),
-    ...capturadosAgora,
-    ...(areaParaPersistir ? { area: areaParaPersistir } : {}),
+
+  const dadosPrev = ((leadAtual as any)?.dados_capturados ?? {}) as Record<string, unknown>;
+  const respostaAgora = (r.resposta_estruturada ?? {}) as Record<string, unknown>;
+  const dadosMerge: Record<string, unknown> = {
+    ...dadosPrev,
+    ...respostaAgora,
+    ...(AREAS_QUALIF.includes(areaAtual) ? { area: areaAtual } : {}),
   };
 
-  // Atualiza leads_geral com area, fluxo, score, subtipo, urgencia e blob completo
-  const patchLead: Record<string, unknown> = {
-    area_normalizada: areaParaPersistir,
-    fluxo_sdr: fluxoFromArea(areaParaPersistir),
-    score: r.score,
-    motivo_qualificacao: r.motivo,
-    dados_capturados: dadosMerge,
-  };
-  if (subtipoAgora && !((leadAtual as any)?.tipo_servico)) {
-    patchLead.tipo_servico = subtipoAgora;
-  } else if (subtipoAgora) {
-    patchLead.tipo_servico = subtipoAgora;
-  }
-  if (urgenciaAgora) patchLead.urgencia = urgenciaAgora;
-
-  await supabase.from("leads_geral").update(patchLead).eq("id", lead.id);
-
-  // ============================================================
-  // Persiste a resposta do lead em qualificacoes_sdr (upsert por
-  // (lead_id, pergunta_codigo) — o mesmo codigo pode ser respondido
-  // novamente se o lead reformular).
-  // ============================================================
+  // ---------- Persiste a resposta desta etapa em qualificacoes_sdr ----------
   {
-    let perguntaCodigo: string;
-    let estruturada: Record<string, unknown> = { ...capturadosAgora };
-
-    if (etapaAnterior === "M0") {
-      perguntaCodigo = "area";
-      if (numeroLead) {
-        estruturada = {
-          ...estruturada,
-          opcao_numero: numeroLead,
-          area: AREA_NUM_TO_KEY[String(numeroLead)],
-          label: AREA_LABEL[AREA_NUM_TO_KEY[String(numeroLead)]],
-        };
-      } else if (areaValida) {
-        estruturada = { ...estruturada, area: r.area, label: AREA_LABEL[r.area as string] ?? r.area };
-      }
-    } else {
-      const a = (areaParaPersistir ?? "fora_escopo").toLowerCase();
-      const etapaSlug = etapaAnterior.replace("M2_valor", "m2_valor").replace(/^M/i, "m").toLowerCase();
-      perguntaCodigo = a === "fora_escopo" ? "fora_escopo" : `${a}_${etapaSlug}`;
-    }
-
-    const perguntaTexto = PERGUNTA_TEXTO_POR_CODIGO[perguntaCodigo]
-      ?? `[${etapaAnterior}] ${r.etapa_proxima}`;
+    const chaveEtapa = CHAVE_POR_ETAPA[etapaAnterior];
+    const perguntaCodigo = etapaAnterior;
+    const estruturada: Record<string, unknown> = chaveEtapa
+      ? { [chaveEtapa]: dadosMerge[chaveEtapa] ?? respostaAgora[chaveEtapa] ?? textoAgrupado }
+      : { area: areaBruta, subclassificacao: r.subclassificacao ?? null };
 
     const { error: qErr } = await supabase.from("qualificacoes_sdr").upsert({
       lead_id: lead.id,
       pergunta_codigo: perguntaCodigo,
-      pergunta_texto: perguntaTexto,
+      pergunta_texto: PERGUNTA_TEXTO_V1[perguntaCodigo] ?? perguntaCodigo,
       resposta_texto: textoAgrupado,
       resposta_estruturada: estruturada,
     }, { onConflict: "lead_id,pergunta_codigo" });
     if (qErr) console.error("[qualificacoes_sdr] erro:", qErr);
   }
 
-  const nome = nomePrimeiro(lead);
-  // Permite o Claude personalizar a mensagem desde que ele a tenha gerado
-  // dentro do tom novo (sem travessao, sem menu). Caso contrario, usa o
-  // template fixo da combinacao area+etapa.
-  let mensagemFinal = (r.proxima_mensagem ?? "").trim();
+  // ---------- Decide a próxima mensagem do roteiro ----------
+  let proximaId: string;
+  let flags: string[] = [...(r.flags_a_adicionar ?? [])].map((f) => String(f));
 
-  // Higienizacao defensiva: troca qualquer travessao por virgula+espaco
-  // mesmo se o Claude esquecer da regra, e filtra emojis nao-permitidos.
-  if (mensagemFinal) mensagemFinal = higienizarTomClaudia(mensagemFinal);
-
-  let novaEtapa = etapaAnterior;
-  let novoStatus = lead.status_sdr ?? "em_atendimento_bot";
-  let novoFluxo: string | null = fluxoFromArea(areaParaPersistir);
-  let pausarBot = false;
-  let advogadoIdNotificar: string | null = null;
-  let encerramento = false;
-  let prioridadeMax = false;
-  let flagsHandoff: Record<string, boolean> = {};
-  let notaHandoff: string | undefined;
-
-  const etapaProx = (r.etapa_proxima ?? "M0").toString();
-  const areaLower = (areaParaPersistir ?? "").toLowerCase();
-
-  // ---------- Qualificação estruturada (2.3 / 2.4 / 2.5) ----------
-  if (["familia", "inventario", "saude"].includes(areaLower) && etapaAnterior !== "M0") {
-    const { data: qRow } = await supabase
-      .from("qualificacao_estruturada_sdr")
-      .select("*")
-      .eq("lead_id", lead.id)
-      .maybeSingle();
-
-    const letra = extrairLetraOpcao(textoAgrupado);
-    let respostasAtuais: RespostasFamilia | RespostasInventario | RespostasSaude = {};
-    if (areaLower === "familia") {
-      respostasAtuais = (qRow?.respostas_familia ?? {}) as RespostasFamilia;
-    } else if (areaLower === "inventario") {
-      respostasAtuais = (qRow?.respostas_inventario ?? {}) as RespostasInventario;
+  if (areaBruta === "pensao_guarda_apenas") {
+    proximaId = "M-A";
+    flags.push("desqualificado_pensao_guarda");
+  } else if (areaBruta === "fora_escopo") {
+    proximaId = "M-B";
+    flags.push("desqualificado_fora_escopo");
+  } else if (AREAS_QUALIF.includes(areaAtual)) {
+    const seq = SEQUENCIA[areaAtual];
+    if (!seq.includes(etapaAnterior)) {
+      proximaId = seq[0];
     } else {
-      respostasAtuais = (qRow?.respostas_saude ?? {}) as RespostasSaude;
+      const regra = aplicarRegrasV1(areaAtual, etapaAnterior, dadosMerge);
+      proximaId = regra.proxima;
+      flags.push(...regra.flags);
     }
-
-    const merged = mergeRespostaPorEtapa(
-      areaLower,
-      etapaAnterior,
-      letra,
-      capturadosAgora,
-      respostasAtuais,
-    );
-
-    const col =
-      areaLower === "familia"
-        ? "respostas_familia"
-        : areaLower === "inventario"
-        ? "respostas_inventario"
-        : "respostas_saude";
-
-    await supabase.from("qualificacao_estruturada_sdr").upsert(
-      {
-        lead_id: lead.id,
-        [col]: merged,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "lead_id" },
-    );
-
-    const resultado =
-      areaLower === "familia"
-        ? avaliarFamilia(merged as RespostasFamilia)
-        : areaLower === "inventario"
-        ? avaliarInventario(merged as RespostasInventario)
-        : avaliarSaude(merged as RespostasSaude);
-
-    if (resultado.acao === "desqualificar") {
-      mensagemFinal = resultado.mensagem;
-      novaEtapa = "finalizado";
-      novoStatus = "perdido";
-      pausarBot = true;
-      encerramento = false; // sem notificar advogada
-      await supabase.from("leads_geral").update({
-        stage: "desqualificado",
-        desqualificado_motivo: resultado.motivo,
-        desqualificado_em: new Date().toISOString(),
-        ticket_minimo: resultado.motivo === "ticket_minimo",
-        bot_pausado: true,
-        status_sdr: "perdido",
-        etapa_qualificacao: "finalizado",
-      }).eq("id", lead.id);
-      await supabase.from("qualificacao_estruturada_sdr").upsert({
-        lead_id: lead.id,
-        [col]: merged,
-        completa_em: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "lead_id" });
-      await registrarEvento(supabase, lead.id, "lead_desqualificado", {
-        motivo: resultado.motivo,
-        area: areaLower,
-        respostas: merged,
-      });
-      const envioDq = await zapiSendText(telefone, mensagemFinal);
-      await registrarMensagem(supabase, lead.id, "bot", mensagemFinal, {
-        zapi: envioDq,
-        acao: "desqualificado_" + resultado.motivo,
-      });
-      return new Response(
-        JSON.stringify({ ok: true, acao: "desqualificado", motivo: resultado.motivo }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    if (resultado.acao === "continuar") {
-      // Força próxima etapa do roteiro (não deixa Claude pular perguntas)
-      r.etapa_proxima = resultado.proximaEtapa;
-    } else if (resultado.acao === "handoff") {
-      r.etapa_proxima = "finalizado";
-      flagsHandoff = resultado.flags ?? {};
-      notaHandoff = resultado.nota;
-      prioridadeMax = !!resultado.flags?.prioridade_max;
-      await supabase.from("qualificacao_estruturada_sdr").upsert({
-        lead_id: lead.id,
-        [col]: merged,
-        completa_em: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "lead_id" });
-    }
+  } else {
+    proximaId = "M1";
   }
+  if (proximaId === "M5C-Desq") flags.push("desqualificado_ticket_baixo");
+  flags = [...new Set(flags.filter(Boolean))];
 
-  // Re-lê etapaProx após possível override da qualificação estruturada
-  const etapaProxFinal = (r.etapa_proxima ?? etapaProx).toString();
+  const ehHandoff = IDS_HANDOFF.includes(proximaId);
+  const ehDesqualifica = IDS_DESQUALIFICA.includes(proximaId);
 
-  if (areaLower === "fora_escopo") {
-    // Handoff direto pra triagem humana, sem qualificar.
-    novaEtapa = "finalizado";
-    novoStatus = "aguardando_triagem";
-    pausarBot = true;
-    encerramento = true;
-    if (!mensagemFinal) mensagemFinal = mensagemForaEscopo(nome);
+  let mensagemFinal = templateV1(proximaId);
+  let novaEtapa = proximaId;
+  let novoStatus = "em_atendimento_bot";
+  let pausarBot = false;
+  let encerramento = false;
+  let advogadoIdNotificar: string | null = null;
+  const flagsHandoff: Record<string, boolean> = {
+    caso_forte: flags.includes("caso_forte"),
+    ticket_minimo: flags.includes("ticket_baixo"),
+    produto_diferente: flags.includes("produto_diferente"),
+    prioridade_max: flags.includes("urgente_saude"),
+  };
 
-    try {
-      await supabase.from("backlog_triagem").insert({
-        motivo: "fora_escopo",
-        telefone,
-        telefone_digits: telefone.replace(/\D/g, ""),
-        nome_capturado: lead.full_name ?? null,
-        msg_recebida: textoAgrupado,
-        lead_existente_id: lead.id,
-      });
-    } catch (_e) { /* ignore */ }
-  } else if (etapaProxFinal === "finalizado") {
-    // Qualificação completa → handoff SQL (round-robin)
-    novaEtapa = "finalizado";
+  if (ehHandoff) {
     novoStatus = "sql_aguardando_humano";
     pausarBot = true;
     encerramento = true;
-    if (!mensagemFinal) mensagemFinal = mensagemHandoffAgendamento(nome);
+  } else if (ehDesqualifica) {
+    novoStatus = "desqualificado";
+    pausarBot = true;
+  }
 
-    const areaHandoff = (["familia", "inventario", "saude"].includes(areaLower)
-      ? areaLower
-      : "familia") as AreaHandoff;
+  // Flags acumuladas
+  const flagsPrev = ((leadAtual as any)?.flags_qualificacao ?? []) as string[];
+  const flagsMerge = [...new Set([...(flagsPrev ?? []), ...flags])];
+
+  const urgenciaTxt = String(dadosMerge.urgencia ?? "");
+  const urgenciaNorm = /extrema/i.test(urgenciaTxt)
+    ? "alta"
+    : /30 dias/i.test(urgenciaTxt)
+    ? "media"
+    : /sem urg/i.test(urgenciaTxt)
+    ? "baixa"
+    : null;
+
+  const patchLead: Record<string, unknown> = {
+    area_normalizada: AREAS_QUALIF.includes(areaAtual) ? areaAtual : (lead.area_normalizada ?? null),
+    fluxo_sdr: fluxoFromArea(AREAS_QUALIF.includes(areaAtual) ? areaAtual : null),
+    dados_capturados: dadosMerge,
+    flags_qualificacao: flagsMerge,
+    motivo_qualificacao: r.subclassificacao ?? null,
+  };
+  if (r.subclassificacao) patchLead.tipo_servico = r.subclassificacao;
+  if (urgenciaNorm) patchLead.urgencia = urgenciaNorm;
+  if (ehDesqualifica) {
+    patchLead.stage = "desqualificado";
+    patchLead.desqualificado_motivo = flags.find((f) => f.startsWith("desqualificado_")) ?? "desqualificado";
+    patchLead.desqualificado_em = new Date().toISOString();
+  }
+  await supabase.from("leads_geral").update(patchLead).eq("id", lead.id);
+
+  // ---------- Handoff comercial ----------
+  if (ehHandoff) {
+    const areaHandoff = (AREAS_QUALIF.includes(areaAtual) ? areaAtual : "familia") as AreaHandoff;
     const advogada = await pickAdvogada(supabase, areaHandoff);
     advogadoIdNotificar = advogada?.id ?? null;
     if (advogada) {
@@ -1310,60 +1155,47 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
         humano_responsavel: advogada.id,
         advogada_responsavel_id: advogada.id,
         stage: "sal",
-        prioridade_max: !!flagsHandoff.prioridade_max,
-        caso_forte: !!flagsHandoff.caso_forte,
-        ticket_minimo: !!flagsHandoff.ticket_minimo,
-        produto_diferente: !!flagsHandoff.produto_diferente,
-        ...(notaHandoff
-          ? {
-              observacoes: [
-                (lead as { observacoes?: string | null }).observacoes,
-                notaHandoff,
-              ].filter(Boolean).join("\n"),
-            }
-          : {}),
+        prioridade_max: flagsHandoff.prioridade_max,
+        caso_forte: flagsHandoff.caso_forte,
+        ticket_minimo: flagsHandoff.ticket_minimo,
+        produto_diferente: flagsHandoff.produto_diferente,
       }).eq("id", lead.id);
     }
-  } else if (etapaProxFinal === "M0") {
-    novaEtapa = "M0";
-    if (!mensagemFinal) mensagemFinal = mensagemM0Organico(nome);
-  } else {
-    // M1 / M2 / M2_valor / M3 — perguntas estruturadas do roteiro
-    novaEtapa = etapaProxFinal;
-    // Prefere template fixo do roteiro (não inventar texto)
-    mensagemFinal = templatePorEtapa(areaParaPersistir, etapaProxFinal, nome);
+  }
+
+  // ---------- Notificação IN-APP urgente (Saúde) ----------
+  if (flags.includes("urgente_saude") && !flagsPrev.includes("urgente_saude")) {
+    await notificarUrgenteInApp(supabase, lead.id, lead.full_name ?? nome);
   }
 
   // ============================================================
-  // FIX 3 — LIMITE DE TENTATIVAS POR ETAPA
-  // Se o bot não conseguiu avançar (mesma etapa ou ação "aguardar"),
-  // incrementa o contador. A partir de 2 tentativas falhas → handoff.
+  // LIMITE DE TENTATIVAS POR ETAPA (preservado)
   // ============================================================
   const avancouEtapa = novaEtapa !== etapaAnterior;
   const tentativasAtuais = (lead as any).tentativas_etapa ?? 0;
   let tentativasNovas = avancouEtapa ? 0 : tentativasAtuais + 1;
 
-  if (!avancouEtapa && tentativasNovas >= 2 && !encerramento) {
+  if (!avancouEtapa && tentativasNovas >= 2 && !encerramento && !ehDesqualifica) {
     await registrarEvento(supabase, lead.id, "bot_handoff_por_tentativas_excedidas", {
       etapa: etapaAnterior,
       tentativas: tentativasNovas,
-      etapa_claude: r.etapa_proxima,
+      proxima_sugerida: proximaId,
     });
-    mensagemFinal = `${nome ? nome + ", " : ""}vou passar pra advogada continuar com você por aqui 💙`;
-    novaEtapa = "finalizado";
+    mensagemFinal = templateV1("M5C").replace(
+      "Uma das nossas advogadas entra em contato ainda hoje pra conversar em detalhes com você.",
+      "Uma das nossas advogadas entra em contato pra conversar em detalhes com você.",
+    );
     novoStatus = "sql_aguardando_humano";
     pausarBot = true;
     encerramento = true;
     tentativasNovas = 0;
-    const advogado = await buscarAdvogadoPorArea(supabase, areaParaPersistir ?? "geral");
+    const advogado = await buscarAdvogadoPorArea(supabase, areaAtual ?? "geral");
     advogadoIdNotificar = advogado?.id ?? null;
     if (advogado) {
       await supabase.from("leads_geral")
         .update({ humano_responsavel: advogado.id })
         .eq("id", lead.id);
     }
-
-    // Empilha no backlog de triagem pra equipe atender manualmente.
     try {
       await supabase.from("backlog_triagem").insert({
         motivo: "duvida_classificacao",
@@ -1376,11 +1208,8 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     } catch (_e) { /* ignore */ }
   }
 
-
   // ============================================================
-  // FIX 2 — ANTI-REPETIÇÃO
-  // Se a próxima mensagem do bot for >85% similar à última que o bot
-  // enviou pra este lead, NÃO envia: escala pro handoff humano.
+  // ANTI-REPETIÇÃO (Jaccard 0.85, preservado)
   // ============================================================
   {
     const { data: ultimaBotMsg } = await supabase
@@ -1393,20 +1222,20 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
       .maybeSingle();
     const ultimoTxt = ((ultimaBotMsg as any)?.conteudo ?? "").toString();
     const sim = similaridade(ultimoTxt, mensagemFinal);
-    if (ultimoTxt && sim >= 0.85 && !encerramento) {
+    if (ultimoTxt && sim >= 0.85 && !encerramento && !ehDesqualifica) {
       await registrarEvento(supabase, lead.id, "bot_evitou_repetir_handoff", {
         similaridade: Number(sim.toFixed(3)),
         preview_anterior: ultimoTxt.slice(0, 120),
         preview_nova: mensagemFinal.slice(0, 120),
-        etapa_original: r.etapa_proxima,
+        etapa_original: proximaId,
       });
-      mensagemFinal = `${nome ? nome + ", " : ""}vou passar pra advogada continuar com você por aqui 💙`;
-      novaEtapa = "finalizado";
+      mensagemFinal = templateV1("M5C");
+      novaEtapa = "M5C";
       novoStatus = "sql_aguardando_humano";
       pausarBot = true;
       encerramento = true;
       tentativasNovas = 0;
-      const advogado = await buscarAdvogadoPorArea(supabase, areaParaPersistir ?? "geral");
+      const advogado = await buscarAdvogadoPorArea(supabase, areaAtual ?? "geral");
       advogadoIdNotificar = advogado?.id ?? null;
       if (advogado) {
         await supabase.from("leads_geral")
@@ -1416,24 +1245,29 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     }
   }
 
+  // ---------- Cadência humana: 2 a 4s antes de falar ----------
+  await cadencia();
+
   const envio = await zapiSendText(telefone, mensagemFinal);
-  await registrarMensagem(supabase, lead.id, "bot", mensagemFinal, { zapi: envio, etapa: r.etapa_proxima });
+  await registrarMensagem(supabase, lead.id, "bot", mensagemFinal, {
+    zapi: envio,
+    etapa: novaEtapa,
+    flags,
+  });
 
   await supabase
     .from("leads_geral")
     .update({
       etapa_qualificacao: novaEtapa,
       status_sdr: novoStatus,
-      fluxo_sdr: novoFluxo,
       bot_pausado: pausarBot ? true : (lead.bot_pausado ?? false),
       tentativas_etapa: tentativasNovas,
     })
     .eq("id", lead.id);
 
-  // Espelha o estado atual no kanban (contact_submissions)
   await espelharContactSubmission(supabase, {
     ...lead,
-    area_normalizada: areaParaPersistir,
+    area_normalizada: AREAS_QUALIF.includes(areaAtual) ? areaAtual : lead.area_normalizada,
     status_sdr: novoStatus,
   });
 
@@ -1442,27 +1276,48 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
       supabase,
       lead.id,
       advogadoIdNotificar,
-      r.etapa_proxima ?? novaEtapa,
-      { prioridadeMax, flags: flagsHandoff, nota: notaHandoff },
+      novaEtapa,
+      { prioridadeMax: flagsHandoff.prioridade_max, flags: flagsHandoff },
     );
   }
 
   await registrarEvento(supabase, lead.id, "msg_processada", {
-    area: r.area,
-    area_persistida: areaParaPersistir,
+    area: areaBruta,
+    area_persistida: areaAtual,
     etapa_anterior: etapaAnterior,
-    etapa_proxima: r.etapa_proxima,
     etapa_nova: novaEtapa,
-    fluxo: novoFluxo,
-    score: r.score,
-    dados_capturados: r.dados_capturados,
+    flags,
+    subclassificacao: r.subclassificacao ?? null,
   });
 
-  return new Response(JSON.stringify({ ok: true, etapa_proxima: r.etapa_proxima }), {
+  return new Response(JSON.stringify({ ok: true, etapa: novaEtapa, flags }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
 });
+
+/**
+ * Notificação IN-APP urgente de Saúde. Cria uma notificação por usuário
+ * do sistema, pra qualquer pessoa logada ver o pop-up piscando.
+ * Nada de WhatsApp externo aqui.
+ */
+async function notificarUrgenteInApp(supabase: any, leadId: string, nomeLead: string) {
+  const { data: usuarios } = await supabase.from("profiles").select("id");
+  const linhas = (usuarios ?? []).map((u: any) => ({
+    usuario_id: u.id,
+    tipo: "urgente_saude",
+    titulo: "🚨 URGENTE — SAÚDE",
+    descricao: `Lead ${nomeLead || "(sem nome)"} com risco de vida. Ver caso.`,
+    link: `/dashboard/leads?id=${leadId}`,
+    metadata: { leadId, urgente: true, area: "saude" },
+  }));
+  if (linhas.length === 0) return;
+  const { error } = await supabase.from("notificacoes").insert(linhas);
+  if (error) console.error("[notificacao urgente] erro:", error);
+  await registrarEvento(supabase, leadId, "notificacao_urgente_saude_in_app", {
+    destinatarios: linhas.length,
+  });
+}
 
 async function notificarAdvogado(
   supabase: any,

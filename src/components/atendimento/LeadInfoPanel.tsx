@@ -90,7 +90,7 @@ export function LeadInfoPanel({ leadId }: Props) {
     queryFn: async () => {
       const { data } = await supabase
         .from("contact_submissions")
-        .select("id, estagio, status, status_cliente, stage")
+        .select("id, estagio, status, status_cliente")
         .eq("lead_geral_id", leadId)
         .maybeSingle();
       return data;

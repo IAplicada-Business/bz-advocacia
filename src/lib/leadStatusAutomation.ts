@@ -13,13 +13,13 @@ export async function atualizarLeadParaPropostaEnviada(
   try {
     const { data: lead, error: fetchError } = await supabase
       .from("contact_submissions")
-      .select("estagio, stage")
+      .select("estagio")
       .eq("id", clienteId)
       .single();
 
     if (fetchError || !lead) return;
 
-    const stage = (lead as { stage?: string | null }).stage;
+    const stage = (lead as unknown as { stage?: string | null }).stage;
     const estagio = lead.estagio;
     const jaAvancado =
       stage === "proposta" ||
@@ -76,13 +76,13 @@ export async function atualizarLeadParaFechado(
   try {
     const { data: lead, error: fetchError } = await supabase
       .from("contact_submissions")
-      .select("estagio, stage")
+      .select("estagio")
       .eq("id", clienteId)
       .single();
 
     if (fetchError || !lead) return;
 
-    const stage = (lead as { stage?: string | null }).stage;
+    const stage = (lead as unknown as { stage?: string | null }).stage;
     if (
       stage === "perdido" ||
       stage === "ganho" ||

@@ -42,11 +42,11 @@ export function useLeadsGeral(search?: string) {
       stage,
     }: {
       id: string;
-      stage: Database["public"]["Enums"]["lead_stage"];
+      stage: string;
     }) => {
       const { error } = await supabase
         .from("leads_geral")
-        .update({ stage })
+        .update({ stage } as any)
         .eq("id", id);
       if (error) throw error;
     },

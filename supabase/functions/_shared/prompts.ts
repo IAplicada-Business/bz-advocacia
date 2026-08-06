@@ -29,37 +29,26 @@ export function extrairNumero(texto: string, max: number): number | null {
   return n >= 1 && n <= max ? n : null;
 }
 
-// ---------- M0: boas-vindas ----------
+// ---------- M0: boas-vindas (roteiro v1) ----------
 
-export function mensagemM0CTWA(nome: string): string {
-  const n = (nome ?? "").trim() || "tudo bem";
-  return (
-`Oi ${n}, sou a Claudia do escritório Borges & Zembruski Advocacia 💙
-Vi que você chegou pelo anúncio. Me conta um pouquinho sobre o que você está precisando hoje?`
-  );
+import { TEMPLATES } from "./roteiro-v1.ts";
+
+// Roteiro v1: o bot nao usa nome proprio e a saudacao e sempre a M0
+// oficial aprovada pelas socias.
+export function mensagemM0CTWA(_nome: string): string {
+  return TEMPLATES.M0;
 }
 
-export function mensagemM0Organico(nome: string): string {
-  const n = (nome ?? "").trim() || "tudo bem";
-  return (
-`Oi ${n}, sou a Claudia do escritório Borges & Zembruski Advocacia 😊 Que bom que você nos procurou.
-Me conta um pouquinho sobre o que você precisa hoje?`
-  );
+export function mensagemM0Organico(_nome: string): string {
+  return TEMPLATES.M0;
 }
 
-export function mensagemReabertura(nome: string): string {
-  const n = (nome ?? "").trim() || "tudo bem";
-  return (
-`Oi ${n}, que bom ter você de volta por aqui 💙 Sou a Claudia da B&Z. Conta um pouquinho como posso te ajudar hoje?`
-  );
+export function mensagemReabertura(_nome: string): string {
+  return TEMPLATES.M0;
 }
 
-export function mensagemM0Recuperacao(nome: string): string {
-  const n = (nome ?? "").trim() || "tudo bem";
-  return (
-`Oi ${n}, que bom ter você de volta 💙
-Sou a Claudia da B&Z. Conta um pouquinho como posso te ajudar agora?`
-  );
+export function mensagemM0Recuperacao(_nome: string): string {
+  return TEMPLATES.M0;
 }
 
 export function mensagemM0(nome: string, _tipoServicoForm?: string | null): string {
