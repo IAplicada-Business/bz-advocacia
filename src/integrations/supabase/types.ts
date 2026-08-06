@@ -1739,6 +1739,12 @@ export type Database = {
           contrato_id: string | null
           valor_fechamento: number | null
           contrato_assinado: boolean | null
+          desqualificado_motivo: string | null
+          desqualificado_em: string | null
+          prioridade_max: boolean | null
+          caso_forte: boolean | null
+          ticket_minimo: boolean | null
+          produto_diferente: boolean | null
           telefone_digits: string | null
           tentativas_etapa: number
           tipo_contato: string
@@ -1800,6 +1806,12 @@ export type Database = {
           contrato_id?: string | null
           valor_fechamento?: number | null
           contrato_assinado?: boolean | null
+          desqualificado_motivo?: string | null
+          desqualificado_em?: string | null
+          prioridade_max?: boolean | null
+          caso_forte?: boolean | null
+          ticket_minimo?: boolean | null
+          produto_diferente?: boolean | null
           telefone_digits?: string | null
           tentativas_etapa?: number
           tipo_contato?: string
@@ -1861,6 +1873,12 @@ export type Database = {
           contrato_id?: string | null
           valor_fechamento?: number | null
           contrato_assinado?: boolean | null
+          desqualificado_motivo?: string | null
+          desqualificado_em?: string | null
+          prioridade_max?: boolean | null
+          caso_forte?: boolean | null
+          ticket_minimo?: boolean | null
+          produto_diferente?: boolean | null
           telefone_digits?: string | null
           tentativas_etapa?: number
           tipo_contato?: string
@@ -3142,6 +3160,48 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+
+      qualificacao_estruturada_sdr: {
+        Row: {
+          id: string
+          lead_id: string
+          respostas_familia: Json | null
+          respostas_inventario: Json | null
+          respostas_saude: Json | null
+          completa_em: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          respostas_familia?: Json | null
+          respostas_inventario?: Json | null
+          respostas_saude?: Json | null
+          completa_em?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          respostas_familia?: Json | null
+          respostas_inventario?: Json | null
+          respostas_saude?: Json | null
+          completa_em?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualificacao_estruturada_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads_geral"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       qualificacoes_sdr: {
         Row: {
@@ -4481,6 +4541,10 @@ export type Database = {
       }
     }
     Functions: {
+      advogadas_lead_count_30d: {
+        Args: never
+        Returns: { advogada_id: string; cnt: number }[]
+      }
       auto_bloquear_telefone_bot: {
         Args: { p_motivo: string; p_nome?: string; p_telefone: string }
         Returns: undefined
@@ -4515,6 +4579,7 @@ export type Database = {
         | "contrato"
         | "ganho"
         | "perdido"
+        | "desqualificado"
       tipo_melhoria: "correcao" | "melhoria" | "nova_funcionalidade"
     }
     CompositeTypes: {
@@ -4654,6 +4719,7 @@ export const Constants = {
         "contrato",
         "ganho",
         "perdido",
+        "desqualificado",
       ],
       tipo_melhoria: ["correcao", "melhoria", "nova_funcionalidade"],
     },

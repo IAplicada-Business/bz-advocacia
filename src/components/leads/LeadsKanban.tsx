@@ -77,7 +77,10 @@ const columns: { id: ColunaId; titulo: string; color: string }[] = [
 ];
 
 function resolveColuna(lead: Lead): ColunaId {
-  return inferStageFromLegacy(lead);
+  const stage = inferStageFromLegacy(lead);
+  // Desqualificados (pensão/guarda, ticket mínimo) ficam na coluna Perdido
+  if (stage === "desqualificado") return "perdido";
+  return stage;
 }
 
 function SortableLeadCard({

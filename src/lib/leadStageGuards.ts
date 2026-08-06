@@ -87,6 +87,7 @@ export const STAGE_GUARDS: Record<LeadStage, StageGuard[]> = {
     },
   ],
   perdido: [],
+  desqualificado: [],
 };
 
 export function checkStageGuards(lead: LeadGuardRow, targetStage: LeadStage): StageGuard[] {
