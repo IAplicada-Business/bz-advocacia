@@ -10,9 +10,10 @@ export function useClientesAtivos(search?: string) {
   return useQuery({
     queryKey: ["clientes-ativos", search],
     queryFn: async () => {
-      const { data: viewRows, error: viewError } = await supabase
+      const { data: viewRows, error: viewError } = await (supabase as any)
         .from("vw_clientes_ativos")
         .select("*");
+
 
       if (viewError) {
         // Fallback: ganhos/fechados na tabela crua
@@ -36,9 +37,10 @@ export function useClientesAtivos(search?: string) {
         })) as unknown as Lead[];
       }
 
-      const ids = (viewRows || [])
-        .map((r) => r.lead_id)
+      const ids = ((viewRows || []) as any[])
+        .map((r) => r.lead_id as string | null)
         .filter((id): id is string => !!id);
+
 
       if (ids.length === 0) return [] as Lead[];
 

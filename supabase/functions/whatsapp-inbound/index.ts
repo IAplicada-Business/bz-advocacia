@@ -959,7 +959,47 @@ Deno.serve(async (req) => {
   }
 
 
+  // ============================================================
+  // GARANTIA DE M0 — toda conversa começa pela saudação.
+  // Se o bot ainda não enviou M0 pra este lead, envia agora e encerra
+  // a invocação. O classificador só entra a partir da 2ª interação.
+  // ============================================================
+  {
+    const { data: msgsM0 } = await supabase
+      .from("mensagens_sdr")
+      .select("id")
+      .eq("lead_id", lead.id)
+      .eq("origem", "bot")
+      .filter("metadata->>etapa", "eq", "M0")
+      .limit(1);
+
+    if ((msgsM0?.length ?? 0) === 0) {
+      const msgM0 = templateV1("M0");
+      await cadencia();
+      const envio = await zapiSendText(telefone, msgM0);
+      await registrarMensagem(supabase, lead.id, "bot", msgM0, {
+        etapa: "M0",
+        zapi_status: envio.status,
+        motivo: "m0_garantido",
+      });
+      await supabase
+        .from("leads_geral")
+        .update({
+          etapa_qualificacao: "M0",
+          status_sdr: "em_atendimento_bot",
+          ultima_mensagem_em: new Date().toISOString(),
+        })
+        .eq("id", lead.id);
+      await registrarEvento(supabase, lead.id, "m0_enviado_garantido", { telefone });
+      return new Response(
+        JSON.stringify({ acao: "m0_enviado", lead_id: lead.id }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+  }
+
   // Monta contexto pra Claude
+
   const historico = await historicoMensagens(supabase, lead.id, 12);
   const contexto = {
     nome: nomePrimeiro(lead),
