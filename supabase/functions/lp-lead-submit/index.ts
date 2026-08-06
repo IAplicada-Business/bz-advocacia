@@ -430,9 +430,11 @@ Deno.serve(async (req) => {
         .from("leads_geral")
         .update({
           dados_capturados: { ...prev, ...capturados, form_reenvio_em: new Date().toISOString() },
+          ...attribution.leadColumns,
           ...leadExtras,
           observacoes: mensagem,
         })
+
         .eq("id", existente.id);
     } catch (e) {
       console.error("[lp-lead-submit] merge dados_capturados failed:", e);
