@@ -227,7 +227,12 @@ CREATE TRIGGER trg_leads_geral_converted_at
   BEFORE INSERT OR UPDATE OF stage ON public.leads_geral
   FOR EACH ROW EXECUTE FUNCTION public.set_converted_at_on_ganho();
 
-CREATE OR REPLACE VIEW public.vw_kanban_leads
+-- DROP obrigatório: CREATE OR REPLACE não muda tipo de coluna.
+-- View antiga tinha lead_id text (leads_geral); a nova usa uuid (contact_submissions).
+DROP VIEW IF EXISTS public.vw_kanban_leads CASCADE;
+DROP VIEW IF EXISTS public.vw_clientes_ativos CASCADE;
+
+CREATE VIEW public.vw_kanban_leads
 WITH (security_invoker = true) AS
 SELECT
   cs.*,
@@ -252,7 +257,7 @@ WHERE coalesce(lg.tipo_contato, 'lead') = 'lead'
 GRANT SELECT ON public.vw_kanban_leads TO authenticated;
 GRANT SELECT ON public.vw_kanban_leads TO anon;
 
-CREATE OR REPLACE VIEW public.vw_clientes_ativos
+CREATE VIEW public.vw_clientes_ativos
 WITH (security_invoker = true) AS
 SELECT
   cs.id AS lead_id,
