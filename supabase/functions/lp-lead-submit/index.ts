@@ -481,8 +481,10 @@ Deno.serve(async (req) => {
     ad_name: adName,
     observacoes: mensagem,
     dados_capturados: capturados,
+    ...attribution.leadColumns,
     ...leadExtras,
   };
+
 
   const { data, error } = await supabase
     .from("leads_geral")
