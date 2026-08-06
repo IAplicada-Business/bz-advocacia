@@ -34,7 +34,7 @@ export function MetaAdsHeader({
   // 4 KPIs compactos
   const cards = [
     { label: "Investimento", value: kpis.gasto > 0 ? brl(kpis.gasto) : "—", Icon: DollarSign },
-    { label: "Leads (bot)", value: String(kpis.leads ?? 0), Icon: Users },
+    { label: "Leads (Meta)", value: String(kpis.leads ?? 0), Icon: Users },
     { label: "Custo / Lead", value: kpis.custoLead > 0 ? brl(kpis.custoLead) : "—", Icon: Target },
     {
       label: "Conversão",

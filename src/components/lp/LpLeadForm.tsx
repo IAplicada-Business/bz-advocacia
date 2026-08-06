@@ -25,6 +25,25 @@ function readUtms() {
   };
 }
 
+/** IDs Meta da URL (URL tags {{ad.id}} etc. ou params custom). */
+function readMetaIds() {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const pick = (...keys: string[]) => {
+    for (const k of keys) {
+      const v = params.get(k) ?? params.get(k.toUpperCase());
+      if (v?.trim()) return v.trim();
+    }
+    return undefined;
+  };
+  return {
+    ad_id: pick("ad_id", "adid", "hsa_ad"),
+    campaign_id: pick("campaign_id", "campaignid", "hsa_cam"),
+    adset_id: pick("adset_id", "adsetid", "hsa_grp"),
+    fbclid: pick("fbclid"),
+  };
+}
+
 export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -43,6 +62,7 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
           slug,
           values,
           utm: readUtms(),
+          meta: readMetaIds(),
           pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
         },
       });
@@ -72,7 +92,7 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
         return;
       }
 
-      trackMetaLead();
+      trackMetaLead({ contentName: `lp_${slug}`, contentCategory: slug });
       setSubmitted(true);
     } catch (err) {
       console.error("[LpLeadForm] submit failed:", err);

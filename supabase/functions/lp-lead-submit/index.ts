@@ -9,6 +9,7 @@ import {
   espelharContactSubmission,
   type Lead,
 } from "../_shared/db.ts";
+import { resolveMetaAttribution } from "../_shared/metaAttribution.ts";
 import { normalizarTelefone } from "../_shared/zapi.ts";
 
 const corsHeaders = {
@@ -28,6 +29,13 @@ interface LpLeadBody {
     campaign?: string;
     content?: string;
     term?: string;
+  };
+  /** IDs Meta da URL (ad_id, campaign_id, adset_id, fbclid). */
+  meta?: {
+    ad_id?: string;
+    campaign_id?: string;
+    adset_id?: string;
+    fbclid?: string;
   };
   pageUrl?: string;
 }
@@ -266,6 +274,8 @@ function buildMensagem(
   if (utm?.source) lines.push(`utm_source: ${utm.source}`);
   if (utm?.medium) lines.push(`utm_medium: ${utm.medium}`);
   if (utm?.campaign) lines.push(`utm_campaign: ${utm.campaign}`);
+  if (utm?.content) lines.push(`utm_content: ${utm.content}`);
+  if (utm?.term) lines.push(`utm_term: ${utm.term}`);
   if (pageUrl) lines.push(`page: ${pageUrl}`);
   return lines.join("\n");
 }
@@ -355,6 +365,8 @@ Deno.serve(async (req) => {
   if (body.utm?.source) capturados.utm_source = body.utm.source;
   if (body.utm?.medium) capturados.utm_medium = body.utm.medium;
   if (body.utm?.campaign) capturados.utm_campaign = body.utm.campaign;
+  if (body.utm?.content) capturados.utm_content = body.utm.content;
+  if (body.utm?.term) capturados.utm_term = body.utm.term;
   if (body.pageUrl) capturados.page_url = body.pageUrl;
 
   const origemCrm =
@@ -374,6 +386,32 @@ Deno.serve(async (req) => {
                   ? "site"
                   : "meta";
 
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } },
+  );
+
+  // Atribuição Meta → funil Marketing (ad_id / campaign_id)
+  const isMetaPaid =
+    !isOrganic &&
+    (platform === "facebook_ads" || platform === "instagram_ads" || platform === "meta_ads");
+  const attribution = isMetaPaid
+    ? await resolveMetaAttribution(supabase, body.utm, body.meta)
+    : {
+      ad_id: null,
+      ad_name: null,
+      campaign_id: null,
+      campaign_name: null,
+      adset_id: null,
+      adset_name: null,
+      fbclid: body.meta?.fbclid?.trim() || null,
+    };
+
+  if (attribution.fbclid) capturados.fbclid = attribution.fbclid;
+  if (attribution.ad_id) capturados.ad_id = attribution.ad_id;
+  if (attribution.campaign_id) capturados.campaign_id = attribution.campaign_id;
+
   const crmPatch: Record<string, unknown> = {
     ...formContact,
     origem: origemCrm,
@@ -385,12 +423,6 @@ Deno.serve(async (req) => {
     mensagem,
     nome_completo: parsed.nome,
   };
-
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } },
-  );
 
   async function enriquecerCrm(leadId: string) {
     const { error: crmErr } = await supabase
@@ -409,23 +441,41 @@ Deno.serve(async (req) => {
     });
     await enriquecerCrm(existente.id);
 
-    // Acumula respostas do form no blob de qualificação (não apaga o que o bot já extraiu).
+    // Acumula respostas do form + atribuição Meta (só preenche IDs se ainda vazios).
     try {
       const { data: atual } = await supabase
         .from("leads_geral")
-        .select("dados_capturados")
+        .select("dados_capturados, ad_id, campaign_id, adset_id, ad_name, campaign_name, adset_name")
         .eq("id", existente.id)
         .maybeSingle();
       const prev =
         atual?.dados_capturados && typeof atual.dados_capturados === "object"
           ? (atual.dados_capturados as Record<string, unknown>)
           : {};
+      const attrPatch: Record<string, unknown> = {};
+      if (!atual?.ad_id && attribution.ad_id) {
+        attrPatch.ad_id = attribution.ad_id;
+        attrPatch.ad_name = attribution.ad_name;
+      }
+      if (!atual?.campaign_id && attribution.campaign_id) {
+        attrPatch.campaign_id = attribution.campaign_id;
+        attrPatch.campaign_name = attribution.campaign_name;
+      }
+      if (!atual?.adset_id && attribution.adset_id) {
+        attrPatch.adset_id = attribution.adset_id;
+        attrPatch.adset_name = attribution.adset_name;
+      }
+      if (!atual?.ad_name && attribution.ad_name) attrPatch.ad_name = attribution.ad_name;
+      if (!atual?.campaign_name && attribution.campaign_name) {
+        attrPatch.campaign_name = attribution.campaign_name;
+      }
       await supabase
         .from("leads_geral")
         .update({
           dados_capturados: { ...prev, ...capturados, form_reenvio_em: new Date().toISOString() },
           ...leadExtras,
           observacoes: mensagem,
+          ...attrPatch,
         })
         .eq("id", existente.id);
     } catch (e) {
@@ -454,9 +504,9 @@ Deno.serve(async (req) => {
   }
 
   const id = `sdr_lp_${area}_${Date.now()}_${parsed.telefone.slice(-6)}`;
-  const adName = body.utm?.campaign
-    ? `lp_${area}_${body.utm.campaign}`
-    : `lp_${area}`;
+  const adName =
+    attribution.ad_name ??
+    (body.utm?.campaign ? `lp_${area}_${body.utm.campaign}` : `lp_${area}`);
 
   const insertPayload: Record<string, unknown> = {
     id,
@@ -472,7 +522,12 @@ Deno.serve(async (req) => {
     area_normalizada: area === "divorcio" ? "familia" : area,
     bot_pausado: false,
     created_time: new Date().toISOString(),
+    ad_id: attribution.ad_id,
     ad_name: adName,
+    campaign_id: attribution.campaign_id,
+    campaign_name: attribution.campaign_name ?? body.utm?.campaign ?? null,
+    adset_id: attribution.adset_id,
+    adset_name: attribution.adset_name,
     observacoes: mensagem,
     dados_capturados: capturados,
     ...leadExtras,
