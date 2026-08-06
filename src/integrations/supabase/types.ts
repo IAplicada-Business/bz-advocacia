@@ -4607,6 +4607,24 @@ export type Database = {
           },
         ]
       }
+      whitelist_teste_bot: {
+        Row: {
+          ativado_em: string | null
+          motivo: string | null
+          telefone_8: string
+        }
+        Insert: {
+          ativado_em?: string | null
+          motivo?: string | null
+          telefone_8: string
+        }
+        Update: {
+          ativado_em?: string | null
+          motivo?: string | null
+          telefone_8?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       v_meta_lead_funnel: {
