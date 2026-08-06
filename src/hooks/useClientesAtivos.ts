@@ -37,9 +37,10 @@ export function useClientesAtivos(search?: string) {
         })) as unknown as Lead[];
       }
 
-      const ids = (viewRows || [])
-        .map((r) => r.lead_id)
+      const ids = ((viewRows || []) as any[])
+        .map((r) => r.lead_id as string | null)
         .filter((id): id is string => !!id);
+
 
       if (ids.length === 0) return [] as Lead[];
 
