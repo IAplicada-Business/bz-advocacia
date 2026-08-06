@@ -31,7 +31,7 @@ export function useClientesAtivos(search?: string) {
         return (res.data || []).map((row) => ({
           ...row,
           origem_descricao: row.outro_como_conheceu || null,
-          stage: row.stage ?? "ganho",
+          stage: (row as any).stage ?? "ganho",
           estagio: (row.estagio as Lead["estagio"]) ?? "fechado",
         })) as unknown as Lead[];
       }
@@ -54,7 +54,7 @@ export function useClientesAtivos(search?: string) {
       return (data || []).map((row) => ({
         ...row,
         origem_descricao: row.outro_como_conheceu || null,
-        stage: row.stage ?? "ganho",
+        stage: (row as any).stage ?? "ganho",
         estagio: (row.estagio as Lead["estagio"]) ?? "fechado",
       })) as unknown as Lead[];
     },

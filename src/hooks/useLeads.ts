@@ -102,7 +102,7 @@ export function useLeads(filters: LeadsFilters) {
     queryKey: ["leads", filters],
     queryFn: async () => {
       let query = supabase
-        .from("vw_kanban_leads")
+        .from("vw_kanban_leads" as any)
         .select("*")
         .order("data_ultima_atividade", { ascending: false });
 
@@ -319,7 +319,7 @@ export function useUpdateLeadStage() {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        await supabase.from("stage_transitions_override").insert({
+        await supabase.from("stage_transitions_override" as any).insert({
           lead_id: id,
           lead_source: "contact_submissions",
           to_stage: resolvedStage,

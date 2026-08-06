@@ -13,7 +13,7 @@ export async function atualizarLeadParaPropostaEnviada(
   try {
     const { data: lead, error: fetchError } = await supabase
       .from("contact_submissions")
-      .select("estagio, stage")
+      .select("estagio")
       .eq("id", clienteId)
       .single();
 
@@ -76,7 +76,7 @@ export async function atualizarLeadParaFechado(
   try {
     const { data: lead, error: fetchError } = await supabase
       .from("contact_submissions")
-      .select("estagio, stage")
+      .select("estagio")
       .eq("id", clienteId)
       .single();
 
