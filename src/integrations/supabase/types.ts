@@ -647,18 +647,6 @@ export type Database = {
           endereco_estado: string | null
           estado_civil: string | null
           estagio: string | null
-          stage: Database["public"]["Enums"]["lead_stage"]
-          stage_entered_at: string | null
-          converted_at: string | null
-          valor_estimado: number | null
-          area_juridica: string | null
-          reuniao_data: string | null
-          reuniao_notas: string | null
-          advogada_responsavel_id: string | null
-          proposta_id: string | null
-          contrato_id: string | null
-          valor_fechamento: number | null
-          contrato_assinado: boolean | null
           id: string
           lead_geral_id: string | null
           lgpd_consent: boolean
@@ -713,18 +701,6 @@ export type Database = {
           endereco_estado?: string | null
           estado_civil?: string | null
           estagio?: string | null
-          stage?: Database["public"]["Enums"]["lead_stage"]
-          stage_entered_at?: string | null
-          converted_at?: string | null
-          valor_estimado?: number | null
-          area_juridica?: string | null
-          reuniao_data?: string | null
-          reuniao_notas?: string | null
-          advogada_responsavel_id?: string | null
-          proposta_id?: string | null
-          contrato_id?: string | null
-          valor_fechamento?: number | null
-          contrato_assinado?: boolean | null
           id?: string
           lead_geral_id?: string | null
           lgpd_consent?: boolean
@@ -779,18 +755,6 @@ export type Database = {
           endereco_estado?: string | null
           estado_civil?: string | null
           estagio?: string | null
-          stage?: Database["public"]["Enums"]["lead_stage"]
-          stage_entered_at?: string | null
-          converted_at?: string | null
-          valor_estimado?: number | null
-          area_juridica?: string | null
-          reuniao_data?: string | null
-          reuniao_notas?: string | null
-          advogada_responsavel_id?: string | null
-          proposta_id?: string | null
-          contrato_id?: string | null
-          valor_fechamento?: number | null
-          contrato_assinado?: boolean | null
           id?: string
           lead_geral_id?: string | null
           lgpd_consent?: boolean
@@ -1705,6 +1669,7 @@ export type Database = {
           dados_capturados: Json
           dias_sem_contato: number
           etapa_qualificacao: string | null
+          flags_qualificacao: string[]
           fluxo_sdr: string | null
           form_id: string | null
           form_name: string | null
@@ -1726,25 +1691,6 @@ export type Database = {
           preferencia_contato: string | null
           score: number | null
           status_sdr: string | null
-          stage: Database["public"]["Enums"]["lead_stage"]
-          stage_entered_at: string | null
-          converted_at: string | null
-          primeiro_contato_em: string | null
-          valor_estimado: number | null
-          area_juridica: string | null
-          reuniao_data: string | null
-          reuniao_notas: string | null
-          advogada_responsavel_id: string | null
-          proposta_id: string | null
-          contrato_id: string | null
-          valor_fechamento: number | null
-          contrato_assinado: boolean | null
-          desqualificado_motivo: string | null
-          desqualificado_em: string | null
-          prioridade_max: boolean | null
-          caso_forte: boolean | null
-          ticket_minimo: boolean | null
-          produto_diferente: boolean | null
           telefone_digits: string | null
           tentativas_etapa: number
           tipo_contato: string
@@ -1772,6 +1718,7 @@ export type Database = {
           dados_capturados?: Json
           dias_sem_contato?: number
           etapa_qualificacao?: string | null
+          flags_qualificacao?: string[]
           fluxo_sdr?: string | null
           form_id?: string | null
           form_name?: string | null
@@ -1793,25 +1740,6 @@ export type Database = {
           preferencia_contato?: string | null
           score?: number | null
           status_sdr?: string | null
-          stage?: Database["public"]["Enums"]["lead_stage"]
-          stage_entered_at?: string | null
-          converted_at?: string | null
-          primeiro_contato_em?: string | null
-          valor_estimado?: number | null
-          area_juridica?: string | null
-          reuniao_data?: string | null
-          reuniao_notas?: string | null
-          advogada_responsavel_id?: string | null
-          proposta_id?: string | null
-          contrato_id?: string | null
-          valor_fechamento?: number | null
-          contrato_assinado?: boolean | null
-          desqualificado_motivo?: string | null
-          desqualificado_em?: string | null
-          prioridade_max?: boolean | null
-          caso_forte?: boolean | null
-          ticket_minimo?: boolean | null
-          produto_diferente?: boolean | null
           telefone_digits?: string | null
           tentativas_etapa?: number
           tipo_contato?: string
@@ -1839,6 +1767,7 @@ export type Database = {
           dados_capturados?: Json
           dias_sem_contato?: number
           etapa_qualificacao?: string | null
+          flags_qualificacao?: string[]
           fluxo_sdr?: string | null
           form_id?: string | null
           form_name?: string | null
@@ -1860,25 +1789,6 @@ export type Database = {
           preferencia_contato?: string | null
           score?: number | null
           status_sdr?: string | null
-          stage?: Database["public"]["Enums"]["lead_stage"]
-          stage_entered_at?: string | null
-          converted_at?: string | null
-          primeiro_contato_em?: string | null
-          valor_estimado?: number | null
-          area_juridica?: string | null
-          reuniao_data?: string | null
-          reuniao_notas?: string | null
-          advogada_responsavel_id?: string | null
-          proposta_id?: string | null
-          contrato_id?: string | null
-          valor_fechamento?: number | null
-          contrato_assinado?: boolean | null
-          desqualificado_motivo?: string | null
-          desqualificado_em?: string | null
-          prioridade_max?: boolean | null
-          caso_forte?: boolean | null
-          ticket_minimo?: boolean | null
-          produto_diferente?: boolean | null
           telefone_digits?: string | null
           tentativas_etapa?: number
           tipo_contato?: string
@@ -3161,48 +3071,6 @@ export type Database = {
         }
         Relationships: []
       }
-
-      qualificacao_estruturada_sdr: {
-        Row: {
-          id: string
-          lead_id: string
-          respostas_familia: Json | null
-          respostas_inventario: Json | null
-          respostas_saude: Json | null
-          completa_em: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          lead_id: string
-          respostas_familia?: Json | null
-          respostas_inventario?: Json | null
-          respostas_saude?: Json | null
-          completa_em?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          lead_id?: string
-          respostas_familia?: Json | null
-          respostas_inventario?: Json | null
-          respostas_saude?: Json | null
-          completa_em?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "qualificacao_estruturada_sdr_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: true
-            referencedRelation: "leads_geral"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       qualificacoes_sdr: {
         Row: {
           created_at: string | null
@@ -4336,40 +4204,6 @@ export type Database = {
           },
         ]
       }
-
-      stage_transitions_override: {
-        Row: {
-          id: string
-          lead_id: string
-          lead_source: string
-          from_stage: Database["public"]["Enums"]["lead_stage"] | null
-          to_stage: Database["public"]["Enums"]["lead_stage"]
-          missing_fields: Json
-          user_id: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          lead_id: string
-          lead_source?: string
-          from_stage?: Database["public"]["Enums"]["lead_stage"] | null
-          to_stage: Database["public"]["Enums"]["lead_stage"]
-          missing_fields?: Json
-          user_id?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          lead_id?: string
-          lead_source?: string
-          from_stage?: Database["public"]["Enums"]["lead_stage"] | null
-          to_stage?: Database["public"]["Enums"]["lead_stage"]
-          missing_fields?: Json
-          user_id?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
       whatsapp_templates: {
         Row: {
           ativo: boolean | null
@@ -4462,56 +4296,6 @@ export type Database = {
           lead_id: string | null
           nome: string | null
           telefone: string | null
-          email: string | null
-          stage: Database["public"]["Enums"]["lead_stage"] | null
-          converted_at: string | null
-          status_cliente: string | null
-          tipo_processo: string | null
-          responsavel_id: string | null
-          created_at: string | null
-        }
-        Relationships: []
-      }
-      vw_kanban_leads: {
-        Row: {
-          id: string | null
-          nome_completo: string | null
-          email: string | null
-          telefone: string | null
-          estagio: string | null
-          stage: Database["public"]["Enums"]["lead_stage"] | null
-          stage_entered_at: string | null
-          converted_at: string | null
-          lead_geral_id: string | null
-          origem: string | null
-          tipo_processo: string | null
-          data_ultima_atividade: string | null
-          created_at: string | null
-          status_cliente: string | null
-          responsavel_id: string | null
-          primeiro_contato_em: string | null
-          valor_estimado: number | null
-          area_juridica: string | null
-          reuniao_data: string | null
-          reuniao_notas: string | null
-          advogada_responsavel_id: string | null
-          proposta_id: string | null
-          contrato_id: string | null
-          valor_fechamento: number | null
-          contrato_assinado: boolean | null
-          bot_status_sdr: string | null
-          bot_fluxo_sdr: string | null
-          bot_area_normalizada: string | null
-          bot_score: number | null
-          bot_etapa_qualificacao: string | null
-          bot_bot_pausado: boolean | null
-          bot_ultima_mensagem_em: string | null
-          bot_origem_sdr: string | null
-          bot_is_organic: boolean | null
-          bot_tipo_contato: string | null
-          bot_tipo_servico: string | null
-          bot_urgencia: string | null
-          bot_dados_capturados: Json | null
         }
         Relationships: []
       }
@@ -4541,10 +4325,6 @@ export type Database = {
       }
     }
     Functions: {
-      advogadas_lead_count_30d: {
-        Args: never
-        Returns: { advogada_id: string; cnt: number }[]
-      }
       auto_bloquear_telefone_bot: {
         Args: { p_motivo: string; p_nome?: string; p_telefone: string }
         Returns: undefined
@@ -4569,17 +4349,6 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "advogado" | "assistente" | "financeiro"
-      lead_stage:
-        | "mql"
-        | "conectado"
-        | "sal"
-        | "reuniao_agendada"
-        | "reuniao_realizada"
-        | "proposta"
-        | "contrato"
-        | "ganho"
-        | "perdido"
-        | "desqualificado"
       tipo_melhoria: "correcao" | "melhoria" | "nova_funcionalidade"
     }
     CompositeTypes: {
@@ -4709,18 +4478,6 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "advogado", "assistente", "financeiro"],
-      lead_stage: [
-        "mql",
-        "conectado",
-        "sal",
-        "reuniao_agendada",
-        "reuniao_realizada",
-        "proposta",
-        "contrato",
-        "ganho",
-        "perdido",
-        "desqualificado",
-      ],
       tipo_melhoria: ["correcao", "melhoria", "nova_funcionalidade"],
     },
   },
