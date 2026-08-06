@@ -25,6 +25,19 @@ function readUtms() {
   };
 }
 
+function readAdParams() {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const keys = ["ad_id", "adset_id", "campaign_id", "fbclid", "ad_name", "adset_name", "campaign_name"];
+  const out: Record<string, string> = {};
+  for (const key of keys) {
+    const value = params.get(key);
+    if (value) out[key] = value;
+  }
+  return out;
+}
+
+
 export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -43,8 +56,10 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
           slug,
           values,
           utm: readUtms(),
+          ads: readAdParams(),
           pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
         },
+
       });
 
       // supabase-js marca error em qualquer non-2xx; o body útil pode vir em data

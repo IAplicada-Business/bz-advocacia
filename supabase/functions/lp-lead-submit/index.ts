@@ -10,6 +10,7 @@ import {
   type Lead,
 } from "../_shared/db.ts";
 import { normalizarTelefone } from "../_shared/zapi.ts";
+import { buildMetaAttribution } from "../_shared/metaAttribution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,8 +30,10 @@ interface LpLeadBody {
     content?: string;
     term?: string;
   };
+  ads?: Record<string, string | undefined>;
   pageUrl?: string;
 }
+
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -352,10 +355,13 @@ Deno.serve(async (req) => {
   const mensagem = buildMensagem(area, values, body.utm, body.pageUrl);
   const { contact: formContact, leadExtras, capturados } = mapFormToPersistence(area, values);
 
-  if (body.utm?.source) capturados.utm_source = body.utm.source;
-  if (body.utm?.medium) capturados.utm_medium = body.utm.medium;
-  if (body.utm?.campaign) capturados.utm_campaign = body.utm.campaign;
-  if (body.pageUrl) capturados.page_url = body.pageUrl;
+  const attribution = buildMetaAttribution({
+    utm: body.utm,
+    ads: body.ads,
+    pageUrl: body.pageUrl,
+  });
+  Object.assign(capturados, attribution.capturados);
+
 
   const origemCrm =
     platform === "instagram_ads"
@@ -424,9 +430,11 @@ Deno.serve(async (req) => {
         .from("leads_geral")
         .update({
           dados_capturados: { ...prev, ...capturados, form_reenvio_em: new Date().toISOString() },
+          ...attribution.leadColumns,
           ...leadExtras,
           observacoes: mensagem,
         })
+
         .eq("id", existente.id);
     } catch (e) {
       console.error("[lp-lead-submit] merge dados_capturados failed:", e);
@@ -475,8 +483,10 @@ Deno.serve(async (req) => {
     ad_name: adName,
     observacoes: mensagem,
     dados_capturados: capturados,
+    ...attribution.leadColumns,
     ...leadExtras,
   };
+
 
   const { data, error } = await supabase
     .from("leads_geral")
