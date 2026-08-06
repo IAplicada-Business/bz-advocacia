@@ -354,13 +354,6 @@ export type Database = {
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
-          {
-            foreignKeyName: "campanhas_envio_lead_geral_id_fkey"
-            columns: ["lead_geral_id"]
-            isOneToOne: false
-            referencedRelation: "vw_clientes_ativos"
-            referencedColumns: ["lead_id"]
-          },
         ]
       }
       categorias_externas: {
@@ -667,6 +660,7 @@ export type Database = {
           responsavel_id: string | null
           rg: string | null
           situacao_atual: string | null
+          stage: Database["public"]["Enums"]["lead_stage"]
           status: string
           status_cliente: string | null
           tags: string[] | null
@@ -721,6 +715,7 @@ export type Database = {
           responsavel_id?: string | null
           rg?: string | null
           situacao_atual?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
           status?: string
           status_cliente?: string | null
           tags?: string[] | null
@@ -775,6 +770,7 @@ export type Database = {
           responsavel_id?: string | null
           rg?: string | null
           situacao_atual?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
           status?: string
           status_cliente?: string | null
           tags?: string[] | null
@@ -1265,13 +1261,6 @@ export type Database = {
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
-          {
-            foreignKeyName: "eventos_sdr_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "vw_clientes_ativos"
-            referencedColumns: ["lead_id"]
-          },
         ]
       }
       financeiro: {
@@ -1642,13 +1631,6 @@ export type Database = {
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
-          {
-            foreignKeyName: "leads_backlog_lead_geral_id_fkey"
-            columns: ["lead_geral_id"]
-            isOneToOne: false
-            referencedRelation: "vw_clientes_ativos"
-            referencedColumns: ["lead_id"]
-          },
         ]
       }
       leads_geral: {
@@ -1690,6 +1672,7 @@ export type Database = {
           platform: string | null
           preferencia_contato: string | null
           score: number | null
+          stage: Database["public"]["Enums"]["lead_stage"]
           status_sdr: string | null
           telefone_digits: string | null
           tentativas_etapa: number
@@ -1739,6 +1722,7 @@ export type Database = {
           platform?: string | null
           preferencia_contato?: string | null
           score?: number | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
           status_sdr?: string | null
           telefone_digits?: string | null
           tentativas_etapa?: number
@@ -1788,6 +1772,7 @@ export type Database = {
           platform?: string | null
           preferencia_contato?: string | null
           score?: number | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
           status_sdr?: string | null
           telefone_digits?: string | null
           tentativas_etapa?: number
@@ -1952,13 +1937,6 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "v_meta_lead_funnel"
-            referencedColumns: ["lead_id"]
-          },
-          {
-            foreignKeyName: "mensagens_sdr_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "vw_clientes_ativos"
             referencedColumns: ["lead_id"]
           },
         ]
@@ -3112,13 +3090,6 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "v_meta_lead_funnel"
-            referencedColumns: ["lead_id"]
-          },
-          {
-            foreignKeyName: "qualificacoes_sdr_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "vw_clientes_ativos"
             referencedColumns: ["lead_id"]
           },
         ]
@@ -4291,14 +4262,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vw_clientes_ativos: {
-        Row: {
-          lead_id: string | null
-          nome: string | null
-          telefone: string | null
-        }
-        Relationships: []
-      }
       vw_pipeline_b_z: {
         Row: {
           area_normalizada: string | null
@@ -4349,6 +4312,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "advogado" | "assistente" | "financeiro"
+      lead_stage:
+        | "mql"
+        | "conectado"
+        | "sal"
+        | "reuniao_agendada"
+        | "reuniao_realizada"
+        | "proposta"
+        | "contrato"
+        | "ganho"
+        | "perdido"
       tipo_melhoria: "correcao" | "melhoria" | "nova_funcionalidade"
     }
     CompositeTypes: {
@@ -4478,6 +4451,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "advogado", "assistente", "financeiro"],
+      lead_stage: [
+        "mql",
+        "conectado",
+        "sal",
+        "reuniao_agendada",
+        "reuniao_realizada",
+        "proposta",
+        "contrato",
+        "ganho",
+        "perdido",
+      ],
       tipo_melhoria: ["correcao", "melhoria", "nova_funcionalidade"],
     },
   },
