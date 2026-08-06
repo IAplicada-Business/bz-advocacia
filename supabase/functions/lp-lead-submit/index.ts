@@ -30,8 +30,10 @@ interface LpLeadBody {
     content?: string;
     term?: string;
   };
+  ads?: Record<string, string | undefined>;
   pageUrl?: string;
 }
+
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
