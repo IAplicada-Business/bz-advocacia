@@ -17,9 +17,24 @@ export const LEAD_STAGE_PERDIDO = {
   sla_days: null,
 } as const;
 
-export type LeadStage = (typeof LEAD_STAGES)[number]["key"] | typeof LEAD_STAGE_PERDIDO.key;
+/** Lead fora do ICP / escopo (ex.: pensão/guarda only, ticket mínimo). */
+export const LEAD_STAGE_DESQUALIFICADO = {
+  key: "desqualificado",
+  label: "Desqualificado",
+  order: 100,
+  sla_days: null,
+} as const;
 
-export const ALL_LEAD_STAGES = [...LEAD_STAGES, LEAD_STAGE_PERDIDO] as const;
+export type LeadStage =
+  | (typeof LEAD_STAGES)[number]["key"]
+  | typeof LEAD_STAGE_PERDIDO.key
+  | typeof LEAD_STAGE_DESQUALIFICADO.key;
+
+export const ALL_LEAD_STAGES = [
+  ...LEAD_STAGES,
+  LEAD_STAGE_PERDIDO,
+  LEAD_STAGE_DESQUALIFICADO,
+] as const;
 
 export const LEAD_STAGE_LABELS: Record<LeadStage, string> = {
   mql: "MQL",
@@ -31,6 +46,7 @@ export const LEAD_STAGE_LABELS: Record<LeadStage, string> = {
   contrato: "Contrato",
   ganho: "Ganho",
   perdido: "Perdido",
+  desqualificado: "Desqualificado",
 };
 
 /** Cores da borda superior das colunas do kanban. */
@@ -44,6 +60,7 @@ export const LEAD_STAGE_COLORS: Record<LeadStage, string> = {
   contrato: "border-t-orange-500",
   ganho: "border-t-emerald-500",
   perdido: "border-t-red-500",
+  desqualificado: "border-t-slate-400",
 };
 
 /** Mapeia stage novo → estagio legado (contact_submissions) para rollback. */
@@ -64,6 +81,8 @@ export function stageToLegacyEstagio(stage: LeadStage): string {
       return "fechado";
     case "perdido":
       return "perdido";
+    case "desqualificado":
+      return "perdido";
     default:
       return "novo";
   }
@@ -83,6 +102,7 @@ export function stageToLegacyStatusSdr(stage: LeadStage): string | null {
     case "ganho":
       return "cliente";
     case "perdido":
+    case "desqualificado":
       return "perdido";
     default:
       return null;
@@ -101,7 +121,11 @@ export function inferStageFromLegacy(lead: {
 
   const s = lead.status_sdr;
   if (s === "cliente") return "ganho";
-  if (s === "perdido" || s === "mql_frio" || s === "perdido_recuperacao") return "perdido";
+  if (s === "perdido" || s === "mql_frio" || s === "perdido_recuperacao") {
+    // desqualificado tem stage próprio; status_sdr pode continuar 'perdido'
+    if (lead.stage === "desqualificado") return "desqualificado";
+    return "perdido";
+  }
   if (s === "agendado") return "reuniao_agendada";
   if (
     s === "qualificacao_iniciada" ||

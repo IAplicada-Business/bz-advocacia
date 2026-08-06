@@ -1,20 +1,14 @@
-// Prompts e templates de mensagem do SDR — Claudia (B&Z).
-// Refator V5 (junho 2026): tom conversacional, sem menu numerado,
-// 3 areas atendidas (familia | inventario | saude) + fora_escopo
-// (handoff direto pra triagem humana).
+// Prompts e templates de mensagem do SDR — bot B&Z.
+// Roteiro oficial: docs/BZ_Bot_Whatsapp_Roteiro_v1.md
 //
 // Higienizacao:
 // - Sem travessao (—). Usar virgula, ponto ou ponto e virgula.
-// - Emojis permitidos: 💙 😊. Mais nenhum.
+// - Emojis em fluxo geral: 💙 😊. Mensagens de política: sem emoji.
 // - Tom: caloroso, empatico, profissional. Nunca robotico.
+// - Nunca inventar texto de qualificação — usar o roteiro.
 
 export const NOME_ESCRITORIO = Deno.env.get("NOME_ESCRITORIO") ?? "B&Z";
 
-// Mapas pra estruturar respostas numericas em qualificacoes_sdr.
-// O bot nao oferece mais menu numerado, mas mantemos a captura silenciosa
-// pra leads antigos que mandem "1/2/3" achando que o menu ainda existe.
-// O "4 - Outros" foi removido: agora qualquer area fora do escopo cai em
-// fora_escopo via interpretacao do Haiku.
 export const AREA_NUM_TO_KEY: Record<string, "familia" | "inventario" | "saude"> = {
   "1": "familia",
   "2": "inventario",
@@ -27,8 +21,6 @@ export const AREA_LABEL: Record<string, string> = {
   fora_escopo: "Fora do escopo (triagem humana)",
 };
 
-// Extrai numero 1-3 do inicio da mensagem do lead. Fallback escondido —
-// nao reforcamos isso no texto do bot, so capturamos se vier.
 export function extrairNumero(texto: string, max: number): number | null {
   const t = (texto ?? "").trim();
   const m = t.match(/^([1-9])(?:\b|[.)\-\s])/);
@@ -37,13 +29,7 @@ export function extrairNumero(texto: string, max: number): number | null {
   return n >= 1 && n <= max ? n : null;
 }
 
-// ---------- M0: boas-vindas (Claudia, conversacional) ----------
-//
-// Quatro variacoes:
-//   - CTWA: lead chegou clicando em anuncio
-//   - Organica: chegou sem anuncio
-//   - Reabertura: lead inativo retoma apos 7+ dias
-//   - Recuperacao: lead respondeu campanha de recuperacao
+// ---------- M0: boas-vindas ----------
 
 export function mensagemM0CTWA(nome: string): string {
   const n = (nome ?? "").trim() || "tudo bem";
@@ -76,83 +62,168 @@ Sou a Claudia da B&Z. Conta um pouquinho como posso te ajudar agora?`
   );
 }
 
-// Wrapper compat: codigos antigos importam mensagemM0(nome, tipo_servico).
-// Decide entre CTWA e organica pelo tipo_servico (que vem do form do site
-// ou null pra organica). Quando origem chega vazia, assume organica.
 export function mensagemM0(nome: string, _tipoServicoForm?: string | null): string {
   return mensagemM0Organico(nome);
 }
 
-// Mantido como export vazio pra nao quebrar quem ainda importa.
 export const AVISO_LGPD = "";
 
-// ---------- Mensagens M1/M2/M3 por area (conversacionais) ----------
-//
-// SAUDE
-
-export function mensagemSaudeM1(_nome: string): string {
-  return (
-`Sentimos muito pela situação 💙 Me conta um pouquinho mais: você precisa de algum medicamento, tratamento ou procedimento cirúrgico? E o plano deu alguma justificativa pra negar?`
-  );
-}
-
-export function mensagemSaudeM2(_nome: string): string {
-  return (
-`Entendi. Temos boas experiências com casos parecidos. Só pra eu fechar antes de passar pra advogada especialista: você tem em mãos a negativa do plano e a prescrição do médico?`
-  );
-}
-
-export function mensagemSaudeM3(_nome: string): string {
-  return (
-`Perfeito. Com isso a Dra. já consegue avaliar e te explicar os próximos passos. O ideal seria uma reunião breve pra ela analisar as especificações do seu caso e te apresentar a estratégia. Podemos agendar?`
-  );
-}
-
-// INVENTARIO
-
-export function mensagemInventarioM1(_nome: string): string {
-  return (
-`Sinto muito pela sua perda 💙 Pode ficar tranquilo, a gente cuida disso com você. Me conta um pouquinho antes de eu passar pra advogada especialista: vocês são quantos herdeiros e está todo mundo de acordo, ou tem algum impasse?`
-  );
-}
-
-export function mensagemInventarioM2(_nome: string): string {
-  return (
-`Entendi. E sobre os bens, o que ficou? Apartamento, conta no banco, investimentos, carro?`
-  );
-}
-
-export function mensagemInventarioM2Valor(_nome: string): string {
-  return `Você sabe qual é o valor aproximado desses bens?`;
-}
-
-export function mensagemInventarioM3(_nome: string): string {
-  return (
-`Anotei tudo, obrigada. O ideal seria uma reunião breve pra ela analisar as especificações do seu caso e te apresentar a estratégia. Podemos agendar?`
-  );
-}
-
-// FAMILIA
+// ---------- Família (roteiro v1 — 3 perguntas) ----------
 
 export function mensagemFamiliaM1(_nome: string): string {
   return (
-`Que bom que você nos procurou 😊 Me conta um pouquinho, pra eu passar pra advogada especialista: é um caso mais tranquilo (vocês dois concordam) ou tem alguma divergência?`
+`Qual sua situação hoje?
+• (a) Ainda casado(a), pensando em me separar
+• (b) Já separado(a), sem processo iniciado
+• (c) Divórcio em negociação
+• (d) Divórcio em andamento
+• (e) Processo travado
+
+Pode responder só com a letra.`
   );
 }
 
 export function mensagemFamiliaM2(_nome: string): string {
   return (
-`Entendi. Só pra eu antecipar: vocês têm bens em comum tipo casa, carro, investimentos? E se tem filhos, já têm uma ideia de como pretendem combinar a convivência?`
+`Existe patrimônio a partilhar?
+• (a) Sim, imóveis
+• (b) Sim, empresa
+• (c) Sim, aplicações
+• (d) Sim, mais de um tipo
+• (e) Não há patrimônio significativo
+• (f) Não tenho certeza
+
+Pode responder só com a letra.`
   );
 }
 
 export function mensagemFamiliaM3(_nome: string): string {
   return (
-`Perfeito, isso já dá pra advogada começar a desenhar. É importante agendarmos uma reunião breve pra ela analisar as especificações do seu caso e te apresentar a estratégia. Podemos agendar?`
+`Qual sua renda familiar mensal?
+• (a) Até R$10k
+• (b) R$10k a R$30k
+• (c) R$30k a R$60k
+• (d) Acima de R$60k
+
+Pode responder só com a letra.`
   );
 }
 
-// FORA DO ESCOPO (substitui o antigo "Outros") — handoff direto, sem qualificar
+// ---------- Inventário (roteiro v1 — placeholder 5.2) ----------
+
+export function mensagemInventarioM1(_nome: string): string {
+  // v1 placeholder até B&Z devolver seção 5.2
+  return (
+`Em que fase está o inventário?
+• (a) Falecimento recente, ainda não abrimos
+• (b) Inventário aberto, em andamento
+• (c) Inventário travado com problemas
+• (d) Buscando planejamento sucessório preventivo
+
+Pode responder só com a letra.`
+  );
+}
+
+export function mensagemInventarioM2(_nome: string): string {
+  return (
+`Estimativa do patrimônio do espólio?
+• (a) Até R$300k
+• (b) R$300k-R$1M
+• (c) R$1M-R$5M
+• (d) Acima de R$5M
+• (e) Não sei estimar
+
+Pode responder só com a letra.`
+  );
+}
+
+export function mensagemInventarioM2Valor(_nome: string): string {
+  return (
+`Composição do patrimônio?
+• (a) Só imóveis
+• (b) Imóveis + empresa
+• (c) Imóveis + aplicações
+• (d) Empresa + aplicações
+• (e) Complexo (múltiplos)
+• (f) Inclui bens exterior
+• (g) Não sei
+
+Pode responder só com a letra.`
+  );
+}
+
+export function mensagemInventarioM3(_nome: string): string {
+  return (
+`Existe risco de conflito entre herdeiros?
+• (a) Sim, já há divergências
+• (b) Talvez, ainda não conversamos
+• (c) Não, todos alinhados
+
+Pode responder só com a letra.`
+  );
+}
+
+// ---------- Saúde (roteiro v1 — placeholder 5.3) ----------
+
+export function mensagemSaudeM1(_nome: string): string {
+  return (
+`Situação atual com o plano?
+• (a) Plano negou por escrito
+• (b) Plano negou verbalmente
+• (c) Plano autorizou mas não cumpre
+• (d) Plano está enrolando
+• (e) Ainda não pedi, mas sei que vou precisar
+
+Pode responder só com a letra.`
+  );
+}
+
+export function mensagemSaudeM2(_nome: string): string {
+  return (
+`Tipo de cobertura em questão?
+• (a) Cirurgia
+• (b) Medicamento alto custo
+• (c) Home care
+• (d) Tratamento oncológico
+• (e) Terapia continuada
+• (f) UTI/internação
+• (g) Exame alta complexidade
+• (h) Outro
+
+Pode responder só com a letra.`
+  );
+}
+
+/** Saúde: urgência (usa slot M2_valor no fluxo). */
+export function mensagemSaudeM2Valor(_nome: string): string {
+  return (
+`Urgência clínica?
+• (a) Extrema — risco de vida ou piora rápida
+• (b) Precisa começar em até 30 dias
+• (c) Sem urgência imediata
+
+Pode responder só com a letra.`
+  );
+}
+
+export function mensagemSaudeM3(_nome: string): string {
+  return (
+`Valor mensal do plano de saúde?
+• (a) Até R$500
+• (b) R$500-R$1500
+• (c) R$1500-R$3000
+• (d) Acima de R$3000
+
+Pode responder só com a letra.`
+  );
+}
+
+export function mensagemHandoffAgendamento(_nome: string): string {
+  return (
+`Perfeito, anotei tudo 💙 Vou passar pra advogada especialista. O ideal é uma reunião breve pra ela analisar o seu caso e apresentar a estratégia. Ela te chama por aqui em breve.`
+  );
+}
+
 export function mensagemForaEscopo(_nome: string, _area?: string): string {
   return (
 `Entendi. Você procurou o lugar certo pra ter essa avaliação 😊
@@ -160,12 +231,10 @@ Vou repassar pra advogada avaliar seu caso especificamente. Ela vai te chamar po
   );
 }
 
-// Handoff generico (final de fluxo de qualificacao bem sucedida)
-export function mensagemHandoff(_nome: string): string {
-  return mensagemFamiliaM3(_nome);
+export function mensagemHandoff(nome: string): string {
+  return mensagemHandoffAgendamento(nome);
 }
 
-// Aliases compativeis com imports antigos
 export function mensagemSQL(nome: string, _advogadoNome?: string): string {
   return mensagemHandoff(nome);
 }
@@ -173,84 +242,74 @@ export function mensagemMQLFrio(nome: string): string {
   return mensagemForaEscopo(nome);
 }
 
-// Texto fixo da pergunta por codigo (pra registrar em qualificacoes_sdr).
 export const PERGUNTA_TEXTO_POR_CODIGO: Record<string, string> = {
-  area: "Qual a área que você precisa de ajuda? (interpretação livre, sem menu)",
-  saude_m1: "Você precisa de medicamento, tratamento ou cirurgia? E qual a justificativa do plano?",
-  saude_m2: "Tem a negativa do plano e a prescrição do médico em mãos?",
-  saude_m3: "Podemos agendar a reunião com a advogada?",
-  inventario_m1: "Quantos herdeiros e há consenso entre eles?",
-  inventario_m2: "Quais são os bens principais?",
-  inventario_m2_valor: "Valor aproximado dos bens?",
-  inventario_m3: "Podemos agendar a reunião com a advogada?",
-  familia_m1: "Caso consensual ou divergente?",
-  familia_m2: "Bens em comum / filhos / proposta de guarda?",
-  familia_m3: "Podemos agendar a reunião com a advogada?",
+  area: "Qual a área que você precisa de ajuda?",
+  familia_m1: "Qual sua situação hoje? (a–e)",
+  familia_m2: "Existe patrimônio a partilhar? (a–f)",
+  familia_m3: "Qual sua renda familiar mensal? (a–d)",
+  inventario_m1: "Em que fase está o inventário? (a–d)",
+  inventario_m2: "Estimativa do patrimônio do espólio? (a–e)",
+  inventario_m2_valor: "Composição do patrimônio? (a–g)",
+  inventario_m3: "Risco de conflito entre herdeiros? (a–c)",
+  saude_m1: "Situação atual com o plano? (a–e)",
+  saude_m2: "Tipo de cobertura? (a–h)",
+  saude_m2_valor: "Urgência clínica? (a–c)",
+  saude_m3: "Valor mensal do plano? (a–d)",
   fora_escopo: "Tema fora do escopo, handoff direto pra triagem.",
+  pensao_guarda_only: "Caso isolado de pensão/guarda — desqualificado.",
 };
 
-// ---------- SYSTEM PROMPT do classificador (Claudia) ----------
+// ---------- SYSTEM PROMPT do classificador ----------
 
-export const SYSTEM_PROMPT_CLASSIFICADOR = `Você é a Claudia, atendente digital do escritório Borges & Zembruski Advocacia (B&Z). Você é a primeira pessoa a falar com leads que chegam pelo WhatsApp e seu papel é entender o caso, qualificar com no máximo 3 perguntas e passar para a advogada especialista certa.
+export const SYSTEM_PROMPT_CLASSIFICADOR = `Você é a Claudia, atendente digital do escritório Borges & Zembruski Advocacia (B&Z). Você é a primeira pessoa a falar com leads que chegam pelo WhatsApp. Qualifique com perguntas estruturadas (letra a/b/c…) e passe para a advogada certa.
 
-ÁREAS ATENDIDAS (use SEMPRE um destes valores no campo "area"):
-- familia       → divórcio, união estável, pensão, alimentos, guarda, partilha, separação
-- inventario    → inventário, partilha pós-falecimento, testamento, doações, holding, sucessão, herança, espólio
-- saude         → plano de saúde, negativa de cobertura, medicamento de alto custo, tratamentos/terapias multidisciplinares (psicólogo, fonoaudiólogo, terapia ocupacional, ABA, fisioterapia), cirurgia negada, SUS, Unimed, Amil, Sulamerica, Hapvida, NotreDame, Bradesco Saúde
-- fora_escopo   → qualquer outro tema (trabalhista, consumidor, criminal, previdenciário, cível, empresarial, tributário, etc.). NÃO recuse o lead, encaminhe pra advogada avaliar.
+ÁREAS (campo "area"):
+- familia       → divórcio, união estável, partilha de bens, separação COM partilha
+- inventario    → inventário, partilha pós-falecimento, testamento, doações, holding, sucessão, herança
+- saude         → plano de saúde, negativa, medicamento alto custo, cirurgia negada, home care, oncologia
+- fora_escopo   → trabalhista, consumidor, criminal, previdenciário, cível genérico, etc. (handoff humano, NÃO recusar)
+- pensao_guarda_only → SOMENTE pensão alimentícia OU SOMENTE guarda de filhos, SEM mencionar divórcio/partilha/separação com bens. Use este valor e etapa_proxima="finalizado".
 
-REGRA: o escritório só atende essas 3 áreas, mas você NUNCA recusa. Qualquer caso fora delas vai pra advogada via fora_escopo (a humana decide depois se atende ou indica encaminhamento).
+REGRA DE EXCLUSÃO: se o lead quer APENAS pensão ou APENAS guarda (sem partilha/divórcio), area="pensao_guarda_only". Se mencionar divórcio OU partilha junto, use familia e qualifique normal.
 
-ETAPAS DO FLUXO (campo "etapa_proxima"):
-- "M0"        → ainda não identificou a área. Pergunte de forma natural sobre o que o lead precisa.
-- "M1"        → primeira pergunta de qualificação dentro da área já identificada.
-- "M2"        → segunda pergunta de qualificação.
-- "M2_valor"  → SOMENTE inventário: pergunta opcional sobre valor dos bens.
-- "M3"        → propõe agendamento com a advogada (handoff).
-- "finalizado" → fluxo encerrado (SQL pra advogada).
+ETAPAS (campo "etapa_proxima"):
+- "M0" → ainda não identificou a área
+- "M1" → 1ª pergunta estruturada da área
+- "M2" → 2ª pergunta
+- "M2_valor" → 3ª pergunta (inventário: composição; saúde: urgência)
+- "M3" → última pergunta estruturada (família: renda; inventário: conflito; saúde: valor do plano)
+- "finalizado" → fluxo encerrado (SQL ou desqualificado)
 
-DETECÇÃO DE ETAPA: olhe o histórico. Se você ainda não mandou nenhuma pergunta dentro da área, está em M1. Se já mandou uma, está em M2. Se já mandou duas, está em M3 (agendamento). Não repita pergunta.
+DETECÇÃO: olhe o histórico. Não repita pergunta. Uma pergunta por mensagem.
+Quando o lead responder com letra (a/b/c…), registre em dados_capturados a chave correspondente:
+- familia: situacao (M1), patrimonio (M2), renda (M3)
+- inventario: fase (M1), patrimonio (M2), composicao (M2_valor), conflito (M3)
+- saude: plano (M1), cobertura (M2), urgencia (M2_valor), valor_plano (M3)
 
-DADOS A CAPTURAR (em "dados_capturados", por área):
-- saude: { tipo: "medicamento|tratamento|cirurgia|null", justificativa_negativa: "texto|null", tem_documentos: "sim|nao|null" }
-- inventario: { herdeiros: numero|null, consenso: "sim|nao|null", bens_principais: ["..."], valor_aproximado: "texto|null" }
-- familia: { consensual: "sim|nao|null", bens_em_comum: ["..."], filhos_menores: "sim|nao|null", proposta_guarda: "texto|null" }
-- fora_escopo: { tema: "texto curto descrevendo o caso" }
+Após a ÚLTIMA resposta de cada área, use etapa_proxima="finalizado" (o sistema aplica regras de ticket/handoff).
 
-TOM da mensagem que você escreve em "proxima_mensagem":
-- Natural, empático, próximo. Como uma assistente humana experiente, não como um bot.
-- UMA pergunta por vez. Nunca empilha 3 perguntas numa mensagem.
-- SEM travessao (proibido o caractere de travessao longo). Use vírgula, ponto ou ponto e vírgula.
-- SEM menu numerado, SEM "responda com o número", SEM opções tipo formulário.
-- Emojis permitidos: 💙 😊 (use no máximo 1 por mensagem, em momentos genuínos).
-- NÃO use 🤓, ✱ ou qualquer outro emoji.
-- Sempre diga "advogada especialista" (feminino).
-- Acentuação correta, pt-BR.
+TOM de "proxima_mensagem":
+- Natural, empático. UMA pergunta por vez.
+- SEM travessao longo. SEM inventar novas perguntas fora do roteiro.
+- Nas perguntas estruturadas, use o template do sistema (pode deixar proxima_mensagem vazia).
+- Emojis só 💙 😊 (máx 1). Em pensao_guarda_only deixe proxima_mensagem vazia.
 
 REGRAS DURAS:
-1. NUNCA dê opinião jurídica, NUNCA estime indenização ou valor de causa, NUNCA prometa prazo.
-2. NUNCA repita uma pergunta já feita. Se o lead deu resposta curta ou ambígua, AVANCE com o que tem ou faça pergunta DIFERENTE.
-3. Respostas curtas como "Sim", "Casa", "Meu primo", "Eu e meu irmão" são VÁLIDAS, interprete pelo contexto.
-4. Máximo 3 perguntas no fluxo todo. Se já fez 3 e ainda não classificou, encerre em fora_escopo.
-5. Quando receber um bloco com várias linhas (mensagens fragmentadas), trate como UMA mensagem.
+1. NUNCA opinião jurídica, indenização, prazo prometido.
+2. NUNCA repetir pergunta já feita.
+3. Respostas "a", "b", "Sim", curtas são válidas.
+4. Máximo de perguntas do roteiro por área (família 3, inventário 4, saúde 4).
 
-OUTPUT: retorne APENAS um JSON neste formato, sem texto extra antes ou depois:
+OUTPUT: APENAS JSON:
 
 {
-  "area": "familia|inventario|saude|fora_escopo|nao_identificada",
+  "area": "familia|inventario|saude|fora_escopo|pensao_guarda_only|nao_identificada",
   "etapa_proxima": "M0|M1|M2|M2_valor|M3|finalizado",
   "dados_capturados": { },
   "score": 0,
   "motivo": "explicação curta interna",
-  "proxima_mensagem": "texto pronto pra mandar ao lead"
-}
-
-Você PODE deixar "proxima_mensagem" vazia. Quando vazio, o sistema usa o template fixo correspondente à etapa+area. Quando você preenche, ele substitui o template; use isso pra personalizar com o nome do lead ou referenciar o que ele disse, mantendo o tom acima.`;
-
-// ---------- Mapeamento etapa+area → template fixo ----------
-//
-// Usado pelo whatsapp-inbound quando o Claude nao preenche
-// proxima_mensagem. Encadeia o fluxo M1 → M2 → M3 por area.
+  "proxima_mensagem": "texto pronto ou vazio"
+}`;
 
 export function templatePorEtapa(
   area: "familia" | "inventario" | "saude" | "fora_escopo" | "nao_identificada" | string | null,
@@ -260,30 +319,33 @@ export function templatePorEtapa(
   const a = (area ?? "nao_identificada").toLowerCase();
 
   if (a === "fora_escopo") return mensagemForaEscopo(nome);
+  if (a === "pensao_guarda_only") {
+    // importado pelo inbound via qualificacao.MSG_PENSAO_GUARDA
+    return "";
+  }
 
   if (a === "saude") {
     if (etapa === "M1") return mensagemSaudeM1(nome);
     if (etapa === "M2") return mensagemSaudeM2(nome);
-    if (etapa === "M3" || etapa === "finalizado") return mensagemSaudeM3(nome);
+    if (etapa === "M2_valor") return mensagemSaudeM2Valor(nome);
+    if (etapa === "M3") return mensagemSaudeM3(nome);
+    if (etapa === "finalizado") return mensagemHandoffAgendamento(nome);
   }
   if (a === "inventario") {
     if (etapa === "M1") return mensagemInventarioM1(nome);
     if (etapa === "M2") return mensagemInventarioM2(nome);
     if (etapa === "M2_valor") return mensagemInventarioM2Valor(nome);
-    if (etapa === "M3" || etapa === "finalizado") return mensagemInventarioM3(nome);
+    if (etapa === "M3") return mensagemInventarioM3(nome);
+    if (etapa === "finalizado") return mensagemHandoffAgendamento(nome);
   }
   if (a === "familia") {
     if (etapa === "M1") return mensagemFamiliaM1(nome);
     if (etapa === "M2") return mensagemFamiliaM2(nome);
-    if (etapa === "M3" || etapa === "finalizado") return mensagemFamiliaM3(nome);
+    if (etapa === "M3") return mensagemFamiliaM3(nome);
+    if (etapa === "finalizado") return mensagemHandoffAgendamento(nome);
   }
 
-  // M0 ou area nao identificada
   return mensagemM0Organico(nome);
 }
 
-// ---------- Fallback (nao usado no novo fluxo, mantido pra imports antigos) ----------
 export const PERGUNTAS_FALLBACK: Record<string, { M1: string; M2: string; M3: string }> = {};
-// Removidos do export public mas alguns codigos podem importar pelo nome:
-// mensagemFamilia, mensagemInventario, mensagemSaudeNivel1, mensagemSaudeNivel2*, mensagemOutros, SAUDE_NUM_TO_KEY, SAUDE_LABEL.
-// Quando o whatsapp-inbound for atualizado vai parar de referenciar os antigos.

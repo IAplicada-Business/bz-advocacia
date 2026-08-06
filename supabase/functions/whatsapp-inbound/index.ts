@@ -23,6 +23,7 @@ import {
   AREA_NUM_TO_KEY,
   extrairNumero,
   mensagemForaEscopo,
+  mensagemHandoffAgendamento,
   mensagemM0Organico,
   mensagemM0Recuperacao,
   mensagemReabertura,
@@ -30,6 +31,18 @@ import {
   SYSTEM_PROMPT_CLASSIFICADOR,
   templatePorEtapa,
 } from "../_shared/prompts.ts";
+import { pickAdvogada, type AreaHandoff } from "../_shared/roundRobin.ts";
+import {
+  MSG_PENSAO_GUARDA,
+  avaliarFamilia,
+  avaliarInventario,
+  avaliarSaude,
+  extrairLetraOpcao,
+  mergeRespostaPorEtapa,
+  type RespostasFamilia,
+  type RespostasInventario,
+  type RespostasSaude,
+} from "../_shared/qualificacao.ts";
 
 interface ZapiInboundPayload {
   phone?: string;
@@ -42,7 +55,14 @@ interface ZapiInboundPayload {
 }
 
 interface ClaudeResponse {
-  area: "familia" | "inventario" | "saude" | "fora_escopo" | "nao_identificada" | string;
+  area:
+    | "familia"
+    | "inventario"
+    | "saude"
+    | "fora_escopo"
+    | "pensao_guarda_only"
+    | "nao_identificada"
+    | string;
   etapa_proxima:
     | "M0"
     | "M1"
@@ -1009,7 +1029,43 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     }
   }
 
-  const areaValida = ["familia", "inventario", "saude", "fora_escopo"].includes((r.area ?? "").toLowerCase());
+  const areaLowerRaw = (r.area ?? "").toLowerCase();
+
+  // 2.1 · Pensão/Guarda isolados → desqualifica sem handoff
+  if (areaLowerRaw === "pensao_guarda_only") {
+    const msgPolitica = MSG_PENSAO_GUARDA;
+    const envioPol = await zapiSendText(telefone, msgPolitica);
+    await registrarMensagem(supabase, lead.id, "bot", msgPolitica, {
+      zapi: envioPol,
+      acao: "desqualificado_pensao_guarda",
+    });
+    await supabase.from("leads_geral").update({
+      area_normalizada: "familia",
+      stage: "desqualificado",
+      desqualificado_motivo: "pensao_guarda_only",
+      desqualificado_em: new Date().toISOString(),
+      status_sdr: "perdido",
+      bot_pausado: true,
+      etapa_qualificacao: "finalizado",
+      motivo_qualificacao: r.motivo || "pensao_guarda_only",
+    }).eq("id", lead.id);
+    await supabase.from("qualificacoes_sdr").upsert({
+      lead_id: lead.id,
+      pergunta_codigo: "pensao_guarda_only",
+      pergunta_texto: PERGUNTA_TEXTO_POR_CODIGO.pensao_guarda_only,
+      resposta_texto: textoAgrupado,
+      resposta_estruturada: { area: "pensao_guarda_only" },
+    }, { onConflict: "lead_id,pergunta_codigo" });
+    await registrarEvento(supabase, lead.id, "lead_desqualificado", {
+      motivo: "pensao_guarda_only",
+    });
+    return new Response(
+      JSON.stringify({ ok: true, acao: "desqualificado_pensao_guarda", lead_id: lead.id }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const areaValida = ["familia", "inventario", "saude", "fora_escopo"].includes(areaLowerRaw);
   const areaParaPersistir = areaValida ? r.area : (lead.area_normalizada ?? null);
 
   // Normaliza dados capturados nesta rodada
@@ -1105,9 +1161,118 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
   let pausarBot = false;
   let advogadoIdNotificar: string | null = null;
   let encerramento = false;
+  let prioridadeMax = false;
+  let flagsHandoff: Record<string, boolean> = {};
+  let notaHandoff: string | undefined;
 
   const etapaProx = (r.etapa_proxima ?? "M0").toString();
   const areaLower = (areaParaPersistir ?? "").toLowerCase();
+
+  // ---------- Qualificação estruturada (2.3 / 2.4 / 2.5) ----------
+  if (["familia", "inventario", "saude"].includes(areaLower) && etapaAnterior !== "M0") {
+    const { data: qRow } = await supabase
+      .from("qualificacao_estruturada_sdr")
+      .select("*")
+      .eq("lead_id", lead.id)
+      .maybeSingle();
+
+    const letra = extrairLetraOpcao(textoAgrupado);
+    let respostasAtuais: RespostasFamilia | RespostasInventario | RespostasSaude = {};
+    if (areaLower === "familia") {
+      respostasAtuais = (qRow?.respostas_familia ?? {}) as RespostasFamilia;
+    } else if (areaLower === "inventario") {
+      respostasAtuais = (qRow?.respostas_inventario ?? {}) as RespostasInventario;
+    } else {
+      respostasAtuais = (qRow?.respostas_saude ?? {}) as RespostasSaude;
+    }
+
+    const merged = mergeRespostaPorEtapa(
+      areaLower,
+      etapaAnterior,
+      letra,
+      capturadosAgora,
+      respostasAtuais,
+    );
+
+    const col =
+      areaLower === "familia"
+        ? "respostas_familia"
+        : areaLower === "inventario"
+        ? "respostas_inventario"
+        : "respostas_saude";
+
+    await supabase.from("qualificacao_estruturada_sdr").upsert(
+      {
+        lead_id: lead.id,
+        [col]: merged,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "lead_id" },
+    );
+
+    const resultado =
+      areaLower === "familia"
+        ? avaliarFamilia(merged as RespostasFamilia)
+        : areaLower === "inventario"
+        ? avaliarInventario(merged as RespostasInventario)
+        : avaliarSaude(merged as RespostasSaude);
+
+    if (resultado.acao === "desqualificar") {
+      mensagemFinal = resultado.mensagem;
+      novaEtapa = "finalizado";
+      novoStatus = "perdido";
+      pausarBot = true;
+      encerramento = false; // sem notificar advogada
+      await supabase.from("leads_geral").update({
+        stage: "desqualificado",
+        desqualificado_motivo: resultado.motivo,
+        desqualificado_em: new Date().toISOString(),
+        ticket_minimo: resultado.motivo === "ticket_minimo",
+        bot_pausado: true,
+        status_sdr: "perdido",
+        etapa_qualificacao: "finalizado",
+      }).eq("id", lead.id);
+      await supabase.from("qualificacao_estruturada_sdr").upsert({
+        lead_id: lead.id,
+        [col]: merged,
+        completa_em: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "lead_id" });
+      await registrarEvento(supabase, lead.id, "lead_desqualificado", {
+        motivo: resultado.motivo,
+        area: areaLower,
+        respostas: merged,
+      });
+      const envioDq = await zapiSendText(telefone, mensagemFinal);
+      await registrarMensagem(supabase, lead.id, "bot", mensagemFinal, {
+        zapi: envioDq,
+        acao: "desqualificado_" + resultado.motivo,
+      });
+      return new Response(
+        JSON.stringify({ ok: true, acao: "desqualificado", motivo: resultado.motivo }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    if (resultado.acao === "continuar") {
+      // Força próxima etapa do roteiro (não deixa Claude pular perguntas)
+      r.etapa_proxima = resultado.proximaEtapa;
+    } else if (resultado.acao === "handoff") {
+      r.etapa_proxima = "finalizado";
+      flagsHandoff = resultado.flags ?? {};
+      notaHandoff = resultado.nota;
+      prioridadeMax = !!resultado.flags?.prioridade_max;
+      await supabase.from("qualificacao_estruturada_sdr").upsert({
+        lead_id: lead.id,
+        [col]: merged,
+        completa_em: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "lead_id" });
+    }
+  }
+
+  // Re-lê etapaProx após possível override da qualificação estruturada
+  const etapaProxFinal = (r.etapa_proxima ?? etapaProx).toString();
 
   if (areaLower === "fora_escopo") {
     // Handoff direto pra triagem humana, sem qualificar.
@@ -1117,7 +1282,6 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     encerramento = true;
     if (!mensagemFinal) mensagemFinal = mensagemForaEscopo(nome);
 
-    // Empilha no backlog pra advogada decidir se atende ou indica encaminhamento.
     try {
       await supabase.from("backlog_triagem").insert({
         motivo: "fora_escopo",
@@ -1128,29 +1292,46 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
         lead_existente_id: lead.id,
       });
     } catch (_e) { /* ignore */ }
-  } else if (etapaProx === "finalizado" || etapaProx === "M3") {
-    // M3 = handoff (proposta de agendamento) — encerra como SQL.
+  } else if (etapaProxFinal === "finalizado") {
+    // Qualificação completa → handoff SQL (round-robin)
     novaEtapa = "finalizado";
     novoStatus = "sql_aguardando_humano";
     pausarBot = true;
     encerramento = true;
-    const advogado = await buscarAdvogadoPorArea(supabase, areaParaPersistir ?? "geral");
-    advogadoIdNotificar = advogado?.id ?? null;
-    if (advogado) {
-      await supabase
-        .from("leads_geral")
-        .update({ humano_responsavel: advogado.id })
-        .eq("id", lead.id);
+    if (!mensagemFinal) mensagemFinal = mensagemHandoffAgendamento(nome);
+
+    const areaHandoff = (["familia", "inventario", "saude"].includes(areaLower)
+      ? areaLower
+      : "familia") as AreaHandoff;
+    const advogada = await pickAdvogada(supabase, areaHandoff);
+    advogadoIdNotificar = advogada?.id ?? null;
+    if (advogada) {
+      await supabase.from("leads_geral").update({
+        humano_responsavel: advogada.id,
+        advogada_responsavel_id: advogada.id,
+        stage: "sal",
+        prioridade_max: !!flagsHandoff.prioridade_max,
+        caso_forte: !!flagsHandoff.caso_forte,
+        ticket_minimo: !!flagsHandoff.ticket_minimo,
+        produto_diferente: !!flagsHandoff.produto_diferente,
+        ...(notaHandoff
+          ? {
+              observacoes: [
+                (lead as { observacoes?: string | null }).observacoes,
+                notaHandoff,
+              ].filter(Boolean).join("\n"),
+            }
+          : {}),
+      }).eq("id", lead.id);
     }
-    if (!mensagemFinal) mensagemFinal = templatePorEtapa(areaParaPersistir, "M3", nome);
-  } else if (etapaProx === "M0") {
-    // Ainda nao identificou a area, segue conversando.
+  } else if (etapaProxFinal === "M0") {
     novaEtapa = "M0";
     if (!mensagemFinal) mensagemFinal = mensagemM0Organico(nome);
   } else {
-    // M1, M2 ou M2_valor — segue qualificando na area atual.
-    novaEtapa = etapaProx;
-    if (!mensagemFinal) mensagemFinal = templatePorEtapa(areaParaPersistir, etapaProx, nome);
+    // M1 / M2 / M2_valor / M3 — perguntas estruturadas do roteiro
+    novaEtapa = etapaProxFinal;
+    // Prefere template fixo do roteiro (não inventar texto)
+    mensagemFinal = templatePorEtapa(areaParaPersistir, etapaProxFinal, nome);
   }
 
   // ============================================================
@@ -1257,7 +1438,13 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
   });
 
   if (encerramento) {
-    await notificarAdvogado(supabase, lead.id, advogadoIdNotificar, r.etapa_proxima ?? novaEtapa);
+    await notificarAdvogado(
+      supabase,
+      lead.id,
+      advogadoIdNotificar,
+      r.etapa_proxima ?? novaEtapa,
+      { prioridadeMax, flags: flagsHandoff, nota: notaHandoff },
+    );
   }
 
   await registrarEvento(supabase, lead.id, "msg_processada", {
@@ -1282,15 +1469,21 @@ async function notificarAdvogado(
   leadId: string,
   advogadoId: string | null,
   etapa: string,
+  opts: {
+    prioridadeMax?: boolean;
+    flags?: Record<string, boolean>;
+    nota?: string;
+  } = {},
 ) {
   const { data: lead } = await supabase
     .from("leads_geral")
-    .select("full_name, phone_number, contato_whatsapp, area_normalizada, tipo_servico, score")
+    .select(
+      "full_name, phone_number, contato_whatsapp, area_normalizada, tipo_servico, score, prioridade_max, caso_forte, ticket_minimo, produto_diferente",
+    )
     .eq("id", leadId)
     .maybeSingle();
   if (!lead) return;
 
-  // Resolve advogado: especifico → fallback "geral" → qualquer ativo
   let adv: { nome: string; email: string | null; telefone: string | null } | null = null;
   if (advogadoId) {
     const { data } = await supabase
@@ -1301,26 +1494,44 @@ async function notificarAdvogado(
     adv = (data as any) ?? null;
   }
   if (!adv) {
-    const fallback = await buscarAdvogadoPorArea(supabase, lead.area_normalizada ?? "geral");
-    if (fallback) adv = { nome: fallback.nome, email: fallback.email, telefone: fallback.telefone };
+    const area = (lead.area_normalizada ?? "familia") as AreaHandoff;
+    const picked = ["familia", "inventario", "saude"].includes(area)
+      ? await pickAdvogada(supabase, area)
+      : await buscarAdvogadoPorArea(supabase, area);
+    if (picked) adv = { nome: picked.nome, email: picked.email, telefone: picked.telefone };
   }
 
-  const urlPainel = Deno.env.get("URL_PAINEL") ?? "https://painel.example.com";
+  const urlPainel = Deno.env.get("URL_PAINEL") ?? "https://gestao.borgesezembruski.com";
   const tel = lead.contato_whatsapp ?? lead.phone_number ?? "";
-  const titulo = lead.area_normalizada === "fora_escopo"
-    ? "Lead fora de escopo, triagem manual 💙"
-    : "Novo SQL na sua fila 💙";
+  const nomeLead = lead.full_name ?? "(sem nome)";
+  const urgencia = opts.prioridadeMax || lead.prioridade_max;
+  const prefix = urgencia ? "🚨 " : "";
 
-  const texto =
-`${titulo}
+  let texto: string;
+  if (lead.area_normalizada === "familia") {
+    // Roteiro 2.2 — template Família
+    texto =
+      `${prefix}Novo lead qualificado: ${nomeLead}, ${tel}. Divórcio + Partilha. Ver detalhes: ${urlPainel}/dashboard/leads/${leadId}`;
+  } else if (lead.area_normalizada === "fora_escopo") {
+    texto =
+      `${prefix}Lead fora de escopo, triagem manual\n\n• Nome: ${nomeLead}\n• WhatsApp: ${tel}\n• Abrir: ${urlPainel}/dashboard/leads/${leadId}`;
+  } else {
+    const flagsTxt = [
+      lead.caso_forte || opts.flags?.caso_forte ? "caso_forte" : null,
+      lead.ticket_minimo || opts.flags?.ticket_minimo ? "ticket_minimo" : null,
+      lead.produto_diferente || opts.flags?.produto_diferente ? "produto_diferente" : null,
+    ].filter(Boolean).join(", ");
+    texto =
+`${prefix}Novo SQL na sua fila
 
-• Nome: ${lead.full_name ?? "(sem nome)"}
+• Nome: ${nomeLead}
 • WhatsApp: ${tel}
 • Área: ${lead.area_normalizada ?? lead.tipo_servico ?? "n/d"}
 • Score: ${lead.score ?? 0}
-• Etapa: ${etapa}
+• Etapa: ${etapa}${flagsTxt ? `\n• Flags: ${flagsTxt}` : ""}${opts.nota ? `\n• Nota: ${opts.nota}` : ""}
 
-Abrir conversa: ${urlPainel}/leads/${leadId}`;
+Abrir conversa: ${urlPainel}/dashboard/leads/${leadId}`;
+  }
 
   if (adv?.telefone) {
     await zapiSendText(adv.telefone, texto);
@@ -1331,6 +1542,7 @@ Abrir conversa: ${urlPainel}/leads/${leadId}`;
     advogado_resolvido: adv?.nome ?? null,
     canal: adv?.telefone ? "whatsapp" : "sem_canal",
     etapa,
+    prioridade_max: !!urgencia,
   });
 }
 
