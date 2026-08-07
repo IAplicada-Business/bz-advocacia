@@ -156,14 +156,13 @@ function CollapsedColumn({
       title={`Expandir ${titulo}`}
       className={cn(
         "flex shrink-0 items-center gap-2 rounded-lg border border-t-4 bg-muted/30 transition-colors hover:bg-accent",
-        "w-full justify-between px-3 py-2",
-        "md:w-12 md:flex-col md:justify-start md:px-0 md:py-3",
+        "w-12 flex-col justify-start px-0 py-3",
         color,
         isOver && "bg-accent/50 ring-2 ring-primary/30",
       )}
     >
       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="text-xs font-semibold md:flex-1 md:[writing-mode:vertical-rl] md:rotate-180">
+      <span className="flex-1 text-xs font-semibold [writing-mode:vertical-rl] rotate-180">
         {titulo}
       </span>
       <span className="shrink-0 rounded-full bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -325,10 +324,10 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4 min-h-[600px]">
-        {columns.filter((c) => c.id !== "perdido").map((col) => (
-          <div key={col.id}>
-            <Skeleton className="h-8 w-full mb-3" />
+      <div className="flex min-h-[600px] gap-3 overflow-x-auto pb-2">
+        {columns.map((col) => (
+          <div key={col.id} className="w-[240px] shrink-0">
+            <Skeleton className="mb-3 h-8 w-full" />
             <div className="space-y-2">
               {[...Array(3)].map((_, i) => (
                 <Skeleton key={i} className="h-24 w-full" />
@@ -344,7 +343,8 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex flex-col gap-4 md:flex-row md:flex-wrap">
+      {/* Uma linha só: scroll horizontal — sem flex-wrap (quebrava Ganho/Perdido) */}
+      <div className="flex min-h-[600px] flex-nowrap gap-3 overflow-x-auto pb-2">
         {columns.map((coluna) => {
           const colLeads = leadsGrouped[coluna.id] || [];
 
@@ -364,7 +364,7 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
           return (
             <div
               key={coluna.id}
-              className={`flex-1 md:min-w-[200px] md:max-w-[280px] border rounded-lg ${coluna.color} border-t-4 bg-muted/30`}
+              className={`w-[240px] shrink-0 border rounded-lg ${coluna.color} border-t-4 bg-muted/30`}
             >
               <div className="flex items-start justify-between gap-2 p-3 border-b">
                 <div>
