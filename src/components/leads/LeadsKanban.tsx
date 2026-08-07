@@ -156,14 +156,13 @@ function CollapsedColumn({
       title={`Expandir ${titulo}`}
       className={cn(
         "flex shrink-0 items-center gap-2 rounded-lg border border-t-4 bg-muted/30 transition-colors hover:bg-accent",
-        "w-full justify-between px-3 py-2",
-        "md:w-12 md:flex-col md:justify-start md:px-0 md:py-3",
+        "w-12 flex-col justify-start px-0 py-3",
         color,
         isOver && "bg-accent/50 ring-2 ring-primary/30",
       )}
     >
       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="text-xs font-semibold md:flex-1 md:[writing-mode:vertical-rl] md:rotate-180">
+      <span className="flex-1 text-xs font-semibold [writing-mode:vertical-rl] rotate-180">
         {titulo}
       </span>
       <span className="shrink-0 rounded-full bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
