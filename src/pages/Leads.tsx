@@ -52,7 +52,7 @@ export default function Leads() {
   const [activeTab, setActiveTab] = useState("leads");
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div>
         <h1 className="text-3xl font-seasons text-primary">Gestão de Leads</h1>
         <p className="text-muted-foreground">
@@ -242,7 +242,7 @@ function LeadsTab({
     useSdrAlerts(filteredLeads, setSelectedLead);
 
   return (
-    <div className="space-y-4 mt-4">
+    <div className="mt-4 min-w-0 space-y-4">
       {aguardandoCount > 0 && (
         <Card className="p-4 border-orange-300 bg-orange-50 flex items-center gap-3 animate-pulse">
           <Zap className="h-6 w-6 text-orange-600 shrink-0" />
