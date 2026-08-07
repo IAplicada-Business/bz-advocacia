@@ -324,17 +324,19 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[600px] gap-3 overflow-x-auto pb-2">
-        {columns.map((col) => (
-          <div key={col.id} className="w-[240px] shrink-0">
-            <Skeleton className="mb-3 h-8 w-full" />
-            <div className="space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full" />
-              ))}
+      <div className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain pb-2">
+        <div className="inline-flex min-h-[600px] min-w-max gap-3">
+          {columns.map((col) => (
+            <div key={col.id} className="w-[240px] shrink-0">
+              <Skeleton className="mb-3 h-8 w-full" />
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
@@ -343,8 +345,13 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      {/* Uma linha só: scroll horizontal — sem flex-wrap (quebrava Ganho/Perdido) */}
-      <div className="flex min-h-[600px] flex-nowrap gap-3 overflow-x-auto pb-2">
+      {/*
+        Scroll horizontal real: wrapper com min-w-0 + overflow-x-auto;
+        faixa interna com min-w-max (não encolhe / não quebra linha).
+        O main do DashboardLayout também precisa de min-w-0 (já ajustado).
+      */}
+      <div className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain pb-3 [scrollbar-gutter:stable]">
+        <div className="inline-flex min-h-[600px] min-w-max flex-nowrap gap-3 pr-2">
         {columns.map((coluna) => {
           const colLeads = leadsGrouped[coluna.id] || [];
 
@@ -408,6 +415,7 @@ export function LeadsKanban({ leads, isLoading, onViewDetails, onAssumed }: Lead
             </div>
           );
         })}
+        </div>
       </div>
 
       <DragOverlay>

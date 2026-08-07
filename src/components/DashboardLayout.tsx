@@ -26,9 +26,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </a>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <SidebarInset className="flex-1 flex flex-col">
+        <SidebarInset className="flex min-w-0 flex-1 flex-col">
           <AppHeader />
-          <main id="main-content" tabIndex={-1} className="flex-1 p-4 md:p-6 overflow-x-hidden">
+          {/* min-w-0: permite filho (Kanban) ter overflow-x-auto; overflow-x-hidden cortava o funil */}
+          <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 overflow-x-auto p-4 md:p-6">
             {children}
           </main>
         </SidebarInset>
