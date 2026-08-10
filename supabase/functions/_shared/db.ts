@@ -116,6 +116,9 @@ export async function criarLeadWhatsApp(
 ): Promise<Lead | null> {
   const id = `sdr_wa_${Date.now()}_${input.telefone.slice(-6)}`;
   const ad = input.adContext ?? null;
+  const isAds = input.platform.endsWith("_ads");
+  // origem_sdr canônico (aba Anúncios / funil Meta). Nunca gravar platform crua aqui.
+  const origemSdr = isAds ? "meta_lead_ads" : "whatsapp_bot";
   const { data, error } = await supabase
     .from("leads_geral")
     .insert({
@@ -124,10 +127,10 @@ export async function criarLeadWhatsApp(
       phone_number: input.telefone,
       contato_whatsapp: input.telefone,
       platform: input.platform,
-      origem_sdr: input.origem,
+      origem_sdr: origemSdr,
       status_sdr: "novo",
       etapa_qualificacao: "M0",
-      is_organic: !input.platform.endsWith("_ads"),
+      is_organic: !isAds,
       created_time: new Date().toISOString(),
       ad_id: ad?.ad_id ?? null,
       ad_name: ad?.ad_name ?? null,
@@ -237,24 +240,24 @@ export async function espelharContactSubmission(
     .maybeSingle();
 
   if (ligado) {
-    await supabase
-      .from("contact_submissions")
-      .update({
-        nome_completo: lead.full_name ?? "Lead WhatsApp",
-        telefone,
-        tipo_processo,
-        origem,
-        status,
-        estagio,
-        data_ultima_atividade: agora,
-        ultimo_contato_em: agora,
-      })
-      .eq("id", (ligado as any).id);
+    const patch: Record<string, unknown> = {
+      nome_completo: lead.full_name ?? "Lead WhatsApp",
+      telefone,
+      tipo_processo,
+      origem,
+      status,
+      estagio,
+      data_ultima_atividade: agora,
+      ultimo_contato_em: agora,
+    };
+    if (platform.endsWith("_ads")) patch.como_conheceu = "Mídia Paga";
+    await supabase.from("contact_submissions").update(patch).eq("id", (ligado as any).id);
     return;
   }
 
   // 2) Existe um contact_submissions com mesmo telefone sem vínculo?
   //    Linka — preserva o registro original. Se estava 'perdido', reabre.
+  //    Sempre atualiza origem (senão lead de ads some da aba Anúncios).
   const { data: porTelefone } = await supabase
     .from("contact_submissions")
     .select("id, estagio")
@@ -267,9 +270,16 @@ export async function espelharContactSubmission(
   if (porTelefone) {
     const updates: Record<string, unknown> = {
       lead_geral_id: lead.id,
+      nome_completo: lead.full_name ?? "Lead WhatsApp",
+      telefone,
+      tipo_processo,
+      origem,
       ultimo_contato_em: agora,
       data_ultima_atividade: agora,
     };
+    if (platform.endsWith("_ads")) {
+      updates.como_conheceu = "Mídia Paga";
+    }
     if ((porTelefone as any).estagio === "perdido") {
       updates.estagio = "novo";
       updates.status = "novo";
