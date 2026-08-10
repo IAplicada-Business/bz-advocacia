@@ -4707,14 +4707,17 @@ export type Database = {
           advogada_responsavel_id: string | null
           area_juridica: string | null
           bens_partilhar: string | null
+          bot_ad_id: string | null
           bot_area_normalizada: string | null
           bot_bot_pausado: boolean | null
+          bot_campaign_id: string | null
           bot_dados_capturados: Json | null
           bot_etapa_qualificacao: string | null
           bot_finalizado: boolean | null
           bot_fluxo_sdr: string | null
           bot_is_organic: boolean | null
           bot_origem_sdr: string | null
+          bot_platform: string | null
           bot_score: number | null
           bot_status_sdr: string | null
           bot_tipo_contato: string | null
@@ -4763,6 +4766,7 @@ export type Database = {
           rg: string | null
           situacao_atual: string | null
           stage: Database["public"]["Enums"]["lead_stage"] | null
+          stage_entered_at: string | null
           status: string | null
           status_cliente: string | null
           tags: string[] | null
