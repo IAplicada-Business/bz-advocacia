@@ -584,8 +584,12 @@ Deno.serve(async (req) => {
     // Detecção determinística de Click-to-WhatsApp Ads (CTWA)
     // ============================================================
     const adReply = p.externalAdReply ?? null;
+    // CTWA: aceita vários sinais do Z-API/Meta (nem sempre vem clickToWhatsappCall)
     const veioDeAnuncio = !!adReply && (
-      adReply.clickToWhatsappCall === true || adReply.sourceType === "ad"
+      adReply.clickToWhatsappCall === true ||
+      adReply.sourceType === "ad" ||
+      !!adReply.ctwaClid ||
+      !!adReply.sourceId
     );
 
     let platform = "whatsapp_organico";
@@ -621,7 +625,7 @@ Deno.serve(async (req) => {
       nome: senderName ?? "Lead WhatsApp",
       telefone,
       platform,
-      origem: platform,
+      origem: veioDeAnuncio ? "meta_lead_ads" : "whatsapp_bot",
       adContext,
     });
     if (!lead) {

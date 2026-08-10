@@ -73,10 +73,12 @@ export interface Lead {
   bot_pausado?: boolean | null;
   ultima_mensagem_em?: string | null;
   origem_sdr?: string | null;
+  /** Platform do bot (leads_geral.platform), ex.: facebook_ads / meta_ads. */
+  platform?: string | null;
+  ad_id?: string | null;
+  campaign_id?: string | null;
   // True quando o bot detectou que o lead veio de fora de anuncio
   // (platform sem sufixo _ads). Fonte: leads_geral.is_organic.
-  // Mais confiavel que `origem` (contact_submissions) pra separar
-  // pipeline Organico vs Anuncios.
   is_organic?: boolean | null;
   // Subtipo capturado pelo bot (ex: "medicamento", "cirurgia",
   // "divorcio_consensual", "inventario_extrajudicial"). Diferente
