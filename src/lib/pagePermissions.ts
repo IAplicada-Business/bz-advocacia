@@ -49,18 +49,6 @@ export const PAGE_PERMISSIONS: PagePermission[] = [
     ],
   },
   {
-    // Pesquisas hoje so tem a consulta de empresa (BrasilAPI gratuita) e o
-    // historico. Datajud (Processo) e Apify (CPF) sao pagas e foram removidas
-    // ate contratacao; quando voltarem, basta reintroduzir as entradas aqui.
-    key: "pesquisas",
-    label: "Pesquisas",
-    description: "Consultas e pesquisas jurídicas",
-    children: [
-      { key: "pesquisas.consulta_empresa", label: "Consultar Empresa", parent: "pesquisas" },
-      { key: "pesquisas.historico", label: "Histórico", parent: "pesquisas" },
-    ],
-  },
-  {
     key: "financeiro",
     label: "Financeiro",
     description: "Módulo financeiro",
@@ -108,8 +96,6 @@ export const ROUTE_TO_PERMISSION: Record<string, string> = {
   // /processos/calendario foi absorvido pela aba "Calendário" em Tarefas;
   // a rota redireciona, entao a chave de Prazos cobre o mesmo conteudo
   // que agora vive dentro de Tarefas.
-  "/dashboard/pesquisas": "pesquisas.consulta_empresa",
-  "/dashboard/pesquisas/historico": "pesquisas.historico",
   "/dashboard/financeiro": "financeiro.analises",
   "/dashboard/financeiro/pagamentos": "financeiro.pagamentos",
   "/dashboard/financeiro/historico": "financeiro.historico",
