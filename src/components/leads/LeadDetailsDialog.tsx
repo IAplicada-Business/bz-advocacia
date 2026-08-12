@@ -27,6 +27,7 @@ import { ClienteTarefasTab } from "./ClienteTarefasTab";
 import { ClienteFinanceiroTab } from "./ClienteFinanceiroTab";
 import { LeadMensagensTab } from "./LeadMensagensTab";
 import { LeadQualificacaoTab } from "./LeadQualificacaoTab";
+import { FormRespostasInsights } from "./FormRespostasInsights";
 import { ConversaBot } from "./ConversaBot";
 import { Bot } from "lucide-react";
 import { ProcessoDetailsInline } from "@/components/processos/ProcessoDetailsInline";
@@ -221,6 +222,21 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
       return adv ? { ...adv, assumido_em: lg.assumido_em } : null;
     },
     enabled: !!lead?.lead_geral_id && open,
+  });
+
+  const leadGeralIdForForm = lead?.lead_geral_id ?? null;
+  const { data: formCtx } = useQuery({
+    queryKey: ["lead-form-contexto-dialog", leadGeralIdForForm],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("leads_geral")
+        .select("oferta_origem, form_flags, form_score, sdr_contexto, dados_capturados")
+        .eq("id", leadGeralIdForForm!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!leadGeralIdForForm && open,
   });
 
   const handleMarcarConcluido = async () => {
@@ -652,6 +668,15 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
                 </div>
 
                 <Separator />
+
+                <FormRespostasInsights
+                  title="Respostas do formulário"
+                  sdrContexto={formCtx?.sdr_contexto}
+                  dadosCapturados={formCtx?.dados_capturados ?? lead.dados_capturados}
+                  ofertaOrigem={formCtx?.oferta_origem}
+                  formFlags={formCtx?.form_flags}
+                  formScore={formCtx?.form_score}
+                />
 
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-muted-foreground">Mensagem Inicial</h3>

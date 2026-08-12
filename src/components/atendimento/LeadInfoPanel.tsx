@@ -8,6 +8,7 @@ import { Loader2, Phone, User, Briefcase, Megaphone, Activity, CheckCircle2, XCi
 import { toast } from "@/lib/toast";
 import { useAssumirLead } from "@/hooks/useAssumirLead";
 import { ReatribuirLeadDialog } from "@/components/leads/ReatribuirLeadDialog";
+import { FormRespostasInsights } from "@/components/leads/FormRespostasInsights";
 import { useIsAdmin, useMeuAdvogadoId, useAdvogadosSdr } from "@/hooks/useReatribuirLead";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -79,7 +80,9 @@ export function LeadInfoPanel({ leadId, onTipoContatoChanged }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("leads_geral")
-        .select("id, full_name, phone_number, contato_whatsapp, tipo_servico, area_normalizada, origem_sdr, platform, ad_name, score, status_sdr, etapa_qualificacao, humano_responsavel, bot_pausado, tipo_contato")
+        .select(
+          "id, full_name, phone_number, contato_whatsapp, tipo_servico, area_normalizada, origem_sdr, platform, ad_name, score, status_sdr, etapa_qualificacao, humano_responsavel, bot_pausado, tipo_contato, oferta_origem, form_flags, form_score, sdr_contexto, dados_capturados",
+        )
         .eq("id", leadId)
         .maybeSingle();
       if (error) throw error;
@@ -257,6 +260,17 @@ export function LeadInfoPanel({ leadId, onTipoContatoChanged }: Props) {
           {cs?.estagio && <Badge variant="outline" className="h-5 text-[10px]">CRM: {cs.estagio}</Badge>}
         </div>
       </div>
+
+      <FormRespostasInsights
+        variant="compact"
+        title="Insights do form / bot"
+        className="mx-4 my-3"
+        sdrContexto={lead.sdr_contexto}
+        dadosCapturados={lead.dados_capturados}
+        ofertaOrigem={lead.oferta_origem}
+        formFlags={lead.form_flags}
+        formScore={lead.form_score}
+      />
 
       <div className="p-4 space-y-2 border-b">
         <div className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold">Classificação manual</div>

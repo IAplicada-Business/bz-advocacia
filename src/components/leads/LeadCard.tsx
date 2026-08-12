@@ -18,6 +18,7 @@ import {
   inferStageFromLegacy,
   isOverSla,
 } from "@/lib/leadStages";
+import { formInsightChip } from "@/lib/formRespostasDisplay";
 
 interface LeadCardProps {
   lead: Lead;
@@ -236,6 +237,20 @@ export function LeadCard({ lead, onClick, onAssumed, onDelete, onMarkLost, onMar
             </span>
           )}
         </div>
+        {(() => {
+          const chip = formInsightChip({
+            dadosCapturados: lead.dados_capturados,
+          });
+          if (!chip) return null;
+          return (
+            <p
+              className="text-[11px] text-primary/90 line-clamp-2 rounded border border-primary/20 bg-primary/5 px-1.5 py-1"
+              title={chip}
+            >
+              {chip}
+            </p>
+          );
+        })()}
         {isHot && (
           <AtenderAgoraButton lead={lead} className="w-full h-8 text-xs px-2" onAssumed={onAssumed} />
         )}
