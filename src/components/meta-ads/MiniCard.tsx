@@ -9,27 +9,27 @@ interface Props {
   className?: string;
 }
 
-/** Card compacto das abas de Marketing — glass + tipografia objetiva. */
+/** Card compacto das abas de Marketing — padding e hierarquia alinhados. */
 export function MiniCard({ label, value, sub, Icon, className }: Props) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/[0.07] bg-card/80 p-3.5 shadow-bz backdrop-blur-sm transition-shadow hover:shadow-glow",
+        "flex min-h-[5.75rem] flex-col gap-2 rounded-2xl border border-border/60 bg-card p-4 shadow-bz transition-shadow hover:shadow-glow",
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {label}
-        </p>
+      <div className="flex items-center gap-2.5">
         {Icon && (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/20">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/20">
             <Icon className="h-3.5 w-3.5" />
           </span>
         )}
+        <p className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          {label}
+        </p>
       </div>
-      <p className="mt-1.5 font-seasons text-xl font-semibold leading-tight">{value}</p>
-      {sub && <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground">{sub}</p>}
+      <p className="font-seasons text-xl font-semibold leading-none tracking-tight">{value}</p>
+      {sub && <p className="mt-auto text-[10px] leading-snug text-muted-foreground">{sub}</p>}
     </div>
   );
 }

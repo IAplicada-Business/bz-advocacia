@@ -1,34 +1,8 @@
-import { Card } from "@/components/ui/card";
 import { MarketingCsvAnalytics } from "@/hooks/useMarketingCsvAnalytics";
 import { MetaKPIs } from "@/types/meta-ads";
-import { Users, DollarSign, Target, TrendingUp, MousePointerClick, BarChart3, UserCheck, LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Users, DollarSign, Target, TrendingUp, MousePointerClick, BarChart3, UserCheck } from "lucide-react";
+import { MetricCard } from "@/components/ui/metric-card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-
-interface KPICardProps {
-  title: string;
-  value: string;
-  subtitle?: string;
-  icon: LucideIcon;
-  valueClassName?: string;
-}
-
-function KPICard({ title, value, subtitle, icon: Icon, valueClassName }: KPICardProps) {
-  return (
-    <Card className="border rounded-xl bg-card p-5">
-      <div className="flex items-start justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <div className="rounded-lg bg-muted p-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-        </div>
-      </div>
-      <p className={cn("text-2xl font-bold mt-2", valueClassName)}>{value}</p>
-      {subtitle && (
-        <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-      )}
-    </Card>
-  );
-}
 
 interface Props {
   analytics: MarketingCsvAnalytics;
@@ -82,7 +56,12 @@ export function MarketingDashboardKPIs({ analytics, metaKpis }: Props) {
         <CarouselContent>
           {kpis.map((kpi) => (
             <CarouselItem key={kpi.title} className="basis-1/2 md:basis-1/4">
-              <KPICard {...kpi} />
+              <MetricCard
+                label={kpi.title}
+                value={kpi.value}
+                sub={kpi.subtitle}
+                icon={kpi.icon}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>

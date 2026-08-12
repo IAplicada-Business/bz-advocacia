@@ -28,19 +28,23 @@ function TotalParcelasPendentesCard({ onClick }: { onClick: () => void }) {
 
   return (
     <button type="button" onClick={onClick} className="w-full text-left">
-      <Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer">
-        <CardContent className="p-5 flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-primary/10">
-            <Receipt className="h-6 w-6 text-primary" />
+      <Card className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
+        <CardContent className="flex items-center gap-4 p-5 md:p-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/20">
+            <Receipt className="h-5 w-5 text-primary" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-muted-foreground">Total de Parcelas Pendentes</p>
-            <p className="text-2xl font-bold text-primary">{fmtCurrency(total)}</p>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Total de Parcelas Pendentes
+            </p>
+            <p className="font-seasons text-2xl font-semibold leading-none text-primary">
+              {fmtCurrency(total)}
+            </p>
             <p className="text-xs text-muted-foreground">
               {count} {count === 1 ? "parcela aguardando recebimento" : "parcelas aguardando recebimento"}
             </p>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+          <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
         </CardContent>
       </Card>
     </button>

@@ -16,9 +16,11 @@ type MetricCardProps = {
   onClick?: () => void;
   className?: string;
   action?: ReactNode;
+  /** Valor com cor custom (ex.: positivo/negativo). */
+  valueClassName?: string;
 };
 
-/** KPI / holding card no estilo dashboard premium (número grande + pills). */
+/** KPI / holding card — padding e hierarquia alinhados em todos os menus. */
 export function MetricCard({
   label,
   value,
@@ -31,6 +33,7 @@ export function MetricCard({
   onClick,
   className,
   action,
+  valueClassName,
 }: MetricCardProps) {
   if (loading) {
     return (
@@ -59,30 +62,40 @@ export function MetricCard({
           className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-primary/25 blur-3xl"
         />
       )}
-      <CardContent className="relative p-5">
+      <CardContent className="relative p-5 md:p-5">
         <Comp
           type={onClick ? "button" : undefined}
           onClick={onClick}
-          className={cn("w-full text-left", onClick && "outline-none")}
+          className={cn(
+            "flex w-full flex-col gap-2.5 text-left",
+            onClick && "outline-none",
+          )}
         >
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              {label}
-            </p>
-            <div className="flex items-center gap-2">
-              {action}
-              {Icon && (
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/20">
-                  <Icon className="h-4 w-4" />
-                </span>
-              )}
+          <div className="flex items-center gap-3">
+            {Icon && (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/20">
+                <Icon className="h-4 w-4" />
+              </span>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {label}
+              </p>
             </div>
+            {action}
           </div>
-          <p className="font-seasons text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+
+          <p
+            className={cn(
+              "font-seasons text-3xl font-semibold leading-none tracking-tight text-foreground md:text-[2rem]",
+              valueClassName,
+            )}
+          >
             {value}
           </p>
+
           {(sub || trend !== undefined) && (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {trend !== undefined && (
                 <span
                   className={cn(
@@ -97,7 +110,9 @@ export function MetricCard({
                   {trendLabel ? ` ${trendLabel}` : ""}
                 </span>
               )}
-              {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+              {sub && (
+                <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">{sub}</p>
+              )}
             </div>
           )}
         </Comp>
