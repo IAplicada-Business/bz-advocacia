@@ -304,6 +304,48 @@ export type Database = {
           },
         ]
       }
+      bot_errors: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string | null
+          mensagem: string | null
+          motivo: string
+          oferta: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          mensagem?: string | null
+          motivo: string
+          oferta?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          mensagem?: string | null
+          motivo?: string
+          oferta?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bot_errors_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_geral"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bot_errors_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_lead_funnel"
+            referencedColumns: ["lead_id"]
+          },
+        ]
+      }
       campanhas_envio: {
         Row: {
           area: string | null
@@ -1432,6 +1474,24 @@ export type Database = {
           },
         ]
       }
+      form_submit_rate: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       historico_pagamentos: {
         Row: {
           created_at: string | null
@@ -1627,6 +1687,45 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_pipeline_b_z"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_form_answers: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string | null
+          oferta: string
+          respostas: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          oferta: string
+          respostas: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          oferta?: string
+          respostas?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_answers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_geral"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_form_answers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_lead_funnel"
+            referencedColumns: ["lead_id"]
           },
         ]
       }
@@ -1842,8 +1941,11 @@ export type Database = {
           etapa_qualificacao: string | null
           flags_qualificacao: string[]
           fluxo_sdr: string | null
+          form_desqualificacao: string | null
+          form_flags: string[] | null
           form_id: string | null
           form_name: string | null
+          form_score: number | null
           full_name: string | null
           humano_responsavel: string | null
           id: string
@@ -1854,6 +1956,7 @@ export type Database = {
           lead_status: string | null
           motivo_qualificacao: string | null
           observacoes: string | null
+          oferta_origem: string | null
           origem_sdr: string | null
           perdido_em: string | null
           perdido_motivo: string | null
@@ -1867,6 +1970,7 @@ export type Database = {
           reuniao_data: string | null
           reuniao_notas: string | null
           score: number | null
+          sdr_contexto: Json | null
           stage: Database["public"]["Enums"]["lead_stage"]
           stage_entered_at: string | null
           status_sdr: string | null
@@ -1910,8 +2014,11 @@ export type Database = {
           etapa_qualificacao?: string | null
           flags_qualificacao?: string[]
           fluxo_sdr?: string | null
+          form_desqualificacao?: string | null
+          form_flags?: string[] | null
           form_id?: string | null
           form_name?: string | null
+          form_score?: number | null
           full_name?: string | null
           humano_responsavel?: string | null
           id: string
@@ -1922,6 +2029,7 @@ export type Database = {
           lead_status?: string | null
           motivo_qualificacao?: string | null
           observacoes?: string | null
+          oferta_origem?: string | null
           origem_sdr?: string | null
           perdido_em?: string | null
           perdido_motivo?: string | null
@@ -1935,6 +2043,7 @@ export type Database = {
           reuniao_data?: string | null
           reuniao_notas?: string | null
           score?: number | null
+          sdr_contexto?: Json | null
           stage?: Database["public"]["Enums"]["lead_stage"]
           stage_entered_at?: string | null
           status_sdr?: string | null
@@ -1978,8 +2087,11 @@ export type Database = {
           etapa_qualificacao?: string | null
           flags_qualificacao?: string[]
           fluxo_sdr?: string | null
+          form_desqualificacao?: string | null
+          form_flags?: string[] | null
           form_id?: string | null
           form_name?: string | null
+          form_score?: number | null
           full_name?: string | null
           humano_responsavel?: string | null
           id?: string
@@ -1990,6 +2102,7 @@ export type Database = {
           lead_status?: string | null
           motivo_qualificacao?: string | null
           observacoes?: string | null
+          oferta_origem?: string | null
           origem_sdr?: string | null
           perdido_em?: string | null
           perdido_motivo?: string | null
@@ -2003,6 +2116,7 @@ export type Database = {
           reuniao_data?: string | null
           reuniao_notas?: string | null
           score?: number | null
+          sdr_contexto?: Json | null
           stage?: Database["public"]["Enums"]["lead_stage"]
           stage_entered_at?: string | null
           status_sdr?: string | null
@@ -4877,6 +4991,7 @@ export type Database = {
         | "ganho"
         | "perdido"
         | "desqualificado"
+        | "continuidade"
       tipo_melhoria: "correcao" | "melhoria" | "nova_funcionalidade"
     }
     CompositeTypes: {
@@ -5017,6 +5132,7 @@ export const Constants = {
         "ganho",
         "perdido",
         "desqualificado",
+        "continuidade",
       ],
       tipo_melhoria: ["correcao", "melhoria", "nova_funcionalidade"],
     },
