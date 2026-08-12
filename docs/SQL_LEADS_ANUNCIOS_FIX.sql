@@ -1,5 +1,6 @@
 -- ============================================================
 -- Lovable Cloud SQL — corrigir leads de ads na aba Anúncios
+-- NÃO marque LP orgânica (utm organic/site) como ads.
 -- ============================================================
 
 DROP VIEW IF EXISTS public.vw_kanban_leads CASCADE;
@@ -32,6 +33,10 @@ WHERE coalesce(lg.tipo_contato, 'lead') = 'lead'
 GRANT SELECT ON public.vw_kanban_leads TO authenticated;
 GRANT SELECT ON public.vw_kanban_leads TO anon;
 
+-- Helper: LP com UTM orgânico (não é mídia paga)
+-- lower(utm_source) in (organic, site) OR lower(utm_medium) = organic
+
+-- Backfill origem CRM só com sinais reais de ads (não todo form_id lp_%)
 UPDATE public.contact_submissions cs
 SET
   origem = CASE
@@ -42,13 +47,25 @@ SET
     WHEN lg.platform = 'tiktok_ads' THEN 'tiktok'
     WHEN lg.platform = 'linkedin_ads' THEN 'linkedin'
     WHEN lg.origem_sdr = 'meta_lead_ads' THEN 'meta'
-    WHEN coalesce(lg.form_id, '') LIKE 'lp_%' THEN 'meta'
+    WHEN coalesce(lg.form_id, '') LIKE 'lp_%'
+      AND NOT (
+        lower(coalesce(lg.dados_capturados->>'utm_source', '')) IN ('organic', 'site')
+        OR lower(coalesce(lg.dados_capturados->>'utm_medium', '')) = 'organic'
+      )
+      THEN 'meta'
     ELSE cs.origem
   END,
   como_conheceu = CASE
     WHEN lg.platform LIKE '%_ads'
       OR lg.origem_sdr = 'meta_lead_ads'
-      OR coalesce(lg.form_id, '') LIKE 'lp_%'
+      OR lg.ad_id IS NOT NULL
+      OR (
+        coalesce(lg.form_id, '') LIKE 'lp_%'
+        AND NOT (
+          lower(coalesce(lg.dados_capturados->>'utm_source', '')) IN ('organic', 'site')
+          OR lower(coalesce(lg.dados_capturados->>'utm_medium', '')) = 'organic'
+        )
+      )
     THEN 'Mídia Paga'
     ELSE cs.como_conheceu
   END
@@ -58,18 +75,31 @@ WHERE cs.lead_geral_id = lg.id
     lg.is_organic = false
     OR lg.platform LIKE '%_ads'
     OR lg.origem_sdr = 'meta_lead_ads'
-    OR coalesce(lg.form_id, '') LIKE 'lp_%'
     OR lg.ad_id IS NOT NULL
+    OR (
+      coalesce(lg.form_id, '') LIKE 'lp_%'
+      AND NOT (
+        lower(coalesce(lg.dados_capturados->>'utm_source', '')) IN ('organic', 'site')
+        OR lower(coalesce(lg.dados_capturados->>'utm_medium', '')) = 'organic'
+      )
+    )
   );
 
+-- Flags no bot: ads reais + LP sem UTM orgânico (não força toda lp_%)
 UPDATE public.leads_geral
 SET is_organic = false
 WHERE is_organic IS DISTINCT FROM false
   AND (
     platform LIKE '%_ads'
     OR origem_sdr = 'meta_lead_ads'
-    OR coalesce(form_id, '') LIKE 'lp_%'
     OR ad_id IS NOT NULL
+    OR (
+      coalesce(form_id, '') LIKE 'lp_%'
+      AND NOT (
+        lower(coalesce(dados_capturados->>'utm_source', '')) IN ('organic', 'site')
+        OR lower(coalesce(dados_capturados->>'utm_medium', '')) = 'organic'
+      )
+    )
   );
 
 -- LP: sincroniza stage do kanban com estagio (evita Novos=0 com stage=perdido)
@@ -85,6 +115,6 @@ WHERE cs.lead_geral_id = lg.id
 SELECT cs.origem, lg.platform, lg.is_organic, count(*)
 FROM contact_submissions cs
 JOIN leads_geral lg ON lg.id = cs.lead_geral_id
-WHERE lg.is_organic = false OR lg.platform LIKE '%_ads' OR lg.form_id LIKE 'lp_%'
+WHERE lg.is_organic = false OR lg.platform LIKE '%_ads'
 GROUP BY 1, 2, 3
 ORDER BY 4 DESC;

@@ -1,13 +1,13 @@
 /**
  * Detecta se um lead do CRM deve aparecer na aba "Leads Anúncios".
  *
- * Inclui:
- * - WhatsApp CTWA / platform *_ads / origem facebook|instagram|meta|…
- * - Forms das LPs (dados_capturados.source = lp_form), salvo UTM orgânico
+ * Sinais de ads (qualquer um, após exclusões orgânicas):
+ * - platform *_ads / origem_sdr de mídia paga / ad_id|campaign_id
  * - is_organic = false
+ * - form LP (source=lp_form ou form_id lp_*), salvo UTM orgânico
  *
- * is_organic sozinho falha quando o espelho CRM ficou com origem errada
- * ou o flag veio nulo.
+ * NÃO usa area/slug (saude/inventario/familia) — o bot grava esses valores
+ * em leads orgânicos durante a qualificação.
  */
 
 const ADS_ORIGENS = new Set([
@@ -39,7 +39,25 @@ export type AdsLeadSignals = {
   campaign_id?: string | null;
 };
 
+function isOrganicUtm(cap: Record<string, unknown> | null | undefined): boolean {
+  if (!cap || typeof cap !== "object") return false;
+  const utm = String(cap.utm_source ?? "").toLowerCase();
+  const medium = String(cap.utm_medium ?? "").toLowerCase();
+  return utm === "organic" || utm === "site" || medium === "organic";
+}
+
+function isLpFormSignal(cap: Record<string, unknown> | null | undefined): boolean {
+  if (!cap || typeof cap !== "object") return false;
+  const source = String(cap.source ?? "");
+  const formId = String(cap.form_id ?? "");
+  return source === "lp_form" || formId.startsWith("lp_");
+}
+
 export function isAdsLead(l: AdsLeadSignals): boolean {
+  // Exclusões orgânicas primeiro (evita is_organic=false do backfill LP orgânica)
+  if (isOrganicUtm(l.dados_capturados)) return false;
+  if (l.is_organic === true) return false;
+
   const origem = (l.origem ?? "").toLowerCase();
   if (ADS_ORIGENS.has(origem)) return true;
 
@@ -53,25 +71,8 @@ export function isAdsLead(l: AdsLeadSignals): boolean {
 
   if (l.is_organic === false) return true;
 
-  const cap = l.dados_capturados;
-  if (cap && typeof cap === "object") {
-    const source = String(cap.source ?? "");
-    const slug = String(cap.slug ?? "");
-    const area = String(cap.area ?? "");
-    const formId = String(cap.form_id ?? "");
-    const isLp =
-      source === "lp_form" ||
-      formId.startsWith("lp_") ||
-      ["saude", "inventario", "divorcio", "familia"].includes(slug) ||
-      ["saude", "inventario", "familia"].includes(area);
-    if (isLp) {
-      const utm = String(cap.utm_source ?? "").toLowerCase();
-      const medium = String(cap.utm_medium ?? "").toLowerCase();
-      if (utm === "organic" || utm === "site" || medium === "organic") return false;
-      // LPs são majoritariamente mídia paga (default do lp-lead-submit)
-      return true;
-    }
-  }
+  // LP form sem UTM orgânico → ads (default das LPs pagas). Sem area/slug.
+  if (isLpFormSignal(l.dados_capturados)) return true;
 
   return false;
 }
