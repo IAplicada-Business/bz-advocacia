@@ -185,11 +185,11 @@ export default function Dashboard() {
       )}
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <Card className="relative overflow-hidden border-primary/25 bg-gradient-to-br from-primary/25 via-card to-card lg:col-span-1">
-          <div aria-hidden className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
+        <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/12 via-card to-card lg:col-span-1">
+          <div aria-hidden className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-primary/15 blur-3xl" />
           <CardContent className="relative flex h-full flex-col justify-between gap-4 p-6">
             <div>
-              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-2.5 py-1 text-[11px] font-medium text-primary ring-1 ring-primary/30">
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-medium text-primary ring-1 ring-primary/25">
                 <Sparkles className="h-3.5 w-3.5" />
                 Decisões com dados
               </div>

@@ -189,8 +189,8 @@ export function AppSidebar() {
   };
 
   const navActive =
-    "relative bg-gradient-to-r from-primary/25 via-primary/10 to-transparent text-sidebar-accent-foreground font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-primary before:shadow-[0_0_12px_hsl(var(--primary)/0.8)]";
-  const navIdle = "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
+    "relative bg-gradient-to-r from-primary/15 via-primary/8 to-transparent text-sidebar-accent-foreground font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-primary";
+  const navIdle = "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground";
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">

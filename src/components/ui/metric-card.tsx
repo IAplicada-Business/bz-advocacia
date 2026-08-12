@@ -51,15 +51,15 @@ export function MetricCard({
     <Card
       className={cn(
         "relative overflow-hidden transition-all duration-300",
-        accent && "border-primary/30 bg-gradient-to-br from-primary/20 via-card to-card",
-        onClick && "cursor-pointer hover:border-primary/40 hover:shadow-[0_0_32px_-12px_hsl(var(--primary)/0.45)]",
+        accent && "border-primary/35 bg-gradient-to-br from-primary/10 via-card to-card",
+        onClick && "cursor-pointer hover:border-primary/45 hover:shadow-bz",
         className,
       )}
     >
       {accent && (
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-primary/25 blur-3xl"
+          className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-primary/15 blur-3xl"
         />
       )}
       <CardContent className="relative p-5 md:p-5">

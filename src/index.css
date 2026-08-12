@@ -8,11 +8,83 @@ All colors MUST be HSL.
 
 @layer base {
   /*
-   * B&Z Design System v3 — CRM premium (dark ink + ouro)
-   * Referência: UI kit modular + dashboard moderno (glass, pills, charts com glow).
-   * Primary = ouro #C5A059; canvas = ink #1A1F1A.
+   * B&Z Design System v3 — CRM claro + ouro
+   * Default = tema claro (fundo off-white, cards brancos).
+   * Primary = ouro #C5A059. Dashboards / charts / pills se mantêm.
+   * Tema escuro opcional via classe `.dark` no root.
    */
   :root {
+    --background: 40 20% 97%;
+    --foreground: 120 8% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 8% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 8% 11%;
+
+    --primary: 38 45% 56%;
+    --primary-foreground: 120 8% 11%;
+
+    --secondary: 40 10% 92%;
+    --secondary-foreground: 120 8% 18%;
+
+    --muted: 40 14% 93%;
+    --muted-foreground: 30 6% 42%;
+
+    --accent: 38 45% 92%;
+    --accent-foreground: 120 8% 14%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 45% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 32 90% 48%;
+    --warning-foreground: 120 8% 11%;
+
+    --info: 210 70% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 36 16% 88%;
+    --input: 36 16% 88%;
+    --ring: 38 45% 56%;
+
+    --radius: 1.15rem;
+
+    --bz-gold: 38 45% 56%;
+    --bz-bronze: 30 33% 48%;
+    --bz-ink: 120 8% 11%;
+    --bz-stone: 40 14% 93%;
+    --bz-gray: 30 6% 42%;
+
+    /* Evolução natural: ouro → bronze → ink → sage → âmbar */
+    --chart-1: 38 45% 56%;
+    --chart-2: 30 33% 48%;
+    --chart-3: 120 8% 22%;
+    --chart-4: 152 32% 42%;
+    --chart-5: 28 80% 52%;
+
+    --gradient-overlay: linear-gradient(135deg, hsla(120, 8%, 11%, 0.88) 0%, hsla(38, 45%, 30%, 0.72) 100%);
+    --gradient-gold-soft: radial-gradient(ellipse at 80% 0%, hsla(38, 45%, 56%, 0.12) 0%, transparent 55%);
+    --shadow-elegant: 0 12px 40px -16px hsla(120, 8%, 11%, 0.18);
+    --shadow-card: 0 1px 2px hsla(120, 8%, 11%, 0.04), 0 8px 24px -12px hsla(120, 8%, 11%, 0.08);
+    --shadow-glow: 0 0 28px -10px hsla(38, 45%, 56%, 0.35);
+    --transition-smooth: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 120 8% 18%;
+    --sidebar-primary: 38 45% 56%;
+    --sidebar-primary-foreground: 120 8% 11%;
+    --sidebar-accent: 38 45% 94%;
+    --sidebar-accent-foreground: 120 8% 14%;
+    --sidebar-border: 36 16% 90%;
+    --sidebar-ring: 38 45% 56%;
+  }
+
+  /* Tema escuro opcional (classe `.dark` no html/root) */
+  .dark {
     --background: 120 10% 7%;
     --foreground: 40 18% 94%;
 
@@ -50,15 +122,12 @@ All colors MUST be HSL.
     --input: 120 6% 18%;
     --ring: 38 48% 58%;
 
-    --radius: 1.15rem;
-
     --bz-gold: 38 48% 58%;
     --bz-bronze: 30 36% 52%;
     --bz-ink: 120 10% 7%;
     --bz-stone: 120 6% 15%;
     --bz-gray: 40 10% 64%;
 
-    /* Evolução natural: ouro → bronze → cream → sage → âmbar */
     --chart-1: 38 52% 58%;
     --chart-2: 30 36% 52%;
     --chart-3: 40 20% 78%;
@@ -70,7 +139,6 @@ All colors MUST be HSL.
     --shadow-elegant: 0 20px 50px -28px hsla(0, 0%, 0%, 0.55);
     --shadow-card: 0 0 0 1px hsla(40, 20%, 96%, 0.04), 0 12px 32px -18px hsla(0, 0%, 0%, 0.55);
     --shadow-glow: 0 0 36px -10px hsla(38, 48%, 58%, 0.45);
-    --transition-smooth: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 
     --sidebar-background: 120 10% 6%;
     --sidebar-foreground: 40 14% 88%;
@@ -80,43 +148,6 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 40 18% 96%;
     --sidebar-border: 120 6% 14%;
     --sidebar-ring: 38 48% 58%;
-  }
-
-  /* Modo claro opcional (caso seja ativado no futuro) */
-  .light {
-    --background: 40 20% 97%;
-    --foreground: 120 8% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 120 8% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 120 8% 11%;
-    --primary: 38 45% 56%;
-    --primary-foreground: 120 8% 11%;
-    --secondary: 40 10% 92%;
-    --secondary-foreground: 120 8% 18%;
-    --muted: 40 14% 93%;
-    --muted-foreground: 30 6% 42%;
-    --accent: 38 45% 92%;
-    --accent-foreground: 120 8% 14%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 36 16% 88%;
-    --input: 36 16% 88%;
-    --ring: 38 45% 56%;
-    --chart-1: 38 45% 56%;
-    --chart-2: 30 33% 48%;
-    --chart-3: 120 8% 22%;
-    --chart-4: 152 32% 42%;
-    --chart-5: 28 80% 52%;
-    --shadow-card: 0 1px 2px hsla(120, 8%, 11%, 0.04), 0 8px 24px -12px hsla(120, 8%, 11%, 0.08);
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 120 8% 18%;
-    --sidebar-primary: 38 45% 56%;
-    --sidebar-primary-foreground: 120 8% 11%;
-    --sidebar-accent: 38 45% 94%;
-    --sidebar-accent-foreground: 120 8% 14%;
-    --sidebar-border: 36 16% 90%;
-    --sidebar-ring: 38 45% 56%;
   }
 }
 
@@ -152,11 +183,20 @@ All colors MUST be HSL.
   .glass-panel {
     background: linear-gradient(
       165deg,
+      hsla(0, 0%, 100%, 0.92) 0%,
+      hsla(40, 20%, 97%, 0.85) 100%
+    );
+    border: 1px solid hsl(var(--border));
+    backdrop-filter: blur(10px);
+  }
+
+  .dark .glass-panel {
+    background: linear-gradient(
+      165deg,
       hsla(40, 20%, 96%, 0.04) 0%,
       hsla(120, 8%, 11%, 0.55) 100%
     );
     border: 1px solid hsla(40, 20%, 96%, 0.08);
-    backdrop-filter: blur(10px);
   }
 
   /* Esconde scrollbar nativa (tabs / carrosséis) */
