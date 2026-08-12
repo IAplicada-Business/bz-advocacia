@@ -25,6 +25,9 @@ type KanbanRow = Record<string, unknown> & {
   bot_ultima_mensagem_em?: string | null;
   bot_origem_sdr?: string | null;
   bot_is_organic?: boolean | null;
+  bot_platform?: string | null;
+  bot_ad_id?: string | null;
+  bot_campaign_id?: string | null;
   bot_tipo_contato?: string | null;
   bot_tipo_servico?: string | null;
   bot_urgencia?: string | null;
@@ -62,6 +65,9 @@ function mapKanbanRowToLead(
     ultima_mensagem_em: (lead.bot_ultima_mensagem_em as string | null) ?? null,
     origem_sdr: (lead.bot_origem_sdr as string | null) ?? null,
     is_organic: (lead.bot_is_organic as boolean | null) ?? null,
+    platform: (lead.bot_platform as string | null) ?? null,
+    ad_id: (lead.bot_ad_id as string | null) ?? null,
+    campaign_id: (lead.bot_campaign_id as string | null) ?? null,
     tipo_contato: (lead.bot_tipo_contato as string | null) ?? null,
     tipo_servico_bot: (lead.bot_tipo_servico as string | null) ?? null,
     urgencia: (lead.bot_urgencia as Lead["urgencia"]) ?? null,
@@ -180,6 +186,9 @@ export function useLeads(filters: LeadsFilters) {
           bot_ultima_mensagem_em: null,
           bot_origem_sdr: null,
           bot_is_organic: null,
+          bot_platform: null,
+          bot_ad_id: null,
+          bot_campaign_id: null,
           bot_tipo_contato: null,
           bot_tipo_servico: null,
           bot_urgencia: null,
@@ -195,7 +204,7 @@ export function useLeads(filters: LeadsFilters) {
         const { data: botData } = await supabase
           .from("leads_geral")
           .select(
-            "id, status_sdr, fluxo_sdr, area_normalizada, score, etapa_qualificacao, bot_pausado, ultima_mensagem_em, origem_sdr, is_organic, tipo_contato, tipo_servico, urgencia, dados_capturados",
+            "id, status_sdr, fluxo_sdr, area_normalizada, score, etapa_qualificacao, bot_pausado, ultima_mensagem_em, origem_sdr, is_organic, platform, ad_id, campaign_id, tipo_contato, tipo_servico, urgencia, dados_capturados",
           )
           .in("id", leadGeralIds);
 
@@ -217,6 +226,9 @@ export function useLeads(filters: LeadsFilters) {
               bot_ultima_mensagem_em: bot?.ultima_mensagem_em ?? null,
               bot_origem_sdr: bot?.origem_sdr ?? null,
               bot_is_organic: bot?.is_organic ?? null,
+              bot_platform: bot?.platform ?? null,
+              bot_ad_id: bot?.ad_id ?? null,
+              bot_campaign_id: bot?.campaign_id ?? null,
               bot_tipo_contato: bot?.tipo_contato ?? null,
               bot_tipo_servico: bot?.tipo_servico ?? null,
               bot_urgencia: bot?.urgencia ?? null,

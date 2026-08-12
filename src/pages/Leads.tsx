@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ORIGEM_LABELS, LeadOrigem } from "@/types/leads";
+import { isAdsLead } from "@/lib/leadAds";
 import { supabase } from "@/integrations/supabase/client";
 
 // Leads (contact_submissions)
@@ -154,37 +155,19 @@ function LeadsTab({
   // Use the standard useLeads hook, which queries contact_submissions
   const { data: leads, isLoading } = useLeads(queryFilters);
 
-  // Filter by origin (ads vs organic) client-side
-  // Fonte preferencial: `lead.is_organic` (vindo de leads_geral.is_organic, derivado de
-  // platform.endsWith('_ads')). Mais confiavel que `lead.origem` (contact_submissions),
-  // que pode ser "whatsapp_organico" mesmo pra leads CTWA quando o anuncio nao foi detectado
-  // no payload Z-API ou quando o contact_submissions ja existia antes do bot linkar.
-  // Fallback no `origem` pra leads sem vinculo com leads_geral (puramente manuais).
-  // Tambem exclui clientes importados (como_conheceu='importacao'): eles entram no banco
-  // como 'fechado' e poluiam Convertido com clientes que nao sao do funil.
+  // Filter by origin (ads vs organic) client-side via isAdsLead (vários sinais).
+  // Exclui importados e não-leads do pipeline.
   const originFilteredLeads = useMemo(() => {
     if (!leads) return undefined;
-    // Filtra do pipeline: clientes importados e leads marcados como
-    // nao-lead (fornecedor / parceiro / institucional / pessoal).
-    let result = leads.filter(l => l.como_conheceu !== 'importacao');
-    result = result.filter(l => !l.tipo_contato || l.tipo_contato === 'lead');
+    let result = leads.filter((l) => l.como_conheceu !== "importacao");
+    result = result.filter((l) => !l.tipo_contato || l.tipo_contato === "lead");
     if (filterOrigins) {
-      // Aba "Anuncios": queremos leads que o bot marcou como NAO-organico
-      // (is_organic=false). Fallback: origem em filterOrigins.
-      result = result.filter(l => {
-        if (l.is_organic === false) return true;
-        if (l.is_organic === true) return false;
-        return filterOrigins.includes(l.origem || '');
-      });
+      // Aba Anúncios
+      result = result.filter((l) => isAdsLead(l));
     }
     if (excludeOrigins) {
-      // Aba "Organicos": queremos leads que o bot marcou como organico
-      // (is_organic=true) ou leads manuais sem vinculo. Fallback: origem fora de excludeOrigins.
-      result = result.filter(l => {
-        if (l.is_organic === true) return true;
-        if (l.is_organic === false) return false;
-        return !excludeOrigins.includes(l.origem || '');
-      });
+      // Aba Orgânicos — tudo que NÃO é ads
+      result = result.filter((l) => !isAdsLead(l));
     }
     return result;
   }, [leads, filterOrigins, excludeOrigins]);
@@ -193,13 +176,19 @@ function LeadsTab({
     if (!originFilteredLeads) return undefined;
     let result = nomeFilter ? originFilteredLeads.filter(l => l.nome_completo === nomeFilter) : [...originFilteredLeads];
 
-    // Filtro Origem (Orgânicos / CTWA / Campanha Recuperação)
+    // Filtro Origem (Orgânicos / CTWA / Campanha Recuperação) — chip interno da aba
     if (origemTipo === "campanha") {
-      result = result.filter(l => l.origem_sdr === "campanha_recuperacao_form");
+      result = result.filter((l) => l.origem_sdr === "campanha_recuperacao_form");
     } else if (origemTipo === "ctwa") {
-      result = result.filter(l => ["facebook", "instagram", "meta"].includes((l.origem || "").toLowerCase()));
+      result = result.filter(
+        (l) =>
+          ["facebook", "instagram", "meta"].includes((l.origem || "").toLowerCase()) ||
+          l.origem_sdr === "meta_lead_ads" ||
+          (l.platform ?? "").endsWith("_ads") ||
+          !!l.ad_id,
+      );
     } else if (origemTipo === "organicos") {
-      result = result.filter(l => !["facebook", "instagram", "meta", "tiktok", "linkedin", "google"].includes((l.origem || "").toLowerCase()) && l.origem_sdr !== "campanha_recuperacao_form");
+      result = result.filter((l) => !isAdsLead(l));
     }
 
     result.sort((a, b) => {
