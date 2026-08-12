@@ -37,6 +37,11 @@ export function useSdrAlerts(leads: Lead[] | undefined, onOpenLead?: (lead: Lead
     localStorage.setItem(NOTIF_KEY, String(enabled));
   }, []);
 
+  const setNotifEnabled = useCallback((v: boolean) => {
+    setNotifEnabledState(v);
+    localStorage.setItem(NOTIF_KEY, String(v));
+  }, []);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const previousIdsRef = useRef<Set<string> | null>(null);
   const onOpenLeadRef = useRef(onOpenLead);
@@ -105,6 +110,7 @@ export function useSdrAlerts(leads: Lead[] | undefined, onOpenLead?: (lead: Lead
     setSoundEnabled,
     notifPermission,
     notifEnabled,
+    setNotifEnabled,
     requestNotifications,
   };
 }
