@@ -183,9 +183,13 @@ export function ConversasList({ selectedId, onSelect }: Props) {
           />
         </div>
         <Tabs value={filtro} onValueChange={(v) => setFiltro(v as any)}>
-          <TabsList className="grid w-full grid-cols-2 h-8">
-            <TabsTrigger value="minhas" className="text-xs">Minhas</TabsTrigger>
-            <TabsTrigger value="todas" className="text-xs">Todas</TabsTrigger>
+          <TabsList className="grid h-9 w-full grid-cols-2 overflow-hidden p-0.5 sm:w-full">
+            <TabsTrigger value="minhas" className="h-full px-2 py-0 text-xs shadow-none">
+              Minhas
+            </TabsTrigger>
+            <TabsTrigger value="todas" className="h-full px-2 py-0 text-xs shadow-none">
+              Todas
+            </TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="grid grid-cols-3 gap-1.5">
