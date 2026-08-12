@@ -37,11 +37,23 @@ export default function Atendimento() {
         </p>
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[320px_minmax(0,1fr)_320px] overflow-hidden">
-        <ConversasList selectedId={selectedId} onSelect={setSelectedId} />
+        <ConversasList
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+        />
         {selectedId ? (
           <>
             <ChatPanel leadId={selectedId} mensagemInicial={mensagemInicial} />
-            <LeadInfoPanel leadId={selectedId} />
+            <LeadInfoPanel
+              leadId={selectedId}
+              onTipoContatoChanged={(tipo) => {
+                // Sai da tela de chat ao sair do tipo "lead" — volta à lista
+                if (tipo !== "lead") {
+                  setSelectedId(null);
+                  setMensagemInicial("");
+                }
+              }}
+            />
           </>
         ) : (
           <div className="col-span-2 flex flex-col items-center justify-center text-center gap-2 text-muted-foreground">

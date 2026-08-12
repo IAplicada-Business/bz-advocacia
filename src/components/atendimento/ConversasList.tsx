@@ -19,14 +19,31 @@ interface ConversaItem {
   ultima_leitura_humano: string | null;
   humano_responsavel: string | null;
   status_sdr: string | null;
+  tipo_contato?: string | null;
   preview?: string | null;
   unread?: number;
 }
 
 interface Props {
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string | null) => void;
 }
+
+const TIPOS_CONTATO_FILTRO = [
+  { v: "lead", l: "Leads" },
+  { v: "fornecedor", l: "Fornecedor" },
+  { v: "parceiro", l: "Parceiro" },
+  { v: "institucional", l: "Institucional" },
+  { v: "pessoal", l: "Pessoal" },
+  { v: "todos", l: "Todos os tipos" },
+] as const;
+
+const TIPO_CONTATO_BADGE: Record<string, { label: string; cls: string }> = {
+  fornecedor: { label: "Fornecedor", cls: "bg-slate-100 text-slate-700" },
+  parceiro: { label: "Parceiro", cls: "bg-indigo-100 text-indigo-800" },
+  institucional: { label: "Institucional", cls: "bg-violet-100 text-violet-800" },
+  pessoal: { label: "Pessoal", cls: "bg-rose-100 text-rose-800" },
+};
 
 const STATUS_HUMANO = ["assumido_humano", "sql_aguardando_humano", "agendado", "cliente"];
 const STATUS_BOT = ["novo", "em_atendimento_bot"];
@@ -48,6 +65,8 @@ export function ConversasList({ selectedId, onSelect }: Props) {
   const [filtro, setFiltro] = useState<"minhas" | "todas">("minhas");
   const [tipo, setTipo] = useState<"todos" | "bot" | "humano">("todos");
   const [statusFiltro, setStatusFiltro] = useState<string>("todos");
+  /** Padrão: só leads do funil. Outros tipos aparecem ao filtrar. */
+  const [tipoContatoFiltro, setTipoContatoFiltro] = useState<string>("lead");
   const [ordenacao, setOrdenacao] = useState<"recentes" | "prazo">("recentes");
   const [meuAdvogadoId, setMeuAdvogadoId] = useState<string | null>(null);
 
@@ -56,11 +75,21 @@ export function ConversasList({ selectedId, onSelect }: Props) {
   }, []);
 
   const { data: conversas = [], isLoading } = useQuery({
-    queryKey: ["atendimento-conversas", filtro, tipo, statusFiltro, ordenacao, meuAdvogadoId],
+    queryKey: [
+      "atendimento-conversas",
+      filtro,
+      tipo,
+      statusFiltro,
+      tipoContatoFiltro,
+      ordenacao,
+      meuAdvogadoId,
+    ],
     queryFn: async () => {
       let q = (supabase as any)
         .from("leads_geral")
-        .select("id, full_name, phone_number, ultima_mensagem_em, ultima_leitura_humano, humano_responsavel, status_sdr")
+        .select(
+          "id, full_name, phone_number, ultima_mensagem_em, ultima_leitura_humano, humano_responsavel, status_sdr, tipo_contato",
+        )
         .order("ultima_mensagem_em", { ascending: ordenacao === "prazo", nullsFirst: false })
         .limit(200);
 
@@ -79,6 +108,13 @@ export function ConversasList({ selectedId, onSelect }: Props) {
 
       if (statusFiltro !== "todos") {
         q = q.eq("status_sdr", statusFiltro);
+      }
+
+      // Tipo de contato: lead (null|lead) | tipo específico | todos
+      if (tipoContatoFiltro === "lead") {
+        q = q.or("tipo_contato.is.null,tipo_contato.eq.lead");
+      } else if (tipoContatoFiltro !== "todos") {
+        q = q.eq("tipo_contato", tipoContatoFiltro);
       }
 
       const { data, error } = await q;
@@ -170,6 +206,14 @@ export function ConversasList({ selectedId, onSelect }: Props) {
     );
   }, [conversas, busca]);
 
+  // Se a conversa aberta sumiu do filtro (ex.: reclassificada), fecha o chat
+  useEffect(() => {
+    if (!selectedId || isLoading) return;
+    if (!filtradas.some((c) => c.id === selectedId)) {
+      onSelect(null);
+    }
+  }, [filtradas, selectedId, isLoading, onSelect]);
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden border-r bg-card">
       <div className="p-3 space-y-2 border-b">
@@ -192,6 +236,18 @@ export function ConversasList({ selectedId, onSelect }: Props) {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+        <Select value={tipoContatoFiltro} onValueChange={setTipoContatoFiltro}>
+          <SelectTrigger className="h-8 text-[11px]">
+            <SelectValue placeholder="Tipo de contato" />
+          </SelectTrigger>
+          <SelectContent>
+            {TIPOS_CONTATO_FILTRO.map((t) => (
+              <SelectItem key={t.v} value={t.v} className="text-xs">
+                {t.l}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="grid grid-cols-3 gap-1.5">
           <Select value={tipo} onValueChange={(v) => setTipo(v as any)}>
             <SelectTrigger className="h-8 text-[11px]"><SelectValue /></SelectTrigger>
@@ -267,12 +323,24 @@ export function ConversasList({ selectedId, onSelect }: Props) {
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {badge && (
                     <Badge className={cn("h-4 px-1 text-[9px] font-normal border-0", badge.cls)}>
                       {badge.label}
                     </Badge>
                   )}
+                  {c.tipo_contato &&
+                    c.tipo_contato !== "lead" &&
+                    TIPO_CONTATO_BADGE[c.tipo_contato] && (
+                      <Badge
+                        className={cn(
+                          "h-4 px-1 text-[9px] font-normal border-0",
+                          TIPO_CONTATO_BADGE[c.tipo_contato].cls,
+                        )}
+                      >
+                        {TIPO_CONTATO_BADGE[c.tipo_contato].label}
+                      </Badge>
+                    )}
                   {!isMinha && filtro === "todas" && c.humano_responsavel && (
                     <span className="text-[10px] text-muted-foreground italic">outro atendente</span>
                   )}
