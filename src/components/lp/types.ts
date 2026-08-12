@@ -1,11 +1,17 @@
 import type { ReactNode } from "react";
 
+export type LpFormOption = {
+  value: string;
+  label: string;
+};
+
 export type LpFormField = {
   id: string;
   label: string;
-  type: "text" | "tel" | "select";
+  type: "text" | "tel" | "select" | "multiselect";
   placeholder?: string;
-  options?: string[];
+  /** Strings legadas ou { value, label } canônicos das regras MQL. */
+  options?: Array<string | LpFormOption>;
   required?: boolean;
 };
 
@@ -77,3 +83,11 @@ export type LpContent = {
   finalHeadline: ReactNode;
   finalCta: string;
 };
+
+export function optionValue(opt: string | LpFormOption): string {
+  return typeof opt === "string" ? opt : opt.value;
+}
+
+export function optionLabel(opt: string | LpFormOption): string {
+  return typeof opt === "string" ? opt : opt.label;
+}

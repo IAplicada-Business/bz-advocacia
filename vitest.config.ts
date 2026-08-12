@@ -11,12 +11,16 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@sdr-shared": path.resolve(__dirname, "./supabase/functions/_shared"),
     },
   },
   test: {
     environment: "jsdom",
     globals: true,
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "supabase/functions/_shared/**/*.{test,spec}.ts",
+    ],
     setupFiles: ["./src/__tests__/setup.ts"],
     coverage: {
       provider: "v8",

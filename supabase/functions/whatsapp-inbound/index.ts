@@ -55,6 +55,17 @@ import {
   type RespostasInventario,
   type RespostasSaude,
 } from "../_shared/qualificacao.ts";
+import {
+  ETAPA_ROTEIRO_POR_CAMPO,
+  validarMensagemDoBot,
+} from "../_shared/campos_ja_respondidos.ts";
+import {
+  areaFromOferta,
+  montarM0Personalizado,
+  systemPromptComContexto,
+  type SdrContexto,
+} from "../_shared/form-m0.ts";
+import type { Oferta, StageDecisao } from "../_shared/classify-form.ts";
 
 interface ZapiInboundPayload {
   phone?: string;
@@ -1000,13 +1011,47 @@ Deno.serve(async (req) => {
       .limit(1);
 
     if ((msgsM0?.length ?? 0) === 0) {
-      const msgM0 = templateV1("M0");
+      const { data: leadForm } = await supabase
+        .from("leads_geral")
+        .select("oferta_origem, form_flags, stage, sdr_contexto")
+        .eq("id", lead.id)
+        .maybeSingle();
+      const ofertaM0 = (leadForm?.oferta_origem ?? null) as Oferta | null;
+      const ctxM0 = (leadForm?.sdr_contexto ?? null) as SdrContexto | null;
+      const msgM0 = montarM0Personalizado({
+        oferta: ofertaM0,
+        stage: (leadForm?.stage ?? "mql") as StageDecisao,
+        flags: (leadForm?.form_flags ?? []) as string[],
+        contexto: ctxM0,
+      });
+
+      if (ofertaM0) {
+        const checkM0 = validarMensagemDoBot(ofertaM0, msgM0);
+        if (!checkM0.ok) {
+          await supabase.from("bot_errors").insert({
+            lead_id: lead.id,
+            motivo: checkM0.motivo,
+            mensagem: msgM0,
+            oferta: ofertaM0,
+          });
+          await registrarEvento(supabase, lead.id, "bot_msg_bloqueada", {
+            motivo: checkM0.motivo,
+            origem: "m0_garantido",
+          });
+          return new Response(
+            JSON.stringify({ acao: "m0_bloqueado", motivo: checkM0.motivo }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          );
+        }
+      }
+
       await cadencia();
       const envio = await zapiSendText(telefone, msgM0);
       await registrarMensagem(supabase, lead.id, "bot", msgM0, {
         etapa: "M0",
         zapi_status: envio.status,
         motivo: "m0_garantido",
+        personalizado_form: !!(ofertaM0 && ctxM0?.respostas),
       });
       await supabase
         .from("leads_geral")
@@ -1024,7 +1069,12 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Monta contexto pra Claude
+  // Monta contexto pra Claude (inclui sdr_contexto do form)
+  const { data: leadCtxRow } = await supabase
+    .from("leads_geral")
+    .select("oferta_origem, form_flags, form_score, stage, sdr_contexto, full_name")
+    .eq("id", lead.id)
+    .maybeSingle();
 
   const historico = await historicoMensagens(supabase, lead.id, 12);
   const contexto = {
@@ -1034,6 +1084,9 @@ Deno.serve(async (req) => {
     etapa_atual: lead.etapa_qualificacao,
     area_atual: lead.area_normalizada,
     score_atual: lead.score,
+    oferta_origem: leadCtxRow?.oferta_origem ?? null,
+    form_flags: leadCtxRow?.form_flags ?? null,
+    respostas_form: (leadCtxRow?.sdr_contexto as SdrContexto | null)?.respostas ?? null,
   };
 
   // Se o lead veio de anúncio (CTWA), busca o contexto do anúncio pra
@@ -1074,8 +1127,20 @@ ${historico.map((m) => `[${m.origem}] ${m.conteudo}`).join("\n")}
 
 Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
 
+  const systemPrompt = systemPromptComContexto({
+    systemBase: SYSTEM_PROMPT_ROTEIRO_V1,
+    lead: {
+      nome: leadCtxRow?.full_name ?? lead.full_name,
+      oferta_origem: leadCtxRow?.oferta_origem ?? null,
+      stage: leadCtxRow?.stage ?? null,
+      form_flags: (leadCtxRow?.form_flags as string[] | null) ?? null,
+      form_score: (leadCtxRow?.form_score as number | null) ?? null,
+      sdr_contexto: (leadCtxRow?.sdr_contexto as SdrContexto | null) ?? null,
+    },
+  });
+
   const classificacao = await claudeJson<ClassificacaoV1>(
-    SYSTEM_PROMPT_ROTEIRO_V1,
+    systemPrompt,
     [{ role: "user", content: userPrompt }],
     { maxTokens: 1024, temperature: 0.2 },
   );
@@ -1150,6 +1215,34 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
       const regra = aplicarRegrasV1(areaAtual, etapaAnterior, dadosMerge);
       proximaId = regra.proxima;
       flags.push(...regra.flags);
+    }
+
+    // Pula etapas já respondidas no form (nunca repetir pergunta do LP)
+    const ofertaLead = (leadCtxRow?.oferta_origem ?? null) as Oferta | null;
+    const respostasForm =
+      ((leadCtxRow?.sdr_contexto as SdrContexto | null)?.respostas ?? {}) as Record<
+        string,
+        string | string[]
+      >;
+    if (ofertaLead && ETAPA_ROTEIRO_POR_CAMPO[ofertaLead]) {
+      const mapa = ETAPA_ROTEIRO_POR_CAMPO[ofertaLead];
+      const areaForm = areaFromOferta(ofertaLead);
+      if (areaForm === areaAtual) {
+        let guard = 0;
+        while (guard < 6 && seq.includes(proximaId)) {
+          const campo = Object.entries(mapa).find(([, mid]) => mid === proximaId)?.[0];
+          if (!campo) break;
+          const v = respostasForm[campo];
+          const filled = Array.isArray(v) ? v.length > 0 : !!(v && String(v).trim());
+          if (!filled) break;
+          // injeta no merge e avança
+          dadosMerge[CHAVE_POR_ETAPA[proximaId] ?? campo] = v;
+          const regraSkip = aplicarRegrasV1(areaAtual, proximaId, dadosMerge);
+          proximaId = regraSkip.proxima;
+          flags.push(...regraSkip.flags, `SKIP_FORM:${campo}`);
+          guard += 1;
+        }
+      }
     }
   } else {
     proximaId = "M1";
@@ -1307,6 +1400,32 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
         await supabase.from("leads_geral")
           .update({ humano_responsavel: advogado.id })
           .eq("id", lead.id);
+      }
+    }
+  }
+
+  // ---------- Guard-rail: não enviar pergunta já respondida no form ----------
+  {
+    const ofertaGuard = (leadCtxRow?.oferta_origem ?? null) as string | null;
+    if (ofertaGuard) {
+      const check = validarMensagemDoBot(ofertaGuard, mensagemFinal);
+      if (!check.ok) {
+        await supabase.from("bot_errors").insert({
+          lead_id: lead.id,
+          motivo: check.motivo,
+          mensagem: mensagemFinal,
+          oferta: ofertaGuard,
+        });
+        await registrarEvento(supabase, lead.id, "bot_msg_bloqueada", {
+          motivo: check.motivo,
+          etapa: novaEtapa,
+          origem: "whatsapp-inbound",
+        });
+        // Silencioso pro cliente — humano corrige
+        return new Response(
+          JSON.stringify({ blocked: true, motivo: check.motivo }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
       }
     }
   }

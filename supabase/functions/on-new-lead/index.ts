@@ -5,6 +5,9 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { zapiSendSequence } from "../_shared/zapi.ts";
 import { mensagemM0CTWA, mensagemM0Organico } from "../_shared/prompts.ts";
+import { montarM0Personalizado, type SdrContexto } from "../_shared/form-m0.ts";
+import { validarMensagemDoBot } from "../_shared/campos_ja_respondidos.ts";
+import type { Oferta, StageDecisao } from "../_shared/classify-form.ts";
 
 
 interface LeadGeralRecord {
@@ -17,6 +20,11 @@ interface LeadGeralRecord {
   origem_sdr: string | null;
   status_sdr?: string | null;
   bot_pausado?: boolean | null;
+  oferta_origem?: string | null;
+  form_flags?: string[] | null;
+  form_score?: number | null;
+  stage?: string | null;
+  sdr_contexto?: SdrContexto | null;
 }
 
 interface WebhookPayload {
@@ -100,13 +108,51 @@ Deno.serve(async (req) => {
     });
   }
 
-  const nome = (lead.full_name ?? "").split(" ")[0] || "tudo bem";
-  // CTWA: platform termina em _ads → mensagem "vi que voce chegou pelo anuncio".
-  // Senao, M0 organico padrao.
-  const veioDeAnuncio = !!(lead.platform && lead.platform.endsWith("_ads"));
-  const texto = veioDeAnuncio ? mensagemM0CTWA(nome) : mensagemM0Organico(nome);
-  const mensagens = [texto];
+  // Preferir sdr_contexto do banco (mais fresco que o payload do trigger)
+  const { data: leadFresh } = await supabase
+    .from("leads_geral")
+    .select("oferta_origem, form_flags, form_score, stage, sdr_contexto, tipo_servico, platform")
+    .eq("id", lead.id)
+    .maybeSingle();
 
+  const oferta = (leadFresh?.oferta_origem ?? lead.oferta_origem ?? null) as Oferta | null;
+  const contexto = (leadFresh?.sdr_contexto ?? lead.sdr_contexto ?? null) as SdrContexto | null;
+  const flags = (leadFresh?.form_flags ?? lead.form_flags ?? []) as string[];
+  const stage = (leadFresh?.stage ?? lead.stage ?? "mql") as StageDecisao;
+  const platform = leadFresh?.platform ?? lead.platform;
+
+  const nome = (lead.full_name ?? "").split(" ")[0] || "tudo bem";
+  const veioDeAnuncio = !!(platform && platform.endsWith("_ads"));
+
+  let texto: string;
+  if (oferta && contexto?.respostas && Object.keys(contexto.respostas).length > 0) {
+    texto = montarM0Personalizado({ oferta, stage, flags, contexto });
+  } else {
+    texto = veioDeAnuncio ? mensagemM0CTWA(nome) : mensagemM0Organico(nome);
+  }
+
+  if (oferta) {
+    const check = validarMensagemDoBot(oferta, texto);
+    if (!check.ok) {
+      await supabase.from("bot_errors").insert({
+        lead_id: lead.id,
+        motivo: check.motivo,
+        mensagem: texto,
+        oferta,
+      });
+      await supabase.from("eventos_sdr").insert({
+        lead_id: lead.id,
+        tipo: "bot_msg_bloqueada",
+        payload: { motivo: check.motivo, origem: "on-new-lead" },
+      });
+      return new Response(
+        JSON.stringify({ blocked: true, motivo: check.motivo }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+  }
+
+  const mensagens = [texto];
   const resultados = await zapiSendSequence(telefone, mensagens, 1200);
   const ok = resultados.every((r) => r.ok);
 
@@ -115,7 +161,11 @@ Deno.serve(async (req) => {
       lead_id: lead.id,
       origem: "bot",
       conteudo: mensagens[i],
-      metadata: { zapi: resultados[i] },
+      metadata: {
+        zapi: resultados[i],
+        etapa: "M0",
+        personalizado_form: !!(oferta && contexto?.respostas),
+      },
     });
   }
 
@@ -133,7 +183,12 @@ Deno.serve(async (req) => {
   await supabase.from("eventos_sdr").insert({
     lead_id: lead.id,
     tipo: "m0_enviada",
-    payload: { tipo_servico: lead.tipo_servico, ok },
+    payload: {
+      tipo_servico: lead.tipo_servico,
+      ok,
+      oferta,
+      personalizado_form: !!(oferta && contexto?.respostas),
+    },
   });
 
   return new Response(JSON.stringify({ ok, lead_id: lead.id }), {

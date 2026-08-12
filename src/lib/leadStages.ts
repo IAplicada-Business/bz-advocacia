@@ -25,15 +25,25 @@ export const LEAD_STAGE_DESQUALIFICADO = {
   sla_days: null,
 } as const;
 
+/** Planejamento preventivo / holding — fora do funil comercial principal. */
+export const LEAD_STAGE_CONTINUIDADE = {
+  key: "continuidade",
+  label: "Continuidade",
+  order: 101,
+  sla_days: null,
+} as const;
+
 export type LeadStage =
   | (typeof LEAD_STAGES)[number]["key"]
   | typeof LEAD_STAGE_PERDIDO.key
-  | typeof LEAD_STAGE_DESQUALIFICADO.key;
+  | typeof LEAD_STAGE_DESQUALIFICADO.key
+  | typeof LEAD_STAGE_CONTINUIDADE.key;
 
 export const ALL_LEAD_STAGES = [
   ...LEAD_STAGES,
   LEAD_STAGE_PERDIDO,
   LEAD_STAGE_DESQUALIFICADO,
+  LEAD_STAGE_CONTINUIDADE,
 ] as const;
 
 export const LEAD_STAGE_LABELS: Record<LeadStage, string> = {
@@ -47,6 +57,7 @@ export const LEAD_STAGE_LABELS: Record<LeadStage, string> = {
   ganho: "Ganho",
   perdido: "Perdido",
   desqualificado: "Desqualificado",
+  continuidade: "Continuidade",
 };
 
 /** Cores da borda superior das colunas do kanban (paleta B&Z). */
@@ -61,6 +72,7 @@ export const LEAD_STAGE_COLORS: Record<LeadStage, string> = {
   ganho: "border-t-[hsl(var(--chart-4))]",
   perdido: "border-t-destructive",
   desqualificado: "border-t-muted-foreground/50",
+  continuidade: "border-t-[hsl(var(--chart-3)/0.7)]",
 };
 
 /** Mapeia stage novo → estagio legado (contact_submissions) para rollback. */
@@ -83,6 +95,8 @@ export function stageToLegacyEstagio(stage: LeadStage): string {
       return "perdido";
     case "desqualificado":
       return "perdido";
+    case "continuidade":
+      return "em_analise";
     default:
       return "novo";
   }
@@ -104,6 +118,8 @@ export function stageToLegacyStatusSdr(stage: LeadStage): string | null {
     case "perdido":
     case "desqualificado":
       return "perdido";
+    case "continuidade":
+      return "aguardando_triagem";
     default:
       return null;
   }
