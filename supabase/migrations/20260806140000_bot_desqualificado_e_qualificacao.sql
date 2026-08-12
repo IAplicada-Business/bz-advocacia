@@ -24,9 +24,10 @@ ALTER TABLE public.leads_geral
 
 -- 3) Tabela estruturada (1 linha por lead) — não sobrescreve qualificacoes_sdr
 --    (que continua 1 linha por pergunta para o histórico/UI).
+-- lead_id TEXT: leads_geral.id é text (padrão do bot SDR / Lovable Cloud)
 CREATE TABLE IF NOT EXISTS public.qualificacao_estruturada_sdr (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  lead_id uuid NOT NULL UNIQUE REFERENCES public.leads_geral(id) ON DELETE CASCADE,
+  lead_id text NOT NULL UNIQUE REFERENCES public.leads_geral(id) ON DELETE CASCADE,
   respostas_familia jsonb,
   respostas_inventario jsonb,
   respostas_saude jsonb,
