@@ -1,7 +1,13 @@
 /**
  * Detecta se um lead do CRM deve aparecer na aba "Leads Anúncios".
- * Usa vários sinais — is_organic sozinho falha quando o espelho CRM
- * ficou com origem errada ou o flag veio nulo.
+ *
+ * Inclui:
+ * - WhatsApp CTWA / platform *_ads / origem facebook|instagram|meta|…
+ * - Forms das LPs (dados_capturados.source = lp_form), salvo UTM orgânico
+ * - is_organic = false
+ *
+ * is_organic sozinho falha quando o espelho CRM ficou com origem errada
+ * ou o flag veio nulo.
  */
 
 const ADS_ORIGENS = new Set([
@@ -51,10 +57,18 @@ export function isAdsLead(l: AdsLeadSignals): boolean {
   if (cap && typeof cap === "object") {
     const source = String(cap.source ?? "");
     const slug = String(cap.slug ?? "");
-    if (source === "lp_form" || slug === "saude" || slug === "inventario" || slug === "divorcio") {
+    const area = String(cap.area ?? "");
+    const formId = String(cap.form_id ?? "");
+    const isLp =
+      source === "lp_form" ||
+      formId.startsWith("lp_") ||
+      ["saude", "inventario", "divorcio", "familia"].includes(slug) ||
+      ["saude", "inventario", "familia"].includes(area);
+    if (isLp) {
       const utm = String(cap.utm_source ?? "").toLowerCase();
-      if (utm === "organic" || utm === "site") return false;
-      // LPs são majoritariamente mídia paga
+      const medium = String(cap.utm_medium ?? "").toLowerCase();
+      if (utm === "organic" || utm === "site" || medium === "organic") return false;
+      // LPs são majoritariamente mídia paga (default do lp-lead-submit)
       return true;
     }
   }

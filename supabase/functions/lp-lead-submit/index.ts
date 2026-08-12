@@ -67,7 +67,23 @@ function parseContato(raw: string): { nome: string; telefone: string } | null {
   const text = (raw ?? "").trim();
   if (!text) return null;
 
-  const phoneMatch = text.match(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?(?:9\s*)?\d{4,5}[-\s]?\d{4}/);
+  // Formatos comuns: "Ana 11 99999-8888", "Ana +55 (11) 99999-8888", "Ana 11999998888"
+  let phoneMatch = text.match(
+    /(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?(?:9\s*)?\d{4,5}[-\s]?\d{4}/,
+  );
+
+  // Fallback: pega bloco de 10–13 dígitos no texto (ex.: colado sem espaços)
+  if (!phoneMatch) {
+    const digitBlocks = text.match(/\d[\d\s().-]{8,}\d/g) ?? [];
+    for (const block of digitBlocks) {
+      const digits = block.replace(/\D/g, "");
+      if (digits.length >= 10 && digits.length <= 13) {
+        phoneMatch = [block] as RegExpMatchArray;
+        break;
+      }
+    }
+  }
+
   if (!phoneMatch) return null;
 
   const telefoneBruto = phoneMatch[0];
@@ -77,6 +93,8 @@ function parseContato(raw: string): { nome: string; telefone: string } | null {
 
   let nome = text.replace(telefoneBruto, " ").replace(/\s+/g, " ").trim();
   nome = nome.replace(/^[\s,;.\-–—|/]+|[\s,;.\-–—|/]+$/g, "").trim();
+  // Remove restos só-numéricos do nome
+  nome = nome.replace(/\d+/g, " ").replace(/\s+/g, " ").trim();
   if (!nome || nome.length < 2) nome = "Lead LP";
 
   return { nome, telefone };
@@ -432,20 +450,20 @@ Deno.serve(async (req) => {
     if (crmErr) console.error("[lp-lead-submit] CRM update error:", crmErr);
   }
 
-  // Duplicata: não recria (evita reenviar M0). Ainda espelha/atualiza CRM com o form.
+  // Duplicata: atualiza CRM. Se estava perdido/frio, REABRE no funil (MQL/novo)
+  // — senão o form "funciona" na LP mas a pessoa some em Perdidos e Novos fica 0.
   const existente = await buscarLeadPorTelefone(supabase, parsed.telefone);
   if (existente) {
-    await espelharContactSubmission(supabase, existente, {
-      platform,
-      mensagem: `${mensagem}\n(reenvio form LP — lead já existia)`,
-    });
-    await enriquecerCrm(existente.id);
+    const statusAtual = (existente.status_sdr ?? "").toLowerCase();
+    const reopenStatuses = new Set(["perdido", "mql_frio", "perdido_recuperacao", ""]);
+    const shouldReopen = reopenStatuses.has(statusAtual);
 
-    // Acumula respostas do form + atribuição Meta (só preenche IDs se ainda vazios).
     try {
       const { data: atual } = await supabase
         .from("leads_geral")
-        .select("dados_capturados, ad_id, campaign_id, adset_id, ad_name, campaign_name, adset_name")
+        .select(
+          "dados_capturados, ad_id, campaign_id, adset_id, ad_name, campaign_name, adset_name, is_organic, platform, stage, status_sdr",
+        )
         .eq("id", existente.id)
         .maybeSingle();
       const prev =
@@ -469,37 +487,113 @@ Deno.serve(async (req) => {
       if (!atual?.campaign_name && attribution.campaign_name) {
         attrPatch.campaign_name = attribution.campaign_name;
       }
+
+      const reopenPatch: Record<string, unknown> = shouldReopen
+        ? {
+          status_sdr: "novo",
+          etapa_qualificacao: "M0",
+          bot_pausado: false,
+          stage: "mql",
+          // Reatribui mídia paga se a LP for ads (mesmo que o lead antigo fosse orgânico)
+          is_organic: isOrganic,
+          platform,
+          origem_sdr: origemSdr,
+        }
+        : {
+          // Garante classificação ads quando LP paga reenvia sobre lead já ativo
+          ...(isOrganic === false
+            ? { is_organic: false, platform, origem_sdr: origemSdr }
+            : {}),
+        };
+
       await supabase
         .from("leads_geral")
         .update({
-          dados_capturados: { ...prev, ...capturados, form_reenvio_em: new Date().toISOString() },
+          full_name: parsed.nome,
+          tipo_servico: tipoServico,
+          area_normalizada: area === "divorcio" ? "familia" : area,
+          dados_capturados: {
+            ...prev,
+            ...capturados,
+            form_reenvio_em: new Date().toISOString(),
+            form_reaberto: shouldReopen,
+          },
           ...leadExtras,
           observacoes: mensagem,
           ...attrPatch,
+          ...reopenPatch,
         })
         .eq("id", existente.id);
     } catch (e) {
       console.error("[lp-lead-submit] merge dados_capturados failed:", e);
     }
 
+    const leadEspelho = {
+      ...existente,
+      full_name: parsed.nome,
+      status_sdr: shouldReopen ? "novo" : existente.status_sdr,
+      tipo_servico: tipoServico,
+      area_normalizada: area === "divorcio" ? "familia" : area,
+      platform,
+    };
+
+    await espelharContactSubmission(supabase, leadEspelho, {
+      platform,
+      mensagem: `${mensagem}\n(reenvio form LP — lead já existia${shouldReopen ? "; reaberto no funil" : ""})`,
+    });
+    await enriquecerCrm(existente.id);
+
+    // Força estágio CRM no espelho após reabertura (stage+estagio).
+    if (shouldReopen) {
+      await supabase
+        .from("contact_submissions")
+        .update({
+          estagio: "novo",
+          status: "novo",
+          stage: "mql",
+          origem: origemCrm,
+          como_conheceu: isOrganic ? "Site / LP" : "Mídia Paga / LP",
+          tipo_processo: tipoProcesso,
+          data_ultima_atividade: new Date().toISOString(),
+        })
+        .eq("lead_geral_id", existente.id);
+    }
+
     try {
       await supabase.from("eventos_sdr").insert({
-        tipo: "lp_form_duplicate",
+        tipo: shouldReopen ? "lp_form_reopened" : "lp_form_duplicate",
         payload: {
           lead_id: existente.id,
           slug: area,
           platform,
           telefone: parsed.telefone,
+          reaberto: shouldReopen,
           form: values,
         },
       });
     } catch (_e) { /* ignore */ }
 
+    // Se reabriu, dispara M0 (on-new-lead é idempotente se já houver msg bot recente —
+    // ainda assim o lead volta pro kanban como MQL/novo).
+    if (shouldReopen) {
+      await dispararOnNewLead(supabase, {
+        ...leadEspelho,
+        id: existente.id,
+        platform,
+        origem_sdr: origemSdr,
+        status_sdr: "novo",
+        bot_pausado: false,
+      });
+    }
+
     return json({
       ok: true,
       duplicate: true,
+      reopened: shouldReopen,
       leadId: existente.id,
-      message: "Lead já cadastrado. Nossa equipe segue no WhatsApp.",
+      message: shouldReopen
+        ? "Cadastro atualizado. Em breve falamos no WhatsApp."
+        : "Lead já cadastrado. Nossa equipe segue no WhatsApp.",
     });
   }
 
@@ -517,6 +611,7 @@ Deno.serve(async (req) => {
     origem_sdr: origemSdr,
     status_sdr: "novo",
     etapa_qualificacao: "M0",
+    stage: "mql",
     is_organic: isOrganic,
     tipo_servico: tipoServico,
     area_normalizada: area === "divorcio" ? "familia" : area,

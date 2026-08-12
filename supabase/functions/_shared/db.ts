@@ -200,6 +200,25 @@ function mapStatusSdrToCrm(s: string | null | undefined): { status: string; esta
   }
 }
 
+/** Kanban usa `stage` (enum) com prioridade sobre `estagio` legado — precisa sync. */
+function mapEstagioToStage(estagio: string): string {
+  switch (estagio) {
+    case "perdido":
+      return "perdido";
+    case "fechado":
+      return "ganho";
+    case "proposta_enviada":
+      return "proposta";
+    case "em_analise":
+      return "sal";
+    case "contato_inicial":
+      return "conectado";
+    case "novo":
+    default:
+      return "mql";
+  }
+}
+
 export async function espelharContactSubmission(
   supabase: SupabaseClient,
   lead: Pick<Lead,
@@ -239,6 +258,8 @@ export async function espelharContactSubmission(
     .eq("lead_geral_id", lead.id)
     .maybeSingle();
 
+  const stage = mapEstagioToStage(estagio);
+
   if (ligado) {
     const patch: Record<string, unknown> = {
       nome_completo: lead.full_name ?? "Lead WhatsApp",
@@ -247,10 +268,13 @@ export async function espelharContactSubmission(
       origem,
       status,
       estagio,
+      stage,
       data_ultima_atividade: agora,
       ultimo_contato_em: agora,
     };
-    if (platform.endsWith("_ads")) patch.como_conheceu = "Mídia Paga";
+    if (platform.endsWith("_ads") || ["facebook", "instagram", "meta", "google", "tiktok", "linkedin"].includes(origem)) {
+      patch.como_conheceu = "Mídia Paga";
+    }
     await supabase.from("contact_submissions").update(patch).eq("id", (ligado as any).id);
     return;
   }
@@ -260,7 +284,7 @@ export async function espelharContactSubmission(
   //    Sempre atualiza origem (senão lead de ads some da aba Anúncios).
   const { data: porTelefone } = await supabase
     .from("contact_submissions")
-    .select("id, estagio")
+    .select("id, estagio, stage")
     .eq("telefone", telefone)
     .is("lead_geral_id", null)
     .order("created_at", { ascending: false })
@@ -274,15 +298,21 @@ export async function espelharContactSubmission(
       telefone,
       tipo_processo,
       origem,
+      status,
+      estagio,
+      stage,
       ultimo_contato_em: agora,
       data_ultima_atividade: agora,
     };
     if (platform.endsWith("_ads")) {
       updates.como_conheceu = "Mídia Paga";
     }
-    if ((porTelefone as any).estagio === "perdido") {
+    const prevEstagio = String((porTelefone as any).estagio ?? "");
+    const prevStage = String((porTelefone as any).stage ?? "");
+    if (prevEstagio === "perdido" || prevStage === "perdido" || prevStage === "desqualificado") {
       updates.estagio = "novo";
       updates.status = "novo";
+      updates.stage = "mql";
     }
     await supabase
       .from("contact_submissions")
@@ -297,12 +327,13 @@ export async function espelharContactSubmission(
     telefone,
     email: "",
     tipo_processo,
-    como_conheceu: "bot",
+    como_conheceu: platform.endsWith("_ads") ? "Mídia Paga" : "bot",
     mensagem: opts.mensagem ?? "Lead criado via WhatsApp Bot SDR",
     lgpd_consent: true,
     origem,
     estagio,
     status,
+    stage,
     lead_geral_id: lead.id,
     whatsapp_id: telefone,
     primeiro_contato_em: agora,

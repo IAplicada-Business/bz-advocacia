@@ -180,13 +180,20 @@ function LeadsTab({
     if (origemTipo === "campanha") {
       result = result.filter((l) => l.origem_sdr === "campanha_recuperacao_form");
     } else if (origemTipo === "ctwa") {
-      result = result.filter(
-        (l) =>
+      // WhatsApp Click-to-WhatsApp + forms LP pagos (classificação ads)
+      result = result.filter((l) => {
+        if (!isAdsLead(l)) return false;
+        const source = String(l.dados_capturados?.source ?? "");
+        const formLp = source === "lp_form" || String(l.dados_capturados?.form_id ?? "").startsWith("lp_");
+        const sdr = (l.origem_sdr ?? "").toLowerCase();
+        return (
+          formLp ||
+          sdr === "meta_lead_ads" ||
           ["facebook", "instagram", "meta"].includes((l.origem || "").toLowerCase()) ||
-          l.origem_sdr === "meta_lead_ads" ||
           (l.platform ?? "").endsWith("_ads") ||
-          !!l.ad_id,
-      );
+          !!l.ad_id
+        );
+      });
     } else if (origemTipo === "organicos") {
       result = result.filter((l) => !isAdsLead(l));
     }
@@ -249,7 +256,7 @@ function LeadsTab({
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-xs font-medium text-muted-foreground">Origem:</span>
         {(["todas", "organicos", "ctwa", "campanha"] as const).map((tipo) => {
-          const labels = { todas: "Todas", organicos: "Orgânicos", ctwa: "Anúncios CTWA", campanha: "Campanha Recuperação" };
+          const labels = { todas: "Todas", organicos: "Orgânicos", ctwa: "Ads / LP / CTWA", campanha: "Campanha Recuperação" };
           const active = origemTipo === tipo;
           return (
             <Button

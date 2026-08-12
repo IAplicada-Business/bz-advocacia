@@ -72,6 +72,15 @@ WHERE is_organic IS DISTINCT FROM false
     OR ad_id IS NOT NULL
   );
 
+-- LP: sincroniza stage do kanban com estagio (evita Novos=0 com stage=perdido)
+UPDATE public.contact_submissions cs
+SET stage = 'mql'::public.lead_stage
+FROM public.leads_geral lg
+WHERE cs.lead_geral_id = lg.id
+  AND coalesce(lg.form_id, '') LIKE 'lp_%'
+  AND cs.estagio = 'novo'
+  AND (cs.stage IS NULL OR cs.stage = 'perdido'::public.lead_stage);
+
 -- Validação
 SELECT cs.origem, lg.platform, lg.is_organic, count(*)
 FROM contact_submissions cs
