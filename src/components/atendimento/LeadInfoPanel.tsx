@@ -14,6 +14,8 @@ import { ptBR } from "date-fns/locale";
 
 interface Props {
   leadId: string;
+  /** Chamado após salvar tipo de contato (ex.: sair da conversa se não for lead). */
+  onTipoContatoChanged?: (tipo: string) => void;
 }
 
 const AREAS = [
@@ -49,7 +51,7 @@ const STATUS_LABELS: Record<string, string> = {
   perdido: "Perdido",
 };
 
-export function LeadInfoPanel({ leadId }: Props) {
+export function LeadInfoPanel({ leadId, onTipoContatoChanged }: Props) {
   const qc = useQueryClient();
   const assumir = useAssumirLead({ onAssumed: () => qc.invalidateQueries({ queryKey: ["lead-info", leadId] }) });
   const [reatribuirOpen, setReatribuirOpen] = useState(false);
@@ -183,7 +185,13 @@ export function LeadInfoPanel({ leadId }: Props) {
     if (ok) {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["leads-kanban"] });
-      toast.success(tipo === "lead" ? "Voltou pro pipeline de leads" : "Classificado como nao-lead");
+      qc.invalidateQueries({ queryKey: ["atendimento-conversas"] });
+      toast.success(
+        tipo === "lead"
+          ? "Voltou pro pipeline de leads"
+          : "Classificado — use o filtro na lista para ver este contato",
+      );
+      onTipoContatoChanged?.(tipo);
     }
   }
 
