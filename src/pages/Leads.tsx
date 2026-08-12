@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Filter, Search, LayoutGrid, List, Table2, ArrowUpDown, Clock, Briefcase, Zap, Bell, BellOff, Volume2, VolumeX, Megaphone } from "lucide-react";
+import { Plus, Filter, Search, LayoutGrid, List, Table2, ArrowUpDown, Clock, Briefcase, Zap, Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { useSdrAlerts } from "@/hooks/useSdrAlerts";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -99,7 +99,6 @@ function LeadsTab({
   const [editLead, setEditLead] = useState<Lead | null>(null);
   const [nomeFilter, setNomeFilter] = useState<string | null>(null);
   const [origemFilter, setOrigemFilter] = useState<string | null>(null);
-  const [origemTipo, setOrigemTipo] = useState<"todas" | "organicos" | "ctwa" | "campanha">("todas");
   const [nomes, setNomes] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<string>("mais_recente");
 
@@ -174,29 +173,9 @@ function LeadsTab({
 
   const filteredLeads = useMemo(() => {
     if (!originFilteredLeads) return undefined;
-    let result = nomeFilter ? originFilteredLeads.filter(l => l.nome_completo === nomeFilter) : [...originFilteredLeads];
-
-    // Filtro Origem (Orgânicos / CTWA / Campanha Recuperação) — chip interno da aba
-    if (origemTipo === "campanha") {
-      result = result.filter((l) => l.origem_sdr === "campanha_recuperacao_form");
-    } else if (origemTipo === "ctwa") {
-      // WhatsApp Click-to-WhatsApp + forms LP pagos (classificação ads)
-      result = result.filter((l) => {
-        if (!isAdsLead(l)) return false;
-        const source = String(l.dados_capturados?.source ?? "");
-        const formLp = source === "lp_form" || String(l.dados_capturados?.form_id ?? "").startsWith("lp_");
-        const sdr = (l.origem_sdr ?? "").toLowerCase();
-        return (
-          formLp ||
-          sdr === "meta_lead_ads" ||
-          ["facebook", "instagram", "meta"].includes((l.origem || "").toLowerCase()) ||
-          (l.platform ?? "").endsWith("_ads") ||
-          !!l.ad_id
-        );
-      });
-    } else if (origemTipo === "organicos") {
-      result = result.filter((l) => !isAdsLead(l));
-    }
+    const result = nomeFilter
+      ? originFilteredLeads.filter((l) => l.nome_completo === nomeFilter)
+      : [...originFilteredLeads];
 
     result.sort((a, b) => {
       // Sempre prioriza leads quentes do bot
@@ -211,7 +190,7 @@ function LeadsTab({
       }
     });
     return result;
-  }, [originFilteredLeads, nomeFilter, sortOrder, origemTipo]);
+  }, [originFilteredLeads, nomeFilter, sortOrder]);
 
   // Conta so leads efetivamente aguardando humano. Ignora os que ja
   // avançaram pra estagio pos-bot (proposta_enviada / fechado / perdido)
@@ -252,26 +231,6 @@ function LeadsTab({
       )}
 
       <LeadsOrganicSummary leads={filteredLeads} loading={isLoading} />
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-medium text-muted-foreground">Origem:</span>
-        {(["todas", "organicos", "ctwa", "campanha"] as const).map((tipo) => {
-          const labels = { todas: "Todas", organicos: "Orgânicos", ctwa: "Ads / LP / CTWA", campanha: "Campanha Recuperação" };
-          const active = origemTipo === tipo;
-          return (
-            <Button
-              key={tipo}
-              size="sm"
-              variant={active ? "default" : "outline"}
-              onClick={() => setOrigemTipo(tipo)}
-              className="h-8 text-xs rounded-full"
-            >
-              {tipo === "campanha" && <Megaphone className="h-3 w-3 mr-1" />}
-              {labels[tipo]}
-            </Button>
-          );
-        })}
-      </div>
 
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
