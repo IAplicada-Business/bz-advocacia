@@ -152,7 +152,12 @@ export const DemandasTable = ({ demandas, onView, onEdit, onDelete, isAdmin }: D
         header: "Status",
         sortable: true,
         sortValue: (d) => statusOrder[d.status] ?? 0,
-        cell: (d) => <Badge variant={statusVariant[d.status]}>{STATUS_LABELS[d.status]}</Badge>,
+        className: "min-w-[140px] whitespace-nowrap",
+        cell: (d) => (
+          <Badge variant={statusVariant[d.status]} className="whitespace-nowrap">
+            {STATUS_LABELS[d.status]}
+          </Badge>
+        ),
       },
       {
         id: "prioridade",

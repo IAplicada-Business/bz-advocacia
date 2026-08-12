@@ -95,7 +95,7 @@ export function ClienteProcessosTab({ clienteId, clienteNome, onSelectProcesso }
             <TableRow>
               <TableHead>Nº Processo</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="min-w-[140px] whitespace-nowrap">Status</TableHead>
               <TableHead>Data Início</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -113,8 +113,8 @@ export function ClienteProcessosTab({ clienteId, clienteNome, onSelectProcesso }
                     {processo.numero_processo || "Sem número"}
                   </TableCell>
                   <TableCell>{processo.tipo}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={statusConfig.className}>
+                  <TableCell className="min-w-[140px] whitespace-nowrap">
+                    <Badge variant="outline" className={`${statusConfig.className} whitespace-nowrap`}>
                       {statusConfig.label}
                     </Badge>
                   </TableCell>
