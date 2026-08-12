@@ -8,7 +8,6 @@ import {
   LogOut,
   ChevronDown,
   ChevronUp,
-  Search,
   TrendingUp,
   FileBarChart,
 } from "lucide-react";
@@ -98,15 +97,6 @@ const menuItems: MenuItem[] = [
     submenu: [
       { title: "Processos", url: "/dashboard/processos" },
       { title: "Tarefas", url: "/dashboard/processos/demandas" },
-    ]
-  },
-  {
-    title: "Pesquisas",
-    label: "Pesquisas",
-    icon: Search,
-    submenu: [
-      { title: "Consultar Empresa", url: "/dashboard/pesquisas" },
-      { title: "Histórico", url: "/dashboard/pesquisas/historico" },
     ]
   },
   {

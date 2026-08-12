@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpen, Users, Scale, DollarSign, Search, MessageSquare, Settings, FileText, Lock } from "lucide-react";
+import { BookOpen, Users, Scale, DollarSign, MessageSquare, Settings, FileText, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SenhasSistema from "./SenhasSistema";
 
@@ -40,17 +40,6 @@ const guias = [
       "Gerando relatórios financeiros personalizados",
       "Acompanhamento de faturamento mensal",
       "Análise de categorias e subcategorias"
-    ]
-  },
-  {
-    id: "pesquisas",
-    icon: Search,
-    titulo: "Pesquisas e Consultas",
-    conteudo: [
-      "Como realizar pesquisas de pessoa física/jurídica",
-      "Consultando histórico de pesquisas anteriores",
-      "Entendendo os créditos de consulta",
-      "Configuração da API de pesquisa"
     ]
   },
   {

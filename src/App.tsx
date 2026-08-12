@@ -42,10 +42,6 @@ import FinanceiroRelatorios from "./pages/financeiro/Relatorios";
 import FinanceiroHistorico from "./pages/financeiro/Historico";
 import FinanceiroPagamentos from "./pages/financeiro/Pagamentos";
 
-// Pesquisas (apenas Consulta gratuita BrasilAPI + Historico ate contratarmos APIs pagas)
-import PesquisasIndex from "./pages/pesquisas/Index";
-import PesquisasHistorico from "./pages/pesquisas/Historico";
-
 // Comunicação
 import ComunicacaoTemplates from "./pages/comunicacao/Templates";
 
@@ -319,35 +315,10 @@ const App = () => {
         }
       />
 
-      {/* Pesquisas - Subrotas */}
-      <Route
-        path="/dashboard/pesquisas"
-        element={
-          <ProtectedRoute permission="pesquisas.consulta_empresa">
-            <PesquisasIndex />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/dashboard/pesquisas/historico"
-        element={
-          <ProtectedRoute permission="pesquisas.historico">
-            <PesquisasHistorico />
-          </ProtectedRoute>
-        }
-      />
-      {/* Links antigos (cnpj, cpf via Apify, processos via Datajud) redirecionam pra raiz */}
-      <Route path="/dashboard/pesquisas/cnpj" element={<Navigate to="/dashboard/pesquisas" replace />} />
-      <Route path="/dashboard/pesquisas/cpf" element={<Navigate to="/dashboard/pesquisas" replace />} />
-      <Route path="/dashboard/pesquisas/processos" element={<Navigate to="/dashboard/pesquisas" replace />} />
-      {/* TODO: reativar quando BigDataCorp for contratada (páginas stub / mock) */}
-      {/* <Route path="/dashboard/pesquisas/imovel" element={<ImovelPage />} /> */}
-      {/* <Route path="/dashboard/pesquisas/veiculo" element={<VeiculoPage />} /> */}
-      {/* <Route path="/dashboard/pesquisas/api" element={<ConsultasApiPage />} /> */}
-      <Route path="/dashboard/pesquisas/imovel" element={<Navigate to="/dashboard/pesquisas" replace />} />
-      <Route path="/dashboard/pesquisas/veiculo" element={<Navigate to="/dashboard/pesquisas" replace />} />
-      <Route path="/dashboard/pesquisas/api" element={<Navigate to="/dashboard/pesquisas" replace />} />
-      
+      {/* Pesquisas removido do menu — links antigos vão pro painel */}
+      <Route path="/dashboard/pesquisas/*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/dashboard/pesquisas" element={<Navigate to="/dashboard" replace />} />
+
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
