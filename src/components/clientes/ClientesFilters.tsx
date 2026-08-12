@@ -22,6 +22,8 @@ export interface ClientesFiltersType {
   statusProcesso: string[];
   semWhatsapp: boolean;
   semProcesso: boolean;
+  /** Clientes com tipo_processo vazio / nulo */
+  semTipo: boolean;
   aniversariantes: 'hoje' | 'semana' | 'mes' | null;
 }
 
@@ -54,6 +56,7 @@ export function ClientesFilters({
       statusProcesso: [],
       semWhatsapp: false,
       semProcesso: false,
+      semTipo: false,
       aniversariantes: null,
     });
   };
@@ -88,7 +91,7 @@ export function ClientesFilters({
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl">
         <SheetHeader>
           <SheetTitle>Filtros de Clientes</SheetTitle>
           <SheetDescription>
@@ -96,12 +99,12 @@ export function ClientesFilters({
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-200px)] pr-4 mt-6">
-          <div className="space-y-6">
+        <ScrollArea className="mt-6 h-[calc(100vh-200px)] pr-4">
+          <div className="space-y-6 pr-1">
             {/* Aniversariantes */}
             <div className="space-y-3">
               <h3 className="font-medium text-sm flex items-center gap-2">
-                <Cake className="h-4 w-4 text-pink-500" />
+                <Cake className="h-4 w-4 text-primary" />
                 Aniversariantes
               </h3>
               <div className="space-y-2">
@@ -154,6 +157,18 @@ export function ClientesFilters({
                   />
                   <Label htmlFor="sem-processo" className="cursor-pointer">
                     Sem processo vinculado
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 rounded-lg bg-primary/10 px-2 py-1.5">
+                  <Checkbox
+                    id="sem-tipo"
+                    checked={filters.semTipo}
+                    onCheckedChange={(checked) =>
+                      onFiltersChange({ ...filters, semTipo: checked === true })
+                    }
+                  />
+                  <Label htmlFor="sem-tipo" className="cursor-pointer font-medium">
+                    Sem tipo nenhum
                   </Label>
                 </div>
               </div>
@@ -227,6 +242,9 @@ export function ClientesFilters({
             {/* Tipo de Processo */}
             <div className="space-y-3">
               <h3 className="font-medium text-sm">Tipo de Processo</h3>
+              <p className="text-xs text-muted-foreground">
+                Para achar quem está sem classificação, use “Sem tipo nenhum” acima.
+              </p>
               <div className="space-y-2">
                 {TIPO_PROCESSO_OPTIONS.map((tipo) => (
                   <div key={tipo} className="flex items-center space-x-2">

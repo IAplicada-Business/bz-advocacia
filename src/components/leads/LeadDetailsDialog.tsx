@@ -481,32 +481,33 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
             )}
 
             <Tabs defaultValue={defaultTab} key={`${lead.id}-${defaultTab}`} className="mt-4">
-              <TabsList className="flex w-full overflow-x-auto">
-                <TabsTrigger value="info">Informações</TabsTrigger>
-                {isCliente && <TabsTrigger value="processos">Processos</TabsTrigger>}
-                <TabsTrigger value="contratos">{isCliente ? 'Contratos' : 'Propostas'}</TabsTrigger>
+              {/* Quebra em linhas — evita scrollbar nativa feia no meio do modal */}
+              <TabsList className="flex h-auto w-full max-w-full flex-wrap justify-start gap-1.5 rounded-2xl p-1.5 sm:w-full">
+                <TabsTrigger value="info" className="shrink-0">Informações</TabsTrigger>
+                {isCliente && <TabsTrigger value="processos" className="shrink-0">Processos</TabsTrigger>}
+                <TabsTrigger value="contratos" className="shrink-0">{isCliente ? 'Contratos' : 'Propostas'}</TabsTrigger>
                 {isCliente && (
-                  <TabsTrigger value="tarefas" className="flex items-center gap-1">
+                  <TabsTrigger value="tarefas" className="flex shrink-0 items-center gap-1">
                     <ClipboardList className="h-3.5 w-3.5" />
                     Tarefas
                   </TabsTrigger>
                 )}
                 {isCliente && (
-                  <TabsTrigger value="financeiro" className="flex items-center gap-1">
+                  <TabsTrigger value="financeiro" className="flex shrink-0 items-center gap-1">
                     <Wallet className="h-3.5 w-3.5" />
                     Financeiro
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="mensagens" className="flex items-center gap-1">
+                <TabsTrigger value="mensagens" className="flex shrink-0 items-center gap-1">
                   <MessageCircle className="h-3.5 w-3.5" />
                   Mensagens
                 </TabsTrigger>
-                <TabsTrigger value="qualificacao" className="flex items-center gap-1">
+                <TabsTrigger value="qualificacao" className="flex shrink-0 items-center gap-1">
                   <Bot className="h-3.5 w-3.5" />
                   Qualificação
                 </TabsTrigger>
-                <TabsTrigger value="documentos">Documentos</TabsTrigger>
-                <TabsTrigger value="notas">Notas</TabsTrigger>
+                <TabsTrigger value="documentos" className="shrink-0">Documentos</TabsTrigger>
+                <TabsTrigger value="notas" className="shrink-0">Notas</TabsTrigger>
               </TabsList>
 
               <TabsContent value="info" className="space-y-4 mt-4">

@@ -158,6 +158,44 @@ All colors MUST be HSL.
     border: 1px solid hsla(40, 20%, 96%, 0.08);
     backdrop-filter: blur(10px);
   }
+
+  /* Esconde scrollbar nativa (tabs / carrosséis) */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* Scrollbar horizontal mais alta e com cor da marca */
+  .scrollbar-brand {
+    scrollbar-width: auto;
+    scrollbar-color: hsl(var(--primary) / 0.65) hsl(var(--muted));
+  }
+  .scrollbar-brand::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+  }
+  .scrollbar-brand::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 999px;
+    margin: 0 4px;
+  }
+  .scrollbar-brand::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--primary) / 0.55),
+      hsl(var(--primary) / 0.85)
+    );
+    border-radius: 999px;
+    border: 2px solid hsl(var(--muted));
+  }
+  .scrollbar-brand::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
 }
 
 /* Landing pages B&Z — dobras amplas + motion entre seções */
