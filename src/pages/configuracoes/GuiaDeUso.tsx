@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpen, Users, Scale, DollarSign, Search, MessageSquare, Settings, FileText, Lock } from "lucide-react";
+import { BookOpen, Users, Scale, DollarSign, MessageSquare, Settings, FileText, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SenhasSistema from "./SenhasSistema";
 
