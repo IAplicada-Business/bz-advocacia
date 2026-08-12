@@ -18,8 +18,8 @@ export function AlertasSdrControle() {
   } = useSdrAlerts(undefined);
 
   return (
-    <div className="space-y-4 max-w-xl">
-      <Card>
+    <div className="w-full min-w-0">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="font-seasons text-xl text-primary">Alertas do funil SDR</CardTitle>
           <CardDescription>
@@ -27,54 +27,69 @@ export function AlertasSdrControle() {
             Só funcionam com a aba do CRM aberta.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-            <div>
-              <p className="text-sm font-medium">Som</p>
-              <p className="text-xs text-muted-foreground">
-                Toca um aviso ao chegar lead quente (bot qualificou).
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSoundEnabled(!soundEnabled)}
-            >
-              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              <span className="ml-1.5 text-xs">
-                {soundEnabled ? "Som ativo" : "Som desativado"}
-              </span>
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-            <div>
-              <p className="text-sm font-medium">Notificações do navegador</p>
-              <p className="text-xs text-muted-foreground">
-                Popup do sistema com nome do lead. O navegador precisa permitir este site.
-              </p>
-            </div>
-            {notifPermission === "denied" ? (
-              <Button variant="outline" size="sm" disabled title="Libere nas configurações do navegador">
-                <BellOff className="h-4 w-4" />
-                <span className="ml-1.5 text-xs">Bloqueadas no navegador</span>
-              </Button>
-            ) : notifEnabled && notifPermission === "granted" ? (
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex min-h-[5.5rem] items-center justify-between gap-4 rounded-lg border p-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Som</p>
+                <p className="text-xs text-muted-foreground">
+                  Toca um aviso ao chegar lead quente (bot qualificou).
+                </p>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setNotifEnabled(false)}
-                title="Desativar notificações neste navegador"
+                className="shrink-0"
+                onClick={() => setSoundEnabled(!soundEnabled)}
               >
-                <Bell className="h-4 w-4 text-green-600" />
-                <span className="ml-1.5 text-xs">Notificações ativas</span>
+                {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                <span className="ml-1.5 text-xs">
+                  {soundEnabled ? "Som ativo" : "Som desativado"}
+                </span>
               </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={() => void requestNotifications()}>
-                <Bell className="h-4 w-4" />
-                <span className="ml-1.5 text-xs">Ativar notificações</span>
-              </Button>
-            )}
+            </div>
+
+            <div className="flex min-h-[5.5rem] items-center justify-between gap-4 rounded-lg border p-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Notificações do navegador</p>
+                <p className="text-xs text-muted-foreground">
+                  Popup do sistema com nome do lead. O navegador precisa permitir este site.
+                </p>
+              </div>
+              {notifPermission === "denied" ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  disabled
+                  title="Libere nas configurações do navegador"
+                >
+                  <BellOff className="h-4 w-4" />
+                  <span className="ml-1.5 text-xs">Bloqueadas no navegador</span>
+                </Button>
+              ) : notifEnabled && notifPermission === "granted" ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => setNotifEnabled(false)}
+                  title="Desativar notificações neste navegador"
+                >
+                  <Bell className="h-4 w-4 text-green-600" />
+                  <span className="ml-1.5 text-xs">Notificações ativas</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => void requestNotifications()}
+                >
+                  <Bell className="h-4 w-4" />
+                  <span className="ml-1.5 text-xs">Ativar notificações</span>
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
