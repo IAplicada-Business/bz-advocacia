@@ -13,6 +13,7 @@ import LpInventario from "./pages/lp/LpInventario";
 import LpDivorcio from "./pages/lp/LpDivorcio";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
+import Contatos from "./pages/Contatos";
 import Atendimento from "./pages/Atendimento";
 import Clientes from "./pages/Clientes";
 
@@ -138,6 +139,14 @@ const App = () => {
         element={
           <ProtectedRoute permission="gestao_vendas.leads">
             <Leads />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/leads/contatos"
+        element={
+          <ProtectedRoute permission="gestao_vendas.leads">
+            <Contatos />
           </ProtectedRoute>
         }
       />

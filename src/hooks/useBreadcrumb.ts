@@ -13,7 +13,8 @@ export function useBreadcrumb(): BreadcrumbItem[] {
     
     // Mapear rotas para labels
     const routeLabels: Record<string, string> = {
-      'leads': 'Vendas',
+      'leads': 'Leads',
+      'contatos': 'Contatos',
       'processos': 'Processos',
       'financeiro': 'Financeiro',
       'configuracoes': 'Configurações',
@@ -27,6 +28,8 @@ export function useBreadcrumb(): BreadcrumbItem[] {
       'templates': 'Templates',
       'tags': 'Tags',
       'logs': 'Logs',
+      'atendimento': 'Atendimento',
+      'clientes': 'Clientes',
     };
     
     let currentPath = '';

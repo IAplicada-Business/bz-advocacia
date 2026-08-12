@@ -24,6 +24,7 @@ export const PAGE_PERMISSIONS: PagePermission[] = [
     description: "Módulo de vendas e marketing",
     children: [
       { key: "gestao_vendas.leads", label: "Leads", parent: "gestao_vendas" },
+      // Contatos herda a permissão de Leads (mesma base de dados / módulo)
       { key: "gestao_vendas.marketing", label: "Marketing", parent: "gestao_vendas" },
       { key: "gestao_vendas.atendimento", label: "Atendimento", parent: "gestao_vendas" },
     ],
@@ -97,6 +98,7 @@ export const PAGE_PERMISSIONS: PagePermission[] = [
 export const ROUTE_TO_PERMISSION: Record<string, string> = {
   "/dashboard": "painel",
   "/dashboard/leads": "gestao_vendas.leads",
+  "/dashboard/leads/contatos": "gestao_vendas.leads",
   "/dashboard/vendas/meta-ads": "gestao_vendas.marketing",
   "/dashboard/atendimento": "gestao_vendas.atendimento",
   "/dashboard/clientes": "gestao_clientes.clientes",
