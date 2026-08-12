@@ -7,7 +7,7 @@ import { UserAvatar } from "./UserAvatar";
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border/80 bg-card/90 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-card/75 md:gap-4 md:px-5">
+    <header className="sticky top-0 z-10 flex h-12 items-center gap-3 bg-card/90 px-3 backdrop-blur-md supports-[backdrop-filter]:bg-card/75 md:gap-4 md:px-4">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <SidebarTrigger className="-ml-1 rounded-full" />
         <Separator orientation="vertical" className="hidden h-5 sm:block" />

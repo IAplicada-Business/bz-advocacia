@@ -29,8 +29,8 @@ export default function Atendimento() {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-6.5rem)] min-h-0 flex flex-col overflow-hidden">
-      <div className="border-b px-4 py-3 shrink-0">
+    <div className="h-[calc(100vh-5.5rem)] min-h-0 flex flex-col overflow-hidden">
+      <div className="shrink-0 pb-3">
         <h1 className="font-seasons text-2xl text-primary">Atendimento</h1>
         <p className="text-xs text-muted-foreground">
           Conversas ativas via WhatsApp — atendimento humano contínuo

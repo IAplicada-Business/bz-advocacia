@@ -194,15 +194,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="border-b border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/20">
-            <img src={logoBZ} alt="B&Z Advocacia" className="h-7 w-7 object-contain" />
+      <SidebarHeader className="px-3 py-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/20">
+            <img src={logoBZ} alt="B&Z Advocacia" className="h-6 w-6 object-contain" />
           </div>
           {!isCollapsed && (
             <div>
-              <h2 className="text-lg font-seasons font-semibold tracking-tight text-foreground">B&Z</h2>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Advocacia</p>
+              <h2 className="text-base font-seasons font-semibold tracking-tight text-foreground">B&Z</h2>
+              <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Advocacia</p>
             </div>
           )}
         </div>
