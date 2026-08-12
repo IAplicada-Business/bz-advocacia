@@ -132,8 +132,8 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
               <Tooltip formatter={(v: number) => fmtNum(v)} />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="impressoes" name="Impressões" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="cliques" name="Cliques" stroke="#f59e0b" strokeWidth={2} dot={false} />
+              <Line yAxisId="left" type="monotone" dataKey="impressoes" name="Impressões" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
+              <Line yAxisId="right" type="monotone" dataKey="cliques" name="Cliques" stroke="hsl(var(--chart-2))" strokeWidth={2.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -167,7 +167,7 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
                 <Tooltip />
                 <Legend />
                 <Line yAxisId="left" type="monotone" dataKey="ctr" name="CTR (%)" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
-                <Line yAxisId="right" type="monotone" dataKey="frequencia" name="Frequência" stroke="#ec4899" strokeWidth={2} dot={false} />
+                <Line yAxisId="right" type="monotone" dataKey="frequencia" name="Frequência" stroke="hsl(var(--chart-3))" strokeWidth={2.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

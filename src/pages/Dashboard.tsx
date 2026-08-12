@@ -38,17 +38,17 @@ function getGreeting() {
 }
 
 const COLORS_DONUT = [
-  { key: "urgentes", label: "Urgentes", color: "#A32D2D" },
-  { key: "atrasadas", label: "Atrasadas", color: "#854F0B" },
-  { key: "pendentes", label: "Pendentes", color: "#378ADD" },
-  { key: "concluidasSemana", label: "Concluídas", color: "#3B6D11" },
+  { key: "urgentes", label: "Urgentes", color: "hsl(var(--destructive))" },
+  { key: "atrasadas", label: "Atrasadas", color: "hsl(var(--chart-5))" },
+  { key: "pendentes", label: "Pendentes", color: "hsl(var(--chart-1))" },
+  { key: "concluidasSemana", label: "Concluídas", color: "hsl(var(--chart-4))" },
 ];
 
 const PIPELINE_STAGES = [
-  { key: "novo" as const, label: "Novo", color: "#378ADD" },
-  { key: "em_contato" as const, label: "Em contato", color: "#3B6D11" },
-  { key: "proposta" as const, label: "Proposta", color: "#854F0B" },
-  { key: "perdido" as const, label: "Perdido", color: "#A32D2D" },
+  { key: "novo" as const, label: "Novo", color: "hsl(var(--chart-1))" },
+  { key: "em_contato" as const, label: "Em contato", color: "hsl(var(--chart-4))" },
+  { key: "proposta" as const, label: "Proposta", color: "hsl(var(--chart-5))" },
+  { key: "perdido" as const, label: "Perdido", color: "hsl(var(--destructive))" },
 ];
 
 export default function Dashboard() {
@@ -101,7 +101,7 @@ export default function Dashboard() {
       label: "Processos ativos",
       value: processosAtivos,
       sub: `${processosConcluidos} concluído${processosConcluidos !== 1 ? "s" : ""} no mês`,
-      accent: "#378ADD",
+      accent: "hsl(var(--chart-1))",
       href: "/dashboard/processos",
     },
     {
@@ -111,7 +111,7 @@ export default function Dashboard() {
       sub: tarefas.urgentes > 0
         ? `${tarefas.urgentes} urgente${tarefas.urgentes > 1 ? "s" : ""} · ${tarefas.atrasadas} atrasada${tarefas.atrasadas > 1 ? "s" : ""}`
         : `${tarefas.concluidasSemana} concluída${tarefas.concluidasSemana !== 1 ? "s" : ""} esta semana`,
-      accent: tarefas.urgentes > 0 ? "#A32D2D" : "#3B6D11",
+      accent: tarefas.urgentes > 0 ? "hsl(var(--destructive))" : "hsl(var(--chart-4))",
       href: "/dashboard/processos/demandas",
     },
     {
@@ -121,7 +121,7 @@ export default function Dashboard() {
       sub: prazos.atrasados > 0
         ? `${prazos.atrasados} atrasado${prazos.atrasados > 1 ? "s" : ""} · ${prazos.hoje} hoje`
         : `${prazos.hoje} hoje · ${prazos.estaSemana} esta semana`,
-      accent: prazos.atrasados > 0 ? "#A32D2D" : "#3B6D11",
+      accent: prazos.atrasados > 0 ? "hsl(var(--destructive))" : "hsl(var(--chart-4))",
       href: "/dashboard/processos/calendario",
     },
     {
@@ -129,7 +129,7 @@ export default function Dashboard() {
       label: "Leads",
       value: leadsNoMes,
       sub: `${taxaConversao}% conversão · ${clientesAtivos} clientes (+${clientesNovos})`,
-      accent: "#3B6D11",
+      accent: "hsl(var(--chart-4))",
       href: "/dashboard/leads",
     },
   ];
@@ -243,7 +243,7 @@ export default function Dashboard() {
                 <div className="mt-3 space-y-1">
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">Conclusão semanal</span>
-                    <span className="font-semibold" style={{ color: "#3B6D11" }}>{taxaConclusao}%</span>
+                    <span className="font-semibold text-[hsl(var(--chart-4))]">{taxaConclusao}%</span>
                   </div>
                   <Progress value={taxaConclusao} className="h-1.5" />
                 </div>
@@ -259,11 +259,11 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-bold">Evolução mensal de processos</CardTitle>
               <div className="flex items-center gap-3 text-[11px]">
                 <div className="flex items-center gap-1">
-                  <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#3B6D11" }} />
+                  <div className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-4))]" />
                   <span className="text-muted-foreground">Abertos</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#A32D2D" }} />
+                  <div className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-2))]" />
                   <span className="text-muted-foreground">Concluídos</span>
                 </div>
               </div>
@@ -340,14 +340,14 @@ export default function Dashboard() {
               <div>
                 <div className="flex items-center justify-between text-xs mb-1">
                   <span className="text-muted-foreground">Conversão do mês</span>
-                  <span className="font-semibold" style={{ color: "#3B6D11" }}>{taxaConversao}%</span>
+                  <span className="font-semibold text-[hsl(var(--chart-4))]">{taxaConversao}%</span>
                 </div>
                 <Progress value={taxaConversao} className="h-1.5" />
               </div>
               {leadsParadosList.length > 0 && (
-                <div className="rounded-lg p-2 flex items-start gap-2" style={{ backgroundColor: "#FAEEDA" }}>
-                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "#854F0B" }} />
-                  <div className="text-[11px]" style={{ color: "#854F0B" }}>
+                <div className="rounded-xl p-2 flex items-start gap-2 bg-[hsl(var(--chart-5)/0.15)]">
+                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[hsl(var(--chart-5))]" />
+                  <div className="text-[11px] text-[hsl(var(--chart-5))]">
                     <span className="font-semibold">{leadsParadosList[0].nome}</span> parado há {leadsParadosList[0].dias_parado} dias
                     {leadsParadosList.length > 1 && ` (+${leadsParadosList.length - 1} outros)`}
                   </div>

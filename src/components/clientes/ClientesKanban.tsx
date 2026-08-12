@@ -27,10 +27,10 @@ interface ClienteWithProcessos extends Lead {
 type ClienteProcessoStatus = 'sem_processo' | 'em_andamento' | 'concluido' | 'arquivado';
 
 const CLIENTE_STATUS_COLUMNS: { status: ClienteProcessoStatus; titulo: string; color: string }[] = [
-  { status: "sem_processo", titulo: "Sem Processo", color: "bg-muted" },
-  { status: "em_andamento", titulo: "Em Andamento", color: "bg-blue-500" },
-  { status: "concluido", titulo: "Concluído", color: "bg-green-500" },
-  { status: "arquivado", titulo: "Arquivado", color: "bg-gray-500" },
+  { status: "sem_processo", titulo: "Sem Processo", color: "bg-muted-foreground/40" },
+  { status: "em_andamento", titulo: "Em Andamento", color: "bg-[hsl(var(--chart-1))]" },
+  { status: "concluido", titulo: "Concluído", color: "bg-[hsl(var(--chart-4))]" },
+  { status: "arquivado", titulo: "Arquivado", color: "bg-[hsl(var(--chart-3))]" },
 ];
 
 function ClienteCard({ cliente, onClick }: { cliente: ClienteWithProcessos; onClick: () => void }) {
