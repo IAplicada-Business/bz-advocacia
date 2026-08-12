@@ -38,17 +38,27 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
+interface SubMenuChild {
+  title: string;
+  url: string;
+  badge?: number;
+}
+
+interface SubMenuItem {
+  title: string;
+  url: string;
+  badge?: number;
+  /** Ex.: Contatos aninhado sob Leads (setinha abre/fecha). */
+  children?: SubMenuChild[];
+}
+
 interface MenuItem {
   title: string;
   label: string;
   icon: any;
   url?: string;
   badge?: number;
-  submenu?: {
-    title: string;
-    url: string;
-    badge?: number;
-  }[];
+  submenu?: SubMenuItem[];
 }
 
 const menuItems: MenuItem[] = [
@@ -63,8 +73,11 @@ const menuItems: MenuItem[] = [
     label: "Gestão de Vendas",
     icon: TrendingUp,
     submenu: [
-      { title: "Leads", url: "/dashboard/leads" },
-      { title: "Contatos", url: "/dashboard/leads/contatos" },
+      {
+        title: "Leads",
+        url: "/dashboard/leads",
+        children: [{ title: "Contatos", url: "/dashboard/leads/contatos" }],
+      },
       { title: "Marketing", url: "/dashboard/vendas/meta-ads" },
       { title: "Atendimento", url: "/dashboard/atendimento" },
     ]
@@ -142,43 +155,78 @@ export function AppSidebar() {
     return (permissoes ?? []).some((p: any) => p.page_key === chave && p.can_access);
   };
 
+  const routeMatches = (url: string, pathname: string) =>
+    pathname === url || pathname.startsWith(`${url}/`);
+
+  const subMatchesPath = (sub: SubMenuItem, pathname: string) =>
+    routeMatches(sub.url, pathname) ||
+    (sub.children?.some((c) => routeMatches(c.url, pathname)) ?? false);
+
   const visibleMenuItems = menuItems
     .map((item) => {
       if (!item.submenu) {
         if (item.url && !podeVerRota(item.url)) return null;
         return item;
       }
-      const subVisivel = item.submenu.filter((sub) => podeVerRota(sub.url));
+      const subVisivel = item.submenu
+        .map((sub) => {
+          const children = (sub.children ?? []).filter((c) => podeVerRota(c.url));
+          const parentOk = podeVerRota(sub.url);
+          if (!parentOk && children.length === 0) return null;
+          return {
+            ...sub,
+            children: children.length > 0 ? children : undefined,
+          };
+        })
+        .filter((x): x is SubMenuItem => x !== null);
       if (subVisivel.length === 0) return null;
       return { ...item, submenu: subVisivel };
     })
     .filter((x): x is MenuItem => x !== null);
 
-  const activeGroup = visibleMenuItems.find(item =>
-    item.submenu?.some(sub => location.pathname.startsWith(sub.url))
+  const activeGroup = visibleMenuItems.find((item) =>
+    item.submenu?.some((sub) => subMatchesPath(sub, location.pathname)),
   )?.title;
 
-
-  const [openMenus, setOpenMenus] = useState<string[]>(
-    () => {
-      const initial = menuItems.find(item =>
-        item.submenu?.some(sub => location.pathname.startsWith(sub.url))
-      )?.title;
-      return initial ? [initial] : [];
+  const [openMenus, setOpenMenus] = useState<string[]>(() => {
+    const initial: string[] = [];
+    const group = menuItems.find((item) =>
+      item.submenu?.some((sub) => subMatchesPath(sub, location.pathname)),
+    );
+    if (group) {
+      initial.push(group.title);
+      for (const sub of group.submenu ?? []) {
+        if (sub.children?.some((c) => routeMatches(c.url, location.pathname))) {
+          initial.push(`${group.title}:${sub.title}`);
+        }
+      }
     }
-  );
+    return initial;
+  });
 
   useEffect(() => {
-    if (activeGroup && !openMenus.includes(activeGroup)) {
-      setOpenMenus(prev => [...prev, activeGroup]);
-    }
+    const pathname = location.pathname;
+    setOpenMenus((prev) => {
+      const toAdd: string[] = [];
+      if (activeGroup && !prev.includes(activeGroup)) toAdd.push(activeGroup);
+      for (const item of menuItems) {
+        if (!item.submenu) continue;
+        for (const sub of item.submenu) {
+          if (!sub.children?.length) continue;
+          const nestedKey = `${item.title}:${sub.title}`;
+          const onChild = sub.children.some((c) => routeMatches(c.url, pathname));
+          if (onChild && !prev.includes(nestedKey) && !toAdd.includes(nestedKey)) {
+            toAdd.push(nestedKey);
+          }
+        }
+      }
+      return toAdd.length ? [...prev, ...toAdd] : prev;
+    });
   }, [location.pathname, activeGroup]);
-  
+
   const toggleMenu = (title: string) => {
-    setOpenMenus(prev => 
-      prev.includes(title) 
-        ? prev.filter(t => t !== title)
-        : [...prev, title]
+    setOpenMenus((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title],
     );
   };
 
@@ -286,36 +334,112 @@ export function AppSidebar() {
                       {!isCollapsed && (
                         <CollapsibleContent>
                           <SidebarMenuSub className="ml-3 border-l border-sidebar-border/80 pl-2">
-                            {item.submenu.map((subItem) => (
-                              <SidebarMenuSubItem key={subItem.url}>
-                                <SidebarMenuSubButton asChild className="rounded-lg">
-                                  <NavLink
-                                    to={subItem.url}
-                                    end={
-                                      // Evita "Leads" ficar ativo em /leads/contatos
-                                      item.submenu.some(
-                                        (other) =>
-                                          other.url !== subItem.url &&
-                                          other.url.startsWith(`${subItem.url}/`),
-                                      )
-                                    }
-                                    className={({ isActive }) =>
-                                      cn(
-                                        "flex items-center gap-2 rounded-lg text-sm",
-                                        isActive ? navActive : navIdle,
-                                      )
-                                    }
-                                  >
-                                    <span>{subItem.title}</span>
-                                    {subItem.badge && (
-                                      <Badge variant="secondary" className="ml-auto">
-                                        {subItem.badge}
-                                      </Badge>
-                                    )}
-                                  </NavLink>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
+                            {item.submenu!.map((subItem) => {
+                              const nestedKey = `${item.title}:${subItem.title}`;
+                              const hasChildren = (subItem.children?.length ?? 0) > 0;
+                              const nestedOpen = openMenus.includes(nestedKey);
+                              const useEnd =
+                                hasChildren ||
+                                item.submenu!.some(
+                                  (other) =>
+                                    other.url !== subItem.url &&
+                                    other.url.startsWith(`${subItem.url}/`),
+                                );
+
+                              if (!hasChildren) {
+                                return (
+                                  <SidebarMenuSubItem key={subItem.url}>
+                                    <SidebarMenuSubButton asChild className="rounded-lg">
+                                      <NavLink
+                                        to={subItem.url}
+                                        end={useEnd}
+                                        className={({ isActive }) =>
+                                          cn(
+                                            "flex items-center gap-2 rounded-lg text-sm",
+                                            isActive ? navActive : navIdle,
+                                          )
+                                        }
+                                      >
+                                        <span>{subItem.title}</span>
+                                        {subItem.badge && (
+                                          <Badge variant="secondary" className="ml-auto">
+                                            {subItem.badge}
+                                          </Badge>
+                                        )}
+                                      </NavLink>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              }
+
+                              return (
+                                <Collapsible
+                                  key={subItem.url}
+                                  open={nestedOpen}
+                                  onOpenChange={() => toggleMenu(nestedKey)}
+                                >
+                                  <SidebarMenuSubItem>
+                                    <div className="flex items-center gap-0.5">
+                                      <SidebarMenuSubButton asChild className="rounded-lg flex-1">
+                                        <NavLink
+                                          to={subItem.url}
+                                          end
+                                          className={({ isActive }) =>
+                                            cn(
+                                              "flex items-center gap-2 rounded-lg text-sm",
+                                              isActive ? navActive : navIdle,
+                                            )
+                                          }
+                                        >
+                                          <span>{subItem.title}</span>
+                                        </NavLink>
+                                      </SidebarMenuSubButton>
+                                      <CollapsibleTrigger asChild>
+                                        <button
+                                          type="button"
+                                          aria-label={
+                                            nestedOpen
+                                              ? `Recolher ${subItem.title}`
+                                              : `Expandir ${subItem.title}`
+                                          }
+                                          className={cn(
+                                            "flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
+                                            navIdle,
+                                          )}
+                                        >
+                                          {nestedOpen ? (
+                                            <ChevronUp className="h-3.5 w-3.5 opacity-60" />
+                                          ) : (
+                                            <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                                          )}
+                                        </button>
+                                      </CollapsibleTrigger>
+                                    </div>
+                                    <CollapsibleContent>
+                                      <SidebarMenuSub className="ml-2 mt-0.5 border-l border-sidebar-border/60 pl-2">
+                                        {subItem.children!.map((child) => (
+                                          <SidebarMenuSubItem key={child.url}>
+                                            <SidebarMenuSubButton asChild className="rounded-lg">
+                                              <NavLink
+                                                to={child.url}
+                                                className={({ isActive }) =>
+                                                  cn(
+                                                    "flex items-center gap-2 rounded-lg text-sm",
+                                                    isActive ? navActive : navIdle,
+                                                  )
+                                                }
+                                              >
+                                                <span>{child.title}</span>
+                                              </NavLink>
+                                            </SidebarMenuSubButton>
+                                          </SidebarMenuSubItem>
+                                        ))}
+                                      </SidebarMenuSub>
+                                    </CollapsibleContent>
+                                  </SidebarMenuSubItem>
+                                </Collapsible>
+                              );
+                            })}
                           </SidebarMenuSub>
                         </CollapsibleContent>
                       )}
