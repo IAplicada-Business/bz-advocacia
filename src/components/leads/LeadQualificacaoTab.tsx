@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCircle2, Sparkles, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FormRespostasInsights } from "@/components/leads/FormRespostasInsights";
 
 const AREA_LABEL: Record<string, string> = {
   familia: "Família",
@@ -96,6 +97,20 @@ export function LeadQualificacaoTab({
     },
   });
 
+  const { data: formCtx } = useQuery({
+    queryKey: ["lead-form-contexto", leadGeralId],
+    enabled: !!leadGeralId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("leads_geral")
+        .select("oferta_origem, form_flags, form_score, sdr_contexto, dados_capturados")
+        .eq("id", leadGeralId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   if (!leadGeralId) {
     return (
       <div className="text-center py-10 text-sm text-muted-foreground">
@@ -115,6 +130,15 @@ export function LeadQualificacaoTab({
 
   return (
     <div className="space-y-5">
+      <FormRespostasInsights
+        title="Respostas do formulário (LP)"
+        sdrContexto={formCtx?.sdr_contexto}
+        dadosCapturados={formCtx?.dados_capturados ?? dadosCapturados}
+        ofertaOrigem={formCtx?.oferta_origem}
+        formFlags={formCtx?.form_flags}
+        formScore={formCtx?.form_score}
+      />
+
       {/* Cabeçalho: badges resumo */}
       <div className="flex flex-wrap items-center gap-2">
         {area && (
