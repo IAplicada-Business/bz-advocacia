@@ -232,7 +232,9 @@ export function ClientesTable({ leads, isLoading, onViewDetails, onEdit }: Clien
               <TableCell className="capitalize">
                 {lead.tipo_processo === 'Outro' && lead.outro_tipo_processo
                   ? lead.outro_tipo_processo
-                  : lead.tipo_processo}
+                  : (lead.tipo_processo ?? "").trim()
+                    ? lead.tipo_processo
+                    : <span className="normal-case text-muted-foreground">Sem tipo</span>}
               </TableCell>
               <TableCell>
                 {lead.status_cliente ? (

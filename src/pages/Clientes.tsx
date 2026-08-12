@@ -11,6 +11,7 @@ import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailsDialog } from "@/components/leads/LeadDetailsDialog";
 import { ImportLeadsDialog } from "@/components/leads/ImportLeadsDialog";
 import { ImportClientesPlanilhaDialog } from "@/components/leads/ImportClientesPlanilhaDialog";
+import { ExportClientesDialog } from "@/components/clientes/ExportClientesDialog";
 import { useClientesAtivos } from "@/hooks/useClientesAtivos";
 import { supabase } from "@/integrations/supabase/client";
 import { Lead } from "@/types/leads";
@@ -23,6 +24,7 @@ export default function Clientes() {
   const [showNewLead, setShowNewLead] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showImportPlanilha, setShowImportPlanilha] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [leadToEdit, setLeadToEdit] = useState<Lead | null>(null);
 
@@ -34,6 +36,7 @@ export default function Clientes() {
     statusProcesso: [],
     semWhatsapp: false,
     semProcesso: searchParams.get("semProcesso") === "true",
+    semTipo: false,
     aniversariantes: (searchParams.get("aniversariantes") as 'hoje' | 'semana' | 'mes') || null,
   });
 
@@ -73,6 +76,9 @@ export default function Clientes() {
     }
     if (clientesFilters.tipoProcesso.length > 0 && result) {
       result = result.filter((l) => clientesFilters.tipoProcesso.includes(l.tipo_processo));
+    }
+    if (clientesFilters.semTipo && result) {
+      result = result.filter((l) => !(l.tipo_processo ?? "").trim());
     }
     if (clientesFilters.statusCliente.length > 0 && result) {
       result = result.filter(
@@ -119,6 +125,7 @@ export default function Clientes() {
     clientesFilters.statusProcesso.length > 0,
     clientesFilters.semWhatsapp,
     clientesFilters.semProcesso,
+    clientesFilters.semTipo,
     clientesFilters.aniversariantes !== null,
   ].filter(Boolean).length;
 
@@ -156,6 +163,7 @@ export default function Clientes() {
             onNewLead={() => { setLeadToEdit(null); setShowNewLead(true); }}
             onImport={() => setShowImport(true)}
             onImportPlanilha={() => setShowImportPlanilha(true)}
+            onExport={() => setShowExport(true)}
             search={clientesFilters.search}
             onSearchChange={(search) => setClientesFilters({ ...clientesFilters, search })}
             activeFiltersCount={activeFiltersCount}
@@ -180,6 +188,7 @@ export default function Clientes() {
       <NewLeadDialog open={showNewLead} onClose={handleCloseNewLead} lead={leadToEdit} isCliente={true} />
       <ImportLeadsDialog open={showImport} onClose={() => setShowImport(false)} isCliente={true} />
       <ImportClientesPlanilhaDialog open={showImportPlanilha} onClose={() => setShowImportPlanilha(false)} />
+      <ExportClientesDialog open={showExport} onClose={() => setShowExport(false)} clients={leads} />
       <LeadDetailsDialog open={selectedLead !== null} onClose={() => setSelectedLead(null)} lead={selectedLead} onEdit={handleEdit} isCliente={true} />
     </div>
   );

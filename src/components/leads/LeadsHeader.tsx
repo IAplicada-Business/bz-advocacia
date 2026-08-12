@@ -1,4 +1,4 @@
-import { Plus, Search, Filter, Table2, LayoutGrid, Upload, ChevronDown, FileSpreadsheet, Table } from "lucide-react";
+import { Plus, Search, Filter, Table2, LayoutGrid, Upload, ChevronDown, FileSpreadsheet, Table, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ interface LeadsHeaderProps {
   onNewLead: () => void;
   onImport: () => void;
   onImportPlanilha?: () => void;
+  onExport?: () => void;
   search: string;
   onSearchChange: (search: string) => void;
   activeFiltersCount: number;
@@ -48,6 +49,7 @@ export function LeadsHeader({
   onNewLead,
   onImport,
   onImportPlanilha,
+  onExport,
   search,
   onSearchChange,
   activeFiltersCount,
@@ -124,6 +126,13 @@ export function LeadsHeader({
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {onExport && (
+          <Button variant="outline" size="sm" onClick={onExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Exportar
+          </Button>
+        )}
 
         {!isClienteTab && onNomeFilterChange && (
           <Select
