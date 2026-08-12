@@ -137,6 +137,7 @@ export function inferStageFromLegacy(lead: {
 
   const s = lead.status_sdr;
   if (s === "cliente") return "ganho";
+  if (s === "desqualificado") return "desqualificado";
   if (s === "perdido" || s === "mql_frio" || s === "perdido_recuperacao") {
     // desqualificado tem stage próprio; status_sdr pode continuar 'perdido'
     if (lead.stage === "desqualificado") return "desqualificado";

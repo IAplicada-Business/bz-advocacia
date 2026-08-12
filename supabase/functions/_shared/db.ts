@@ -2,6 +2,11 @@
 // Helpers alinhados ao schema real V4: leads_geral + *_sdr.
 
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import {
+  mapStatusSdrToCrm,
+  stageFromStatusSdr,
+  shouldPreserveCrmStage,
+} from "./crm-espelho-map.ts";
 
 export function getSupabaseAdmin(): SupabaseClient {
   const url = Deno.env.get("SUPABASE_URL")!;
@@ -182,43 +187,6 @@ function mapPlatformToOrigem(platform: string | null | undefined): string {
   return "whatsapp_organico";
 }
 
-function mapStatusSdrToCrm(s: string | null | undefined): { status: string; estagio: string } {
-  // estagio CHECK: novo | contato_inicial | em_analise | proposta_enviada | fechado | perdido
-  switch (s) {
-    case "perdido":
-      return { status: "fechado", estagio: "perdido" };
-    case "mql_frio":
-      return { status: "fechado", estagio: "fechado" };
-    case "sql_aguardando_humano":
-      return { status: "qualificado", estagio: "em_analise" };
-    case "assumido_humano":
-      return { status: "em_andamento", estagio: "contato_inicial" };
-    case "em_atendimento_bot":
-      return { status: "em_andamento", estagio: "novo" };
-    default:
-      return { status: "novo", estagio: "novo" };
-  }
-}
-
-/** Kanban usa `stage` (enum) com prioridade sobre `estagio` legado — precisa sync. */
-function mapEstagioToStage(estagio: string): string {
-  switch (estagio) {
-    case "perdido":
-      return "perdido";
-    case "fechado":
-      return "ganho";
-    case "proposta_enviada":
-      return "proposta";
-    case "em_analise":
-      return "sal";
-    case "contato_inicial":
-      return "conectado";
-    case "novo":
-    default:
-      return "mql";
-  }
-}
-
 export async function espelharContactSubmission(
   supabase: SupabaseClient,
   lead: Pick<Lead,
@@ -249,33 +217,35 @@ export async function espelharContactSubmission(
   }
 
   const agora = new Date().toISOString();
+  const stage = stageFromStatusSdr(lead.status_sdr, estagio);
 
-
-  // 1) Já vinculado? só atualiza campos relevantes ao kanban.
+  // 1) Já vinculado? atualiza atividade/origem; não reseta stage comercial avançado.
   const { data: ligado } = await supabase
     .from("contact_submissions")
-    .select("id")
+    .select("id, stage, estagio")
     .eq("lead_geral_id", lead.id)
     .maybeSingle();
 
-  const stage = mapEstagioToStage(estagio);
-
   if (ligado) {
+    const prevStage = String((ligado as { stage?: string | null }).stage ?? "");
+    const preserve = shouldPreserveCrmStage(prevStage, lead.status_sdr);
     const patch: Record<string, unknown> = {
       nome_completo: lead.full_name ?? "Lead WhatsApp",
       telefone,
       tipo_processo,
       origem,
-      status,
-      estagio,
-      stage,
       data_ultima_atividade: agora,
       ultimo_contato_em: agora,
     };
+    if (!preserve) {
+      patch.status = status;
+      patch.estagio = estagio;
+      patch.stage = stage;
+    }
     if (platform.endsWith("_ads") || ["facebook", "instagram", "meta", "google", "tiktok", "linkedin"].includes(origem)) {
       patch.como_conheceu = "Mídia Paga";
     }
-    await supabase.from("contact_submissions").update(patch).eq("id", (ligado as any).id);
+    await supabase.from("contact_submissions").update(patch).eq("id", (ligado as { id: string }).id);
     return;
   }
 
@@ -307,9 +277,14 @@ export async function espelharContactSubmission(
     if (platform.endsWith("_ads")) {
       updates.como_conheceu = "Mídia Paga";
     }
-    const prevEstagio = String((porTelefone as any).estagio ?? "");
-    const prevStage = String((porTelefone as any).stage ?? "");
-    if (prevEstagio === "perdido" || prevStage === "perdido" || prevStage === "desqualificado") {
+    const prevEstagio = String((porTelefone as { estagio?: string | null }).estagio ?? "");
+    const prevStage = String((porTelefone as { stage?: string | null }).stage ?? "");
+    // Card já avançado sem vínculo: só linka, não força stage do bot.
+    if (shouldPreserveCrmStage(prevStage, lead.status_sdr)) {
+      delete updates.status;
+      delete updates.estagio;
+      delete updates.stage;
+    } else if (prevEstagio === "perdido" || prevStage === "perdido" || prevStage === "desqualificado") {
       updates.estagio = "novo";
       updates.status = "novo";
       updates.stage = "mql";
@@ -317,7 +292,7 @@ export async function espelharContactSubmission(
     await supabase
       .from("contact_submissions")
       .update(updates)
-      .eq("id", (porTelefone as any).id);
+      .eq("id", (porTelefone as { id: string }).id);
     return;
   }
 
