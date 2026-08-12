@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetaChartData } from "@/types/meta-ads";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 interface Props {
   chartData: MetaChartData[];
@@ -18,21 +19,50 @@ export function MetaAdsVisaoGeralTab({ chartData }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Performance no período</CardTitle>
+        <CardTitle className="text-base md:text-lg">Performance no período</CardTitle>
+        <p className="text-xs text-muted-foreground">Gasto e leads com evolução contínua</p>
       </CardHeader>
       <CardContent>
         {hasData ? (
           <ResponsiveContainer width="100%" height={360}>
-            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="data" tick={{ fontSize: 11 }} />
-              <YAxis yAxisId="left" tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v: number, n) => (n === "Gasto" ? [fmtBRL(v), n] : [v, n])} />
+            <AreaChart data={chartData} margin={{ top: 8, right: 20, left: 0, bottom: 5 }}>
+              <ChartGradientDefs
+                gradients={[
+                  { id: "meta-gasto", color: "hsl(var(--chart-1))" },
+                  { id: "meta-leads", color: "hsl(var(--chart-4))", fromOpacity: 0.25, glow: false },
+                ]}
+              />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="data" {...modernAxisProps} />
+              <YAxis yAxisId="left" tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} {...modernAxisProps} width={48} />
+              <YAxis yAxisId="right" orientation="right" {...modernAxisProps} width={36} />
+              <Tooltip
+                contentStyle={chartTooltipStyle}
+                formatter={(v: number, n) => (n === "Gasto" ? [fmtBRL(v), n] : [v, n])}
+              />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="gasto" name="Gasto" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--chart-4))" strokeWidth={2.5} dot={false} />
-            </LineChart>
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="gasto"
+                name="Gasto"
+                stroke="hsl(var(--chart-1))"
+                strokeWidth={2.75}
+                fill="url(#meta-gasto)"
+                filter="url(#meta-gasto-glow)"
+                dot={false}
+              />
+              <Area
+                yAxisId="right"
+                type="monotone"
+                dataKey="leads"
+                name="Leads"
+                stroke="hsl(var(--chart-4))"
+                strokeWidth={2.5}
+                fill="url(#meta-leads)"
+                dot={false}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           <p className="text-sm text-muted-foreground text-center py-12">

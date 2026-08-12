@@ -56,11 +56,15 @@ export function LeadsDistributionChart({ data, loading }: LeadsDistributionChart
                 data={chartData}
                 cx="50%"
                 cy="50%"
+                innerRadius={62}
+                outerRadius={100}
+                paddingAngle={3}
                 labelLine={false}
                 label={(entry) => `${entry.name}: ${entry.percentage.toFixed(1)}%`}
-                outerRadius={100}
                 fill="hsl(var(--chart-1))"
                 dataKey="value"
+                stroke="hsl(var(--card))"
+                strokeWidth={3}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS] || COLORS.outro} />
@@ -69,9 +73,11 @@ export function LeadsDistributionChart({ data, loading }: LeadsDistributionChart
               <Tooltip
                 formatter={(value: number) => [`${value} leads`, 'Total']}
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
+                  backgroundColor: 'hsl(var(--popover))',
                   border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
+                  borderRadius: '14px',
+                  boxShadow: 'var(--shadow-glow)',
+                  fontSize: 12,
                 }}
               />
             </PieChart>

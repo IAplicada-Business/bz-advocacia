@@ -22,10 +22,10 @@ interface FaturamentoChartsProps {
   onSelectMonth?: (mes: string) => void;
 }
 
-const COR_NOVOS = "hsl(var(--primary))";
-const COR_ENTRADAS = "#94a3b8"; // slate-400
-const COR_PROJECAO = "#38bdf8"; // sky-400 (a receber / futuro)
-const COR_META = "#f59e0b"; // amber-500
+const COR_NOVOS = "hsl(var(--chart-1))";
+const COR_ENTRADAS = "hsl(var(--chart-3))";
+const COR_PROJECAO = "hsl(var(--chart-4))";
+const COR_META = "hsl(var(--chart-5))";
 
 export function FaturamentoCharts({ filters, selectedMes, onSelectMonth }: FaturamentoChartsProps) {
   const { data: chartData = [] } = useFaturamentoMensal(filters);
@@ -89,25 +89,28 @@ export function FaturamentoCharts({ filters, selectedMes, onSelectMonth }: Fatur
                 if (mes && onSelectMonth) onSelectMonth(String(mes));
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <CartesianGrid strokeDasharray="3 8" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.55} />
               <XAxis
                 dataKey="mes"
                 tickFormatter={formatXAxis}
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                tickLine={false}
+                axisLine={false}
                 angle={chartData.length > 6 ? -45 : 0}
                 textAnchor={chartData.length > 6 ? "end" : "middle"}
                 height={chartData.length > 6 ? 60 : 30}
-                className="text-muted-foreground"
               />
-              <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} className="text-muted-foreground" />
+              <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
               <Tooltip
                 formatter={(value: number, name: string) => [formatCurrencyFull(value), nomeSerie(name)]}
                 labelFormatter={formatTooltipLabel}
                 cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
+                  backgroundColor: 'hsl(var(--popover))',
                   border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  borderRadius: '14px',
+                  boxShadow: 'var(--shadow-glow)',
+                  fontSize: 12,
                 }}
               />
               <Legend formatter={(value: string) => nomeSerie(value)} />

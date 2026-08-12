@@ -189,11 +189,11 @@ export function AppSidebar() {
   };
 
   const navActive =
-    "relative bg-sidebar-accent text-sidebar-accent-foreground font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-primary";
-  const navIdle = "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
+    "relative bg-gradient-to-r from-primary/25 via-primary/10 to-transparent text-sidebar-accent-foreground font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-primary before:shadow-[0_0_12px_hsl(var(--primary)/0.8)]";
+  const navIdle = "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/20">

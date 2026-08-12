@@ -5,11 +5,12 @@ import { PeriodoFiltro } from "@/types/meta-ads";
 import { subDays, format } from "date-fns";
 import { useMemo } from "react";
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer,
 } from "recharts";
 import { Eye, MousePointerClick, Users, Repeat, Activity, Target } from "lucide-react";
 import { MiniCard } from "./MiniCard";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 interface Props { periodo: PeriodoFiltro; }
 
@@ -122,19 +123,27 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
 
       {/* Impressoes + cliques no tempo */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Impressões e cliques por dia</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base md:text-lg">Impressões e cliques por dia</CardTitle>
+        </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={byDay} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="data" tick={{ fontSize: 11 }} />
-              <YAxis yAxisId="left" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => fmtNum(v)} />
+            <AreaChart data={byDay} margin={{ top: 8, right: 20, left: 0, bottom: 5 }}>
+              <ChartGradientDefs
+                gradients={[
+                  { id: "perf-imp", color: "hsl(var(--chart-1))" },
+                  { id: "perf-clk", color: "hsl(var(--chart-2))", fromOpacity: 0.22, glow: false },
+                ]}
+              />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="data" {...modernAxisProps} />
+              <YAxis yAxisId="left" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} {...modernAxisProps} width={40} />
+              <YAxis yAxisId="right" orientation="right" {...modernAxisProps} width={36} />
+              <Tooltip formatter={(v: number) => fmtNum(v)} contentStyle={chartTooltipStyle} />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="impressoes" name="Impressões" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="cliques" name="Cliques" stroke="hsl(var(--chart-2))" strokeWidth={2.5} dot={false} />
-            </LineChart>
+              <Area yAxisId="left" type="monotone" dataKey="impressoes" name="Impressões" stroke="hsl(var(--chart-1))" strokeWidth={2.75} fill="url(#perf-imp)" filter="url(#perf-imp-glow)" dot={false} />
+              <Area yAxisId="right" type="monotone" dataKey="cliques" name="Cliques" stroke="hsl(var(--chart-2))" strokeWidth={2.5} fill="url(#perf-clk)" dot={false} />
+            </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
@@ -145,12 +154,12 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
           <CardHeader><CardTitle className="text-base">Alcance por dia</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={byDay} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="data" tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => fmtNum(v)} />
-                <Bar dataKey="alcance" name="Alcance" fill="hsl(var(--chart-4))" radius={[6, 6, 0, 0]} />
+              <BarChart data={byDay} margin={{ top: 8, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="data" {...modernAxisProps} />
+                <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} {...modernAxisProps} width={40} />
+                <Tooltip formatter={(v: number) => fmtNum(v)} contentStyle={chartTooltipStyle} />
+                <Bar dataKey="alcance" name="Alcance" fill="hsl(var(--chart-4))" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -159,16 +168,22 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
           <CardHeader><CardTitle className="text-base">CTR e Frequência por dia</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={byDay} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="data" tick={{ fontSize: 11 }} />
-                <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-                <Tooltip />
+              <AreaChart data={byDay} margin={{ top: 8, right: 20, left: 0, bottom: 5 }}>
+                <ChartGradientDefs
+                  gradients={[
+                    { id: "perf-ctr", color: "hsl(var(--chart-1))" },
+                    { id: "perf-freq", color: "hsl(var(--chart-3))", fromOpacity: 0.2, glow: false },
+                  ]}
+                />
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="data" {...modernAxisProps} />
+                <YAxis yAxisId="left" {...modernAxisProps} tickFormatter={(v) => `${v.toFixed(1)}%`} width={40} />
+                <YAxis yAxisId="right" orientation="right" {...modernAxisProps} width={36} />
+                <Tooltip contentStyle={chartTooltipStyle} />
                 <Legend />
-                <Line yAxisId="left" type="monotone" dataKey="ctr" name="CTR (%)" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
-                <Line yAxisId="right" type="monotone" dataKey="frequencia" name="Frequência" stroke="hsl(var(--chart-3))" strokeWidth={2.5} dot={false} />
-              </LineChart>
+                <Area yAxisId="left" type="monotone" dataKey="ctr" name="CTR (%)" stroke="hsl(var(--chart-1))" strokeWidth={2.75} fill="url(#perf-ctr)" filter="url(#perf-ctr-glow)" dot={false} />
+                <Area yAxisId="right" type="monotone" dataKey="frequencia" name="Frequência" stroke="hsl(var(--chart-3))" strokeWidth={2.5} fill="url(#perf-freq)" dot={false} />
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

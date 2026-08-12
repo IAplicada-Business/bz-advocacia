@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useDespesasPorCategoria } from "@/hooks/useDespesas";
 import type { DespesasGlobalFiltersState } from "./DespesasGlobalFilters";
+import { chartTooltipStyle } from "@/components/charts/ChartPrimitives";
+import { CHART_SERIES } from "@/lib/chartConfig";
 
 interface DespesasChartsProps {
   filters?: DespesasGlobalFiltersState;
@@ -10,22 +12,17 @@ interface DespesasChartsProps {
 export function DespesasCharts({ filters }: DespesasChartsProps) {
   const { data: despesasPorCategoria } = useDespesasPorCategoria(filters);
 
-  // O hook ja resolve o label (subcategoria "juliana" -> "Juliana",
-  // "aluguel" -> "Aluguel e Condomínio", desconhecidas -> Title Case).
-  // Nao fazemos mais lookup em CATEGORIA_DESPESA_LABELS porque o type
-  // era um enum fechado que nao cobria subcategorias reais do banco.
   const despesasChartData = despesasPorCategoria?.map((item) => ({
     name: item.categoria,
     value: item.total,
     percentual: item.percentual,
   }));
 
-  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Despesas por Categoria</CardTitle>
+        <CardTitle className="text-base md:text-lg">Despesas por Categoria</CardTitle>
+        <p className="text-xs text-muted-foreground">Distribuição do período</p>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -34,21 +31,28 @@ export function DespesasCharts({ filters }: DespesasChartsProps) {
               data={despesasChartData}
               cx="50%"
               cy="50%"
+              innerRadius={62}
+              outerRadius={100}
+              paddingAngle={3}
               labelLine={false}
               label={(entry) => `${entry.name}: ${entry.percentual?.toFixed(0) || 0}%`}
-              outerRadius={100}
               fill="hsl(var(--chart-1))"
               dataKey="value"
+              stroke="hsl(var(--card))"
+              strokeWidth={3}
             >
-              {despesasChartData?.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              {despesasChartData?.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={CHART_SERIES[index % CHART_SERIES.length]} />
               ))}
             </Pie>
-            <Tooltip 
-              formatter={(value: number) => new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-              }).format(value)}
+            <Tooltip
+              contentStyle={chartTooltipStyle}
+              formatter={(value: number) =>
+                new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(value)
+              }
             />
           </PieChart>
         </ResponsiveContainer>
