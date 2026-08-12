@@ -17,35 +17,24 @@ function lead(partial: Partial<Lead>): Lead {
 }
 
 describe("isContato", () => {
-  it("inclui MQL mesmo com status_cliente=ativo (default da coluna)", () => {
+  it("inclui lead do funil mesmo com status_cliente=ativo (default)", () => {
     expect(isContato(lead({ stage: "mql", status_cliente: "ativo" }))).toBe(true);
+    expect(isContato(lead({ stage: "proposta", status_cliente: "ativo" }))).toBe(true);
   });
 
-  it("inclui proposta / perdido / desqualificado", () => {
-    expect(isContato(lead({ stage: "proposta" }))).toBe(true);
+  it("inclui perdido / desqualificado (não são clientes)", () => {
     expect(isContato(lead({ stage: "perdido", estagio: "perdido" }))).toBe(true);
     expect(isContato(lead({ stage: "desqualificado" }))).toBe(true);
   });
 
-  it("exclui ganho e status_sdr=cliente", () => {
+  it("exclui quem está em Clientes (ganho / fechado / status_sdr cliente)", () => {
     expect(isContato(lead({ stage: "ganho", estagio: "fechado" }))).toBe(false);
-    expect(isContato(lead({ stage: "mql", status_sdr: "cliente" }))).toBe(false);
+    expect(isContato(lead({ stage: "mql", estagio: "fechado" }))).toBe(false);
+    expect(isContato(lead({ stage: "conectado", status_sdr: "cliente" }))).toBe(false);
   });
 
   it("exclui importação e não-leads", () => {
     expect(isContato(lead({ como_conheceu: "importacao" }))).toBe(false);
     expect(isContato(lead({ tipo_contato: "fornecedor" }))).toBe(false);
-  });
-
-  it("exclui legado convertido (estagio fechado + status convertido)", () => {
-    expect(
-      isContato(
-        lead({
-          stage: "conectado",
-          estagio: "fechado",
-          status: "convertido",
-        }),
-      ),
-    ).toBe(false);
   });
 });

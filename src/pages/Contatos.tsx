@@ -84,7 +84,7 @@ export default function Contatos() {
         <div>
           <h1 className="text-3xl font-seasons text-primary">Contatos</h1>
           <p className="text-muted-foreground">
-            Todos os leads que ainda não viraram clientes, em qualquer estágio
+            Leads do funil que ainda não são clientes (quem já ganhou fica em Clientes)
           </p>
         </div>
         <Badge variant="secondary" className="rounded-full px-3 py-1 text-sm">
