@@ -122,7 +122,7 @@ export default function Dashboard() {
         </div>
         <SegmentControl
           value={segment}
-          onChange={setSegment}
+          onChange={(v) => setSegment(v as typeof segment)}
           size="md"
           options={[
             { value: "operacao", label: "Operação" },
@@ -221,7 +221,7 @@ export default function Dashboard() {
               </div>
               <SegmentControl
                 value={range}
-                onChange={setRange}
+                onChange={(v) => setRange(v as typeof range)}
                 options={[
                   { value: "3m", label: "3M" },
                   { value: "6m", label: "6M" },
