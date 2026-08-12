@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, BookOpen, Sparkles, Video, Zap } from "lucide-react";
-import GuiaDeUso from "./GuiaDeUso";
+import { Bell, Sparkles, Video, Zap } from "lucide-react";
 import Atualizacoes from "./Atualizacoes";
 import Automacoes from "./Automacoes";
 import Treinamentos from "./Treinamentos";
@@ -12,16 +11,12 @@ export default function Controle() {
       <div>
         <h1 className="text-3xl font-seasons text-primary">Controle</h1>
         <p className="text-muted-foreground mt-2">
-          Guia de uso, alertas, atualizações do sistema, treinamentos e automações
+          Alertas, atualizações do sistema, treinamentos e automações
         </p>
       </div>
 
-      <Tabs defaultValue="guia" className="w-full">
+      <Tabs defaultValue="alertas" className="w-full">
         <TabsList>
-          <TabsTrigger value="guia" className="gap-2">
-            <BookOpen className="h-4 w-4" />
-            Guia de Uso
-          </TabsTrigger>
           <TabsTrigger value="alertas" className="gap-2">
             <Bell className="h-4 w-4" />
             Alertas
@@ -39,10 +34,6 @@ export default function Controle() {
             Automações
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="guia">
-          <GuiaDeUso />
-        </TabsContent>
 
         <TabsContent value="alertas">
           <AlertasSdrControle />
