@@ -341,6 +341,13 @@ export type Database = {
             foreignKeyName: "bot_errors_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "bot_errors_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
@@ -430,6 +437,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "leads_geral"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campanhas_envio_lead_geral_id_fkey"
+            columns: ["lead_geral_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "campanhas_envio_lead_geral_id_fkey"
@@ -1425,6 +1439,13 @@ export type Database = {
             foreignKeyName: "eventos_sdr_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "eventos_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
@@ -1724,6 +1745,13 @@ export type Database = {
             foreignKeyName: "lead_form_answers_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "lead_form_answers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
@@ -1903,6 +1931,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "leads_geral"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_backlog_lead_geral_id_fkey"
+            columns: ["lead_geral_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "leads_backlog_lead_geral_id_fkey"
@@ -2306,6 +2341,13 @@ export type Database = {
             foreignKeyName: "mensagens_sdr_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "mensagens_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
@@ -2513,6 +2555,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      meta_capi_events_log: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_name: string
+          id: number
+          lead_id: string
+          ok: boolean | null
+          response: Json | null
+          stage: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_name: string
+          id?: number
+          lead_id: string
+          ok?: boolean | null
+          response?: Json | null
+          stage?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_name?: string
+          id?: number
+          lead_id?: string
+          ok?: boolean | null
+          response?: Json | null
+          stage?: string | null
+        }
+        Relationships: []
       }
       meta_connections: {
         Row: {
@@ -3476,6 +3551,13 @@ export type Database = {
             foreignKeyName: "qualificacao_estruturada_sdr_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: true
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "qualificacao_estruturada_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
             referencedRelation: "v_meta_lead_funnel"
             referencedColumns: ["lead_id"]
           },
@@ -3516,6 +3598,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "leads_geral"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualificacoes_sdr_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_crm_funnel"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "qualificacoes_sdr_lead_id_fkey"
@@ -4741,6 +4830,26 @@ export type Database = {
       }
     }
     Views: {
+      v_meta_ad_crm_funnel: {
+        Row: {
+          ad_id: string | null
+          ad_name: string | null
+          adset_id: string | null
+          adset_name: string | null
+          avancado: boolean | null
+          campaign_id: string | null
+          campaign_name: string | null
+          converted: boolean | null
+          crm_stage: string | null
+          is_mql: boolean | null
+          lead_at: string | null
+          lead_id: string | null
+          origem_sdr: string | null
+          platform: string | null
+          status_sdr: string | null
+        }
+        Relationships: []
+      }
       v_meta_lead_funnel: {
         Row: {
           ad_id: string | null
