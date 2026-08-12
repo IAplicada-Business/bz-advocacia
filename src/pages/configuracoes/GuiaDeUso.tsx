@@ -43,17 +43,6 @@ const guias = [
     ]
   },
   {
-    id: "pesquisas",
-    icon: Search,
-    titulo: "Pesquisas e Consultas",
-    conteudo: [
-      "Como realizar pesquisas de pessoa física/jurídica",
-      "Consultando histórico de pesquisas anteriores",
-      "Entendendo os créditos de consulta",
-      "Configuração da API de pesquisa"
-    ]
-  },
-  {
     id: "comunicacao",
     icon: MessageSquare,
     titulo: "Comunicação e WhatsApp",
