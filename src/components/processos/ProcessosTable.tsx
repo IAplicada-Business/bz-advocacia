@@ -111,8 +111,8 @@ function ProcessoRow({
         )}
       </TableCell>
 
-      <TableCell>
-        <Badge variant={getStatusBadgeVariant(processo.status)}>
+      <TableCell className="min-w-[140px] whitespace-nowrap">
+        <Badge variant={getStatusBadgeVariant(processo.status)} className="whitespace-nowrap">
           {PROCESSO_STATUS_LABELS[processo.status]}
         </Badge>
       </TableCell>
@@ -298,7 +298,7 @@ export function ProcessosTable({
               </TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Tribunal</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="min-w-[140px] whitespace-nowrap">Status</TableHead>
               <TableHead>Última Atualização</TableHead>
               <TableHead>Próximo Prazo</TableHead>
               <TableHead>Docs</TableHead>
