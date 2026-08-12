@@ -16,11 +16,11 @@ export function DashboardEvolucaoProcessosV2({ data, loading }: Props) {
           <CardTitle className="text-sm font-bold">Evolução mensal de processos</CardTitle>
           <div className="flex items-center gap-3 text-[11px]">
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#3B6D11" }} />
+              <div className="w-3 h-3 rounded-sm bg-[hsl(var(--chart-4))]" />
               <span className="text-muted-foreground">Abertos</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#A32D2D" }} />
+              <div className="w-3 h-3 rounded-sm bg-[hsl(var(--chart-2))]" />
               <span className="text-muted-foreground">Concluídos</span>
             </div>
           </div>
@@ -43,8 +43,8 @@ export function DashboardEvolucaoProcessosV2({ data, loading }: Props) {
                   fontSize: 12,
                 }}
               />
-              <Bar dataKey="abertos" fill="#3B6D11" radius={[3, 3, 0, 0]} name="Abertos" />
-              <Bar dataKey="concluidos" fill="#A32D2D" radius={[3, 3, 0, 0]} name="Concluídos" />
+              <Bar dataKey="abertos" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} name="Abertos" />
+              <Bar dataKey="concluidos" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Concluídos" />
             </BarChart>
           </ResponsiveContainer>
         )}

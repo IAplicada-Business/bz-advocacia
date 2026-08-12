@@ -49,18 +49,18 @@ export const LEAD_STAGE_LABELS: Record<LeadStage, string> = {
   desqualificado: "Desqualificado",
 };
 
-/** Cores da borda superior das colunas do kanban. */
+/** Cores da borda superior das colunas do kanban (paleta B&Z). */
 export const LEAD_STAGE_COLORS: Record<LeadStage, string> = {
-  mql: "border-t-blue-500",
-  conectado: "border-t-sky-500",
-  sal: "border-t-purple-500",
-  reuniao_agendada: "border-t-violet-500",
-  reuniao_realizada: "border-t-fuchsia-500",
-  proposta: "border-t-amber-500",
-  contrato: "border-t-orange-500",
-  ganho: "border-t-emerald-500",
-  perdido: "border-t-red-500",
-  desqualificado: "border-t-slate-400",
+  mql: "border-t-[hsl(var(--chart-1))]",
+  conectado: "border-t-[hsl(var(--chart-5))]",
+  sal: "border-t-[hsl(var(--chart-2))]",
+  reuniao_agendada: "border-t-[hsl(var(--chart-1)/0.75)]",
+  reuniao_realizada: "border-t-[hsl(var(--chart-3))]",
+  proposta: "border-t-[hsl(var(--chart-5))]",
+  contrato: "border-t-[hsl(var(--chart-2))]",
+  ganho: "border-t-[hsl(var(--chart-4))]",
+  perdido: "border-t-destructive",
+  desqualificado: "border-t-muted-foreground/50",
 };
 
 /** Mapeia stage novo → estagio legado (contact_submissions) para rollback. */

@@ -7,16 +7,16 @@ import { Demanda } from "@/types/demandas";
 import { useOpcoesSistema } from "@/hooks/useOpcoesSistema";
 
 const DEFAULT_COLUMNS = [
-  { key: 'pendente', label: 'Pendente', color: 'bg-yellow-500' },
-  { key: 'em_andamento', label: 'Em Andamento', color: 'bg-blue-500' },
-  { key: 'concluido', label: 'Concluído', color: 'bg-green-500' },
+  { key: 'pendente', label: 'Pendente', color: 'bg-[hsl(var(--chart-5))]' },
+  { key: 'em_andamento', label: 'Em Andamento', color: 'bg-[hsl(var(--chart-1))]' },
+  { key: 'concluido', label: 'Concluído', color: 'bg-[hsl(var(--chart-4))]' },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  pendente: 'bg-yellow-500',
-  em_andamento: 'bg-blue-500',
-  concluido: 'bg-green-500',
-  cancelado: 'bg-red-500',
+  pendente: 'bg-[hsl(var(--chart-5))]',
+  em_andamento: 'bg-[hsl(var(--chart-1))]',
+  concluido: 'bg-[hsl(var(--chart-4))]',
+  cancelado: 'bg-destructive',
 };
 
 interface DemandasKanbanProps {

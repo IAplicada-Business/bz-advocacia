@@ -7,120 +7,123 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  /*
+   * B&Z Design System v2 — CRM
+   * UI kit modular + ouro da marca (#C5A059) como primary (equivalente ao amarelo do kit).
+   * Texto sobre primary = ink escuro (como no kit).
+   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 72 6% 18%;
+    --background: 40 20% 97%;
+    --foreground: 120 8% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 72 6% 18%;
+    --card-foreground: 120 8% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 72 6% 18%;
+    --popover-foreground: 120 8% 11%;
 
-    --primary: 30 33% 55%;
-    --primary-foreground: 0 0% 100%;
+    /* Ouro B&Z — CTA / selected / charts */
+    --primary: 38 45% 56%;
+    --primary-foreground: 120 8% 11%;
 
-    --secondary: 220 4% 40%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 40 10% 92%;
+    --secondary-foreground: 120 8% 18%;
 
-    --muted: 0 0% 95%;
-    --muted-foreground: 220 4% 40%;
+    --muted: 40 14% 93%;
+    --muted-foreground: 30 6% 42%;
 
-    --accent: 30 33% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 38 45% 92%;
+    --accent-foreground: 120 8% 14%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 30 33% 55%;
+    --success: 152 45% 36%;
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
-    
-    /* Custom B&Z Design Tokens */
-    --bz-bronze: 30 33% 55%;
-    --bz-gray: 220 4% 40%;
-    --bz-dark: 72 6% 18%;
-    --bz-light: 0 0% 95%;
-    
-    /* Chart Colors - Consistent palette */
-    --chart-1: 30 33% 55%;      /* Terra cota / Bronze (primary) */
-    --chart-2: 220 4% 40%;      /* Cinza (secondary) */
-    --chart-3: 72 6% 18%;       /* Escuro (foreground) */
-    --chart-4: 142 76% 36%;     /* Verde (success) */
-    --chart-5: 38 92% 50%;      /* Amarelo (warning) */
-    
-    /* Gradients */
-    --gradient-overlay: linear-gradient(135deg, hsla(72, 6%, 18%, 0.85) 0%, hsla(220, 4%, 40%, 0.75) 100%);
-    
-    /* Shadows */
-    --shadow-elegant: 0 10px 40px -10px hsla(72, 6%, 18%, 0.3);
-    
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --warning: 32 90% 48%;
+    --warning-foreground: 120 8% 11%;
 
-    --sidebar-background: 0 0% 98%;
+    --info: 210 70% 48%;
+    --info-foreground: 0 0% 100%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --border: 36 16% 88%;
+    --input: 36 16% 88%;
+    --ring: 38 45% 56%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --radius: 1rem;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --bz-gold: 38 45% 56%;
+    --bz-bronze: 30 33% 48%;
+    --bz-ink: 120 8% 11%;
+    --bz-stone: 40 14% 93%;
+    --bz-gray: 30 6% 42%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    /* Evolução natural: ouro → bronze → ink → sage → âmbar */
+    --chart-1: 38 45% 56%;
+    --chart-2: 30 33% 48%;
+    --chart-3: 120 8% 22%;
+    --chart-4: 152 32% 42%;
+    --chart-5: 28 80% 52%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --gradient-overlay: linear-gradient(135deg, hsla(120, 8%, 11%, 0.88) 0%, hsla(38, 45%, 30%, 0.72) 100%);
+    --shadow-elegant: 0 12px 40px -16px hsla(120, 8%, 11%, 0.18);
+    --shadow-card: 0 1px 2px hsla(120, 8%, 11%, 0.04), 0 8px 24px -12px hsla(120, 8%, 11%, 0.08);
+    --transition-smooth: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 120 8% 18%;
+    --sidebar-primary: 38 45% 56%;
+    --sidebar-primary-foreground: 120 8% 11%;
+    --sidebar-accent: 38 45% 94%;
+    --sidebar-accent-foreground: 120 8% 14%;
+    --sidebar-border: 36 16% 90%;
+    --sidebar-ring: 38 45% 56%;
   }
 
   .dark {
-    --background: 72 6% 18%;
-    --foreground: 0 0% 100%;
+    --background: 120 8% 9%;
+    --foreground: 40 20% 96%;
 
-    --card: 220 4% 25%;
-    --card-foreground: 0 0% 100%;
+    --card: 120 6% 13%;
+    --card-foreground: 40 20% 96%;
 
-    --popover: 72 6% 18%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 120 6% 13%;
+    --popover-foreground: 40 20% 96%;
 
-    --primary: 30 33% 55%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 38 48% 58%;
+    --primary-foreground: 120 8% 11%;
 
-    --secondary: 220 4% 40%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 120 5% 18%;
+    --secondary-foreground: 40 20% 96%;
 
-    --muted: 220 4% 30%;
-    --muted-foreground: 0 0% 70%;
+    --muted: 120 5% 18%;
+    --muted-foreground: 40 10% 70%;
 
-    --accent: 30 33% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 38 30% 20%;
+    --accent-foreground: 40 20% 96%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 4% 30%;
-    --input: 220 4% 30%;
-    --ring: 30 33% 55%;
-    
-    /* Chart Colors - Dark mode */
-    --chart-1: 30 33% 60%;      /* Terra cota mais claro */
-    --chart-2: 220 4% 55%;      /* Cinza mais claro */
-    --chart-3: 0 0% 80%;        /* Claro */
-    --chart-4: 142 76% 45%;     /* Verde mais claro */
-    --chart-5: 38 92% 55%;      /* Amarelo mais claro */
-    
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 120 5% 22%;
+    --input: 120 5% 22%;
+    --ring: 38 48% 58%;
+
+    --chart-1: 38 48% 60%;
+    --chart-2: 30 36% 55%;
+    --chart-3: 40 20% 80%;
+    --chart-4: 152 36% 48%;
+    --chart-5: 28 82% 58%;
+
+    --sidebar-background: 120 8% 8%;
+    --sidebar-foreground: 40 20% 96%;
+    --sidebar-primary: 38 48% 58%;
+    --sidebar-primary-foreground: 120 8% 11%;
+    --sidebar-accent: 38 25% 16%;
+    --sidebar-accent-foreground: 40 20% 96%;
+    --sidebar-border: 120 5% 16%;
+    --sidebar-ring: 38 48% 58%;
   }
 }
 
@@ -130,7 +133,19 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01" on, "cv11" on;
+  }
+
+  /* Títulos de página no shell do CRM */
+  #main-content h1 {
+    @apply font-seasons tracking-tight text-foreground;
+  }
+}
+
+@layer utilities {
+  .shadow-bz {
+    box-shadow: var(--shadow-card);
   }
 }
 
