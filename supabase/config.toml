@@ -109,3 +109,15 @@ verify_jwt = false
 [functions.reativar-bot-contato]
 verify_jwt = true
 
+
+[functions.public-form-submit]
+verify_jwt = false
+
+[functions.classify-form-lead]
+verify_jwt = false
+
+[functions.whatsapp-bot-dispatch]
+verify_jwt = false
+
+[functions.notify-mariana-desq]
+verify_jwt = false
