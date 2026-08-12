@@ -1,12 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { ChannelEvolution } from "@/types/analytics";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps, seriesColor } from "@/components/charts/ChartPrimitives";
 
 interface ChannelEvolutionChartProps {
   data?: ChannelEvolution[];
   loading?: boolean;
 }
+
+const SERIES = [
+  { key: "google", label: "Google" },
+  { key: "meta", label: "Meta" },
+  { key: "indicacao", label: "Indicação" },
+  { key: "site", label: "Site" },
+  { key: "outro", label: "Outro" },
+] as const;
 
 export function ChannelEvolutionChart({ data, loading }: ChannelEvolutionChartProps) {
   if (loading) {
@@ -32,61 +41,34 @@ export function ChannelEvolutionChart({ data, loading }: ChannelEvolutionChartPr
       <CardContent>
         {data && data.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="mes" 
-                className="text-xs"
-                stroke="hsl(var(--muted-foreground))"
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <ChartGradientDefs
+                gradients={SERIES.map((s, i) => ({
+                  id: `ch-${s.key}`,
+                  color: seriesColor(i),
+                  fromOpacity: i === 0 ? 0.35 : 0.12,
+                  glow: i === 0,
+                }))}
               />
-              <YAxis 
-                className="text-xs"
-                stroke="hsl(var(--muted-foreground))"
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
-              />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="mes" {...modernAxisProps} />
+              <YAxis {...modernAxisProps} width={36} />
+              <Tooltip contentStyle={chartTooltipStyle} />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="google" 
-                stroke="hsl(var(--chart-1))" 
-                strokeWidth={2}
-                dot={{ r: 3 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="meta" 
-                stroke="hsl(var(--chart-2))" 
-                strokeWidth={2}
-                dot={{ r: 3 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="indicacao" 
-                stroke="hsl(var(--chart-3))" 
-                strokeWidth={2}
-                dot={{ r: 3 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="site" 
-                stroke="hsl(var(--chart-4))" 
-                strokeWidth={2}
-                dot={{ r: 3 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="outro" 
-                stroke="hsl(var(--chart-5))" 
-                strokeWidth={2}
-                dot={{ r: 3 }}
-              />
-            </LineChart>
+              {SERIES.map((s, i) => (
+                <Area
+                  key={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.label}
+                  stroke={seriesColor(i)}
+                  strokeWidth={i === 0 ? 2.75 : 2}
+                  fill={`url(#ch-${s.key})`}
+                  filter={i === 0 ? "url(#ch-google-glow)" : undefined}
+                  dot={false}
+                />
+              ))}
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           <div className="h-64 flex items-center justify-center text-muted-foreground">

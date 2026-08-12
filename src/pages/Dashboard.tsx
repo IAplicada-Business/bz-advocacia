@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -8,22 +9,27 @@ import {
   Clock,
   Users,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MetricCard } from "@/components/ui/metric-card";
+import { SegmentControl } from "@/components/ui/segment-control";
+import { Button } from "@/components/ui/button";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { ChartGradientDefs, modernAxisProps, modernGridProps, chartTooltipStyle } from "@/components/charts/ChartPrimitives";
 import { useDashboardPrincipal } from "@/hooks/useDashboardPrincipal";
 import { useDashboardVisual } from "@/hooks/useDashboardVisual";
 import { useProcessosEvolucao } from "@/hooks/useProcessosEvolucao";
@@ -51,6 +57,8 @@ const PIPELINE_STAGES = [
   { key: "perdido" as const, label: "Perdido", color: "hsl(var(--destructive))" },
 ];
 
+type DashSegment = "operacao" | "processos" | "leads";
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -58,6 +66,8 @@ export default function Dashboard() {
   const { data: visual, isLoading: visualLoading } = useDashboardVisual();
   const { data: evolucaoData, isLoading: evolucaoLoading } = useProcessosEvolucao();
   const navigate = useNavigate();
+  const [segment, setSegment] = useState<DashSegment>("operacao");
+  const [range, setRange] = useState<"3m" | "6m" | "12m">("6m");
 
   const userName =
     profile?.nome_completo?.split(" ")[0] ||
@@ -95,98 +105,180 @@ export default function Dashboard() {
 
   const funilMax = Math.max(funil.novo, funil.em_contato, funil.proposta, funil.perdido, 1);
 
-  const kpis = [
-    {
-      icon: Scale,
-      label: "Processos ativos",
-      value: processosAtivos,
-      sub: `${processosConcluidos} concluído${processosConcluidos !== 1 ? "s" : ""} no mês`,
-      accent: "hsl(var(--chart-1))",
-      href: "/dashboard/processos",
-    },
-    {
-      icon: ListChecks,
-      label: "Tarefas",
-      value: tarefas.totalAtivas,
-      sub: tarefas.urgentes > 0
-        ? `${tarefas.urgentes} urgente${tarefas.urgentes > 1 ? "s" : ""} · ${tarefas.atrasadas} atrasada${tarefas.atrasadas > 1 ? "s" : ""}`
-        : `${tarefas.concluidasSemana} concluída${tarefas.concluidasSemana !== 1 ? "s" : ""} esta semana`,
-      accent: tarefas.urgentes > 0 ? "hsl(var(--destructive))" : "hsl(var(--chart-4))",
-      href: "/dashboard/processos/demandas",
-    },
-    {
-      icon: Clock,
-      label: "Prazos",
-      value: totalPrazos,
-      sub: prazos.atrasados > 0
-        ? `${prazos.atrasados} atrasado${prazos.atrasados > 1 ? "s" : ""} · ${prazos.hoje} hoje`
-        : `${prazos.hoje} hoje · ${prazos.estaSemana} esta semana`,
-      accent: prazos.atrasados > 0 ? "hsl(var(--destructive))" : "hsl(var(--chart-4))",
-      href: "/dashboard/processos/calendario",
-    },
-    {
-      icon: Users,
-      label: "Leads",
-      value: leadsNoMes,
-      sub: `${taxaConversao}% conversão · ${clientesAtivos} clientes (+${clientesNovos})`,
-      accent: "hsl(var(--chart-4))",
-      href: "/dashboard/leads",
-    },
-  ];
+  const meses = evolucaoData?.meses || [];
+  const rangeCount = range === "3m" ? 3 : range === "6m" ? 6 : 12;
+  const chartMeses = meses.slice(-rangeCount);
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-end justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl md:text-4xl font-seasons text-primary">
-            {getGreeting()}, {userName}
+          <h1 className="text-3xl md:text-4xl font-seasons text-foreground">
+            {getGreeting()}, <span className="text-primary">{userName}</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{dataCapitalizada}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Visão objetiva da operação · {dataCapitalizada}
+          </p>
         </div>
+        <SegmentControl
+          value={segment}
+          onChange={setSegment}
+          size="md"
+          options={[
+            { value: "operacao", label: "Operação" },
+            { value: "processos", label: "Processos" },
+            { value: "leads", label: "Leads" },
+          ]}
+        />
       </div>
 
-      {/* Row 1: 4 KPI cards */}
       {loading ? (
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-[1.35rem]" />
+          ))}
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {kpis.map((kpi) => (
-            <button
-              key={kpi.label}
-              onClick={() => navigate(kpi.href)}
-              className="text-left group"
-            >
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardContent className="p-4 flex gap-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ backgroundColor: kpi.accent + "18" }}
-                  >
-                    <kpi.icon className="w-5 h-5" style={{ color: kpi.accent }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{kpi.label}</p>
-                    <p className="text-2xl font-bold leading-tight">{kpi.value}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{kpi.sub}</p>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0" />
-                </CardContent>
-              </Card>
-            </button>
-          ))}
+          <MetricCard
+            label="Processos ativos"
+            value={processosAtivos}
+            sub={`${processosConcluidos} concluído${processosConcluidos !== 1 ? "s" : ""} no mês`}
+            icon={Scale}
+            onClick={() => navigate("/dashboard/processos")}
+            accent={segment === "processos"}
+          />
+          <MetricCard
+            label="Tarefas"
+            value={tarefas.totalAtivas}
+            sub={
+              tarefas.urgentes > 0
+                ? `${tarefas.urgentes} urgente${tarefas.urgentes > 1 ? "s" : ""} · ${tarefas.atrasadas} atrasada${tarefas.atrasadas > 1 ? "s" : ""}`
+                : `${tarefas.concluidasSemana} concluída${tarefas.concluidasSemana !== 1 ? "s" : ""} esta semana`
+            }
+            icon={ListChecks}
+            onClick={() => navigate("/dashboard/processos/demandas")}
+            accent={segment === "operacao"}
+          />
+          <MetricCard
+            label="Prazos"
+            value={totalPrazos}
+            sub={
+              prazos.atrasados > 0
+                ? `${prazos.atrasados} atrasado${prazos.atrasados > 1 ? "s" : ""} · ${prazos.hoje} hoje`
+                : `${prazos.hoje} hoje · ${prazos.estaSemana} esta semana`
+            }
+            icon={Clock}
+            onClick={() => navigate("/dashboard/processos/calendario")}
+          />
+          <MetricCard
+            label="Leads no mês"
+            value={leadsNoMes}
+            sub={`${taxaConversao}% conversão · ${clientesAtivos} clientes (+${clientesNovos})`}
+            icon={Users}
+            trend={taxaConversao}
+            trendLabel="conv."
+            onClick={() => navigate("/dashboard/leads")}
+            accent={segment === "leads"}
+          />
         </div>
       )}
 
-      {/* Row 2: Donut tarefas (1/3) + Evolução mensal (2/3) */}
       <div className="grid gap-5 lg:grid-cols-3">
-        {/* Donut: distribuição de tarefas */}
+        <Card className="relative overflow-hidden border-primary/25 bg-gradient-to-br from-primary/25 via-card to-card lg:col-span-1">
+          <div aria-hidden className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
+          <CardContent className="relative flex h-full flex-col justify-between gap-4 p-6">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-2.5 py-1 text-[11px] font-medium text-primary ring-1 ring-primary/30">
+                <Sparkles className="h-3.5 w-3.5" />
+                Decisões com dados
+              </div>
+              <h3 className="font-seasons text-2xl font-semibold leading-tight">
+                Foque no que move o escritório
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {leadsParados > 0
+                  ? `${leadsParados} lead${leadsParados > 1 ? "s" : ""} sem follow-up. Priorize o pipeline.`
+                  : "Pipeline saudável. Continue acompanhando conversão e prazos."}
+              </p>
+            </div>
+            <Button
+              className="w-fit rounded-full shadow-glow"
+              onClick={() => navigate(leadsParados > 0 ? "/dashboard/leads" : "/dashboard/vendas/meta-ads")}
+            >
+              {leadsParados > 0 ? "Ver leads parados" : "Abrir Marketing"}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-base md:text-lg">Evolução de processos</CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">Abertos × concluídos</p>
+              </div>
+              <SegmentControl
+                value={range}
+                onChange={setRange}
+                options={[
+                  { value: "3m", label: "3M" },
+                  { value: "6m", label: "6M" },
+                  { value: "12m", label: "1A" },
+                ]}
+              />
+            </div>
+          </CardHeader>
+          <CardContent>
+            {evolucaoLoading ? (
+              <Skeleton className="h-[260px] w-full rounded-xl" />
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={chartMeses} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <ChartGradientDefs
+                    gradients={[
+                      { id: "proc-abertos", color: "hsl(var(--chart-1))" },
+                      { id: "proc-concluidos", color: "hsl(var(--chart-4))", fromOpacity: 0.28, glow: false },
+                    ]}
+                  />
+                  <CartesianGrid {...modernGridProps} />
+                  <XAxis dataKey="mes" {...modernAxisProps} />
+                  <YAxis {...modernAxisProps} tickCount={5} width={36} />
+                  <Tooltip contentStyle={chartTooltipStyle} />
+                  <Area
+                    type="monotone"
+                    dataKey="abertos"
+                    name="Abertos"
+                    stroke="hsl(var(--chart-1))"
+                    strokeWidth={2.75}
+                    fill="url(#proc-abertos)"
+                    filter="url(#proc-abertos-glow)"
+                    dot={false}
+                    activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="concluidos"
+                    name="Concluídos"
+                    stroke="hsl(var(--chart-4))"
+                    strokeWidth={2.25}
+                    fill="url(#proc-concluidos)"
+                    dot={false}
+                    activeDot={{ r: 4, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-4))" }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-bold">Tarefas da semana</CardTitle>
+              <CardTitle className="text-base">Tarefas da semana</CardTitle>
               <button
                 onClick={() => navigate("/dashboard/processos/demandas")}
                 className="text-xs text-primary hover:underline flex items-center gap-0.5"
@@ -197,25 +289,26 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <Skeleton className="h-[180px] w-full" />
+              <Skeleton className="h-[200px] w-full" />
             ) : donutData.length === 0 ? (
-              <div className="h-[180px] flex items-center justify-center text-sm text-muted-foreground">
+              <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground">
                 Sem tarefas
               </div>
             ) : (
               <>
                 <div className="relative">
-                  <ResponsiveContainer width="100%" height={180}>
+                  <ResponsiveContainer width="100%" height={190}>
                     <PieChart>
                       <Pie
                         data={donutData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={50}
-                        outerRadius={75}
-                        paddingAngle={3}
+                        innerRadius={54}
+                        outerRadius={78}
+                        paddingAngle={4}
                         dataKey="value"
-                        stroke="none"
+                        stroke="hsl(var(--card))"
+                        strokeWidth={3}
                       >
                         {donutData.map((d, i) => (
                           <Cell key={i} fill={d.color} />
@@ -224,11 +317,11 @@ export default function Dashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-2xl font-bold">{totalTarefas}</span>
-                    <span className="text-[10px] text-muted-foreground">total</span>
+                    <span className="text-2xl font-semibold font-seasons">{totalTarefas}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">total</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-2">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
                   {COLORS_DONUT.map((c) => {
                     const val = tarefas[c.key as keyof typeof tarefas] as number;
                     return (
@@ -240,7 +333,7 @@ export default function Dashboard() {
                     );
                   })}
                 </div>
-                <div className="mt-3 space-y-1">
+                <div className="mt-4 space-y-1.5">
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">Conclusão semanal</span>
                     <span className="font-semibold text-[hsl(var(--chart-4))]">{taxaConclusao}%</span>
@@ -252,111 +345,80 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Evolução mensal — 2 colunas */}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-bold">Evolução mensal de processos</CardTitle>
-              <div className="flex items-center gap-3 text-[11px]">
-                <div className="flex items-center gap-1">
-                  <div className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-4))]" />
-                  <span className="text-muted-foreground">Abertos</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-2))]" />
-                  <span className="text-muted-foreground">Concluídos</span>
-                </div>
+              <div>
+                <CardTitle className="text-base md:text-lg">Pipeline de leads</CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">Segmentação visual do funil</p>
               </div>
+              <button
+                onClick={() => navigate("/dashboard/leads")}
+                className="text-xs text-primary hover:underline flex items-center gap-0.5"
+              >
+                Ver leads <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           </CardHeader>
-          <CardContent>
-            {evolucaoLoading ? (
-              <Skeleton className="h-[240px] w-full" />
+          <CardContent className="space-y-4">
+            {loading ? (
+              <Skeleton className="h-[200px] w-full" />
             ) : (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={evolucaoData?.meses || []} barGap={2}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickCount={5} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Bar dataKey="abertos" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} name="Abertos" />
-                  <Bar dataKey="concluidos" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Concluídos" />
-                </BarChart>
-              </ResponsiveContainer>
+              <>
+                <div className="space-y-2.5">
+                  {PIPELINE_STAGES.map((s) => {
+                    const val = funil[s.key];
+                    const width = Math.max((val / funilMax) * 100, val > 0 ? 12 : 0);
+                    return (
+                      <div key={s.key} className="flex items-center gap-3">
+                        <span className="w-20 text-right text-[11px] text-muted-foreground">{s.label}</span>
+                        <div className="relative h-7 flex-1 overflow-hidden rounded-full bg-muted/60">
+                          <div
+                            className="flex h-full items-center justify-end rounded-full px-2 text-[11px] font-bold text-primary-foreground transition-all duration-500"
+                            style={{
+                              width: `${width}%`,
+                              background:
+                                val > 0
+                                  ? `linear-gradient(90deg, ${s.color}99, ${s.color})`
+                                  : "transparent",
+                              minWidth: val > 0 ? 28 : 0,
+                              boxShadow: val > 0 ? `0 0 18px -6px ${s.color}` : undefined,
+                            }}
+                          >
+                            {val > 0 && val}
+                          </div>
+                          {val === 0 && (
+                            <span className="absolute inset-0 flex items-center justify-center text-[11px] font-medium text-muted-foreground">
+                              0
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Conversão do mês</span>
+                    <span className="font-semibold text-[hsl(var(--chart-4))]">{taxaConversao}%</span>
+                  </div>
+                  <Progress value={taxaConversao} className="h-1.5" />
+                </div>
+                {leadsParadosList.length > 0 && (
+                  <div className="flex items-start gap-2 rounded-2xl bg-[hsl(var(--chart-5)/0.12)] p-3 ring-1 ring-[hsl(var(--chart-5)/0.25)]">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--chart-5))]" />
+                    <div className="text-[11px] text-[hsl(var(--chart-5))]">
+                      <span className="font-semibold">{leadsParadosList[0].nome}</span> parado há{" "}
+                      {leadsParadosList[0].dias_parado} dias
+                      {leadsParadosList.length > 1 && ` (+${leadsParadosList.length - 1} outros)`}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Row 3: Pipeline de leads — agora ocupa a linha inteira. Carga da
-          equipe e Prazos processuais foram removidos a pedido pra deixar
-          o Painel B&Z mais enxuto (topo + tarefas + evolucao + pipeline). */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-bold">Pipeline de leads</CardTitle>
-            <button
-              onClick={() => navigate("/dashboard/leads")}
-              className="text-xs text-primary hover:underline flex items-center gap-0.5"
-            >
-              Ver leads <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {loading ? (
-            <Skeleton className="h-[180px] w-full" />
-          ) : (
-            <>
-              <div className="space-y-2">
-                {PIPELINE_STAGES.map((s) => {
-                  const val = funil[s.key];
-                  const width = Math.max((val / funilMax) * 100, val > 0 ? 12 : 0);
-                  return (
-                    <div key={s.key} className="flex items-center gap-2">
-                      <span className="text-[11px] text-muted-foreground w-16 text-right">{s.label}</span>
-                      <div className="relative flex-1 h-6 rounded-md overflow-hidden" style={{ backgroundColor: "hsl(var(--muted))" }}>
-                        <div
-                          className="h-full rounded-md flex items-center justify-center text-[11px] font-bold text-white transition-all"
-                          style={{ width: `${width}%`, backgroundColor: val > 0 ? s.color : "transparent", minWidth: val > 0 ? 28 : 0 }}
-                        >
-                          {val > 0 && val}
-                        </div>
-                        {val === 0 && (
-                          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-medium text-muted-foreground">0</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">Conversão do mês</span>
-                  <span className="font-semibold text-[hsl(var(--chart-4))]">{taxaConversao}%</span>
-                </div>
-                <Progress value={taxaConversao} className="h-1.5" />
-              </div>
-              {leadsParadosList.length > 0 && (
-                <div className="rounded-xl p-2 flex items-start gap-2 bg-[hsl(var(--chart-5)/0.15)]">
-                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[hsl(var(--chart-5))]" />
-                  <div className="text-[11px] text-[hsl(var(--chart-5))]">
-                    <span className="font-semibold">{leadsParadosList[0].nome}</span> parado há {leadsParadosList[0].dias_parado} dias
-                    {leadsParadosList.length > 1 && ` (+${leadsParadosList.length - 1} outros)`}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
