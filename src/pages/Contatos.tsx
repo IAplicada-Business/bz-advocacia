@@ -166,14 +166,13 @@ export default function Contatos() {
 
       <NewLeadDialog
         open={newLeadOpen || !!editLead}
-        onOpenChange={(open) => {
-          if (!open) {
-            setNewLeadOpen(false);
-            setEditLead(null);
-          }
+        onClose={() => {
+          setNewLeadOpen(false);
+          setEditLead(null);
         }}
         lead={editLead}
       />
+
     </div>
   );
 }

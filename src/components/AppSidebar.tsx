@@ -168,7 +168,7 @@ export function AppSidebar() {
             children: children.length > 0 ? children : undefined,
           };
         })
-        .filter((x): x is SubMenuItem => x !== null);
+        .filter((x): x is NonNullable<typeof x> => x !== null);
       if (subVisivel.length === 0) return null;
       return { ...item, submenu: subVisivel };
     })
