@@ -22,6 +22,7 @@ export type StageGuard = {
 
 export const STAGE_GUARDS: Record<LeadStage, StageGuard[]> = {
   mql: [],
+  continuidade: [],
   conectado: [
     {
       field: "primeiro_contato_em",
