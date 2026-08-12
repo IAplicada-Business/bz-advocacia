@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackMetaLead } from "@/lib/metaPixel";
-import type { LpFormField } from "./types";
+import { optionLabel, optionValue, type LpFormField } from "./types";
 
 type LpLeadFormProps = {
   slug: "saude" | "inventario" | "divorcio";
@@ -44,20 +44,48 @@ function readMetaIds() {
   };
 }
 
+type FormValues = Record<string, string | string[]>;
+
 export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [values, setValues] = useState<Record<string, string>>({});
+  const [values, setValues] = useState<FormValues>({});
+
+  const toggleMulti = (fieldId: string, optValue: string) => {
+    setValues((prev) => {
+      const cur = Array.isArray(prev[fieldId]) ? [...(prev[fieldId] as string[])] : [];
+      const idx = cur.indexOf(optValue);
+      if (idx >= 0) cur.splice(idx, 1);
+      else cur.push(optValue);
+      return { ...prev, [fieldId]: cur };
+    });
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setError(null);
+
+    for (const field of fields) {
+      if (!field.required) continue;
+      const v = values[field.id];
+      if (field.type === "multiselect") {
+        if (!Array.isArray(v) || v.length === 0) {
+          setError(`Selecione ao menos uma opção em: ${field.label}`);
+          return;
+        }
+      } else if (!(typeof v === "string" && v.trim())) {
+        setError(`Preencha: ${field.label}`);
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("lp-lead-submit", {
+      // Endpoint público: classifica MQL + grava sdr_contexto + dispara bot sem repetir form
+      const { data, error: fnError } = await supabase.functions.invoke("public-form-submit", {
         body: {
           slug,
           values,
@@ -67,8 +95,6 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
         },
       });
 
-      // supabase-js marca error em qualquer non-2xx; o body útil pode vir em data
-      // ou em error.context (Response). Preferimos a mensagem da function.
       let payload = data as { error?: string; message?: string; ok?: boolean } | null;
       if (!payload && fnError && "context" in fnError) {
         try {
@@ -83,6 +109,11 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
 
       if (payload?.error === "invalid_contato" || payload?.error === "missing_fields") {
         setError(payload.message ?? "Preencha todos os campos obrigatórios.");
+        return;
+      }
+
+      if (payload?.error === "rate_limited") {
+        setError(payload.message ?? "Muitas tentativas. Aguarde alguns minutos.");
         return;
       }
 
@@ -137,23 +168,46 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
             {field.type === "select" ? (
               <select
                 required={field.required}
-                value={values[field.id] ?? ""}
+                value={typeof values[field.id] === "string" ? (values[field.id] as string) : ""}
                 onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
                 className="w-full max-w-full rounded-2xl border border-lp-ink/10 bg-white/90 px-3.5 py-2.5 text-sm text-lp-ink outline-none transition focus:border-lp-gold"
               >
                 <option value="">{field.placeholder ?? "Selecione"}</option>
                 {field.options?.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
+                  <option key={optionValue(opt)} value={optionValue(opt)}>
+                    {optionLabel(opt)}
                   </option>
                 ))}
               </select>
+            ) : field.type === "multiselect" ? (
+              <div className="space-y-1.5 rounded-2xl border border-lp-ink/10 bg-white/90 p-2.5">
+                {field.options?.map((opt) => {
+                  const val = optionValue(opt);
+                  const selected = Array.isArray(values[field.id])
+                    ? (values[field.id] as string[]).includes(val)
+                    : false;
+                  return (
+                    <label
+                      key={val}
+                      className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm text-lp-ink hover:bg-lp-gold/10"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleMulti(field.id, val)}
+                        className="h-4 w-4 rounded border-lp-ink/20 text-lp-gold focus:ring-lp-gold"
+                      />
+                      <span>{optionLabel(opt)}</span>
+                    </label>
+                  );
+                })}
+              </div>
             ) : (
               <input
                 type={field.type}
                 required={field.required}
                 placeholder={field.placeholder}
-                value={values[field.id] ?? ""}
+                value={typeof values[field.id] === "string" ? (values[field.id] as string) : ""}
                 onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
                 className="w-full max-w-full rounded-2xl border border-lp-ink/10 bg-white/90 px-3.5 py-2.5 text-sm text-lp-ink outline-none transition focus:border-lp-gold"
               />

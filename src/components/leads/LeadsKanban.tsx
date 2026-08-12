@@ -78,8 +78,8 @@ const columns: { id: ColunaId; titulo: string; color: string }[] = [
 
 function resolveColuna(lead: Lead): ColunaId {
   const stage = inferStageFromLegacy(lead);
-  // Desqualificados (pensão/guarda, ticket mínimo) ficam na coluna Perdido
-  if (stage === "desqualificado") return "perdido";
+  // Desqualificados / Continuidade (holding preventivo) ficam fora do funil principal
+  if (stage === "desqualificado" || stage === "continuidade") return "perdido";
   return stage;
 }
 
