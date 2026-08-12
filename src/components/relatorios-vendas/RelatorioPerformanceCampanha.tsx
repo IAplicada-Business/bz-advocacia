@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps, seriesColor } from "@/components/charts/ChartPrimitives";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo } from "react";
@@ -24,8 +24,6 @@ interface AnuncioAggregated {
   leadsConvertidos: number;
   taxaConversao: number;
 }
-
-const COLORS = [chartColors.primary, chartColors.secondary, chartColors.accent, chartColors.muted, '#8884d8', '#82ca9d'];
 
 export function RelatorioPerformanceCampanha({ dataInicio, dataFim }: RelatorioPerformanceCampanhaProps) {
   const { data: dbLeads, isLoading } = useQuery({
@@ -158,25 +156,18 @@ export function RelatorioPerformanceCampanha({ dataInicio, dataFim }: RelatorioP
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={anuncios.slice(0, 10)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
-              <YAxis 
-                dataKey="anuncio" 
-                type="category" 
-                width={150} 
-                stroke="hsl(var(--muted-foreground))"
-                tick={{ fontSize: 12 }}
+                <CartesianGrid {...modernGridProps} horizontal={false} vertical />
+              <XAxis type="number" {...modernAxisProps} />
+              <YAxis
+                dataKey="anuncio"
+                type="category"
+                width={150}
+                {...modernAxisProps}
               />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-              />
-              <Bar dataKey="totalLeads" name="Total Leads">
+              <Tooltip contentStyle={chartTooltipStyle} />
+              <Bar dataKey="totalLeads" name="Total Leads" radius={[0, 8, 8, 0]}>
                 {anuncios.slice(0, 10).map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                 ))}
               </Bar>
             </BarChart>

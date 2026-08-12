@@ -8,6 +8,8 @@ import { ptBR } from "date-fns/locale";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRelatoriosVendasPeriodo } from "@/hooks/useRelatoriosVendasPeriodo";
+import { chartColors, CHART_SERIES } from "@/lib/chartConfig";
+import { chartTooltipStyle, seriesColor } from "@/components/charts/ChartPrimitives";
 
 interface RelatorioLeadsStatusProps {
   dataInicio: Date;
@@ -15,14 +17,14 @@ interface RelatorioLeadsStatusProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  'Pendente': '#f59e0b',
-  'Em Andamento': '#3b82f6',
-  'Concluído': '#22c55e',
-  'Cancelado': '#ef4444',
-  'Aguardando': '#8b5cf6',
+  'Pendente': chartColors.amber,
+  'Em Andamento': chartColors.gold,
+  'Concluído': chartColors.sage,
+  'Cancelado': chartColors.danger,
+  'Aguardando': chartColors.bronze,
 };
 
-const DEFAULT_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+const DEFAULT_COLORS = [...CHART_SERIES];
 
 export function RelatorioLeadsStatus({ dataInicio, dataFim }: RelatorioLeadsStatusProps) {
   const { data, isLoading } = useRelatoriosVendasPeriodo(dataInicio, dataFim);
@@ -127,22 +129,20 @@ export function RelatorioLeadsStatus({ dataInicio, dataFim }: RelatorioLeadsStat
                   cx="50%"
                   cy="50%"
                   labelLine={false}
+                  innerRadius={62}
                   outerRadius={100}
-                  fill="#8884d8"
+                  paddingAngle={3}
+                  fill="hsl(var(--chart-1))"
                   dataKey="value"
+                  stroke="hsl(var(--card))"
+                  strokeWidth={3}
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                    <Cell key={`cell-${index}`} fill={entry.fill || seriesColor(index)} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
+                <Tooltip contentStyle={chartTooltipStyle} />
               </RechartsPieChart>
             </ResponsiveContainer>
           </div>

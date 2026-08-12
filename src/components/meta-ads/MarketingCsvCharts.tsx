@@ -6,7 +6,14 @@ import {
   PieChart, Pie, Cell,
   Area, AreaChart, Legend,
 } from "recharts";
-import { chartColors, chartTheme } from "@/lib/chartConfig";
+import { chartColors, CHART_SERIES } from "@/lib/chartConfig";
+import {
+  ChartGradientDefs,
+  chartTooltipStyle,
+  modernAxisProps,
+  modernGridProps,
+  seriesColor,
+} from "@/components/charts/ChartPrimitives";
 import type { MarketingCsvAnalytics } from "@/hooks/useMarketingCsvAnalytics";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,15 +25,15 @@ interface Props {
   showCampaigns?: boolean;
 }
 
-const PIE_COLORS = [chartColors.primary, chartColors.secondary, chartColors.success, chartColors.warning, chartColors.dark];
+const PIE_COLORS = [...CHART_SERIES];
 
 const FUNNEL_COLORS: Record<string, string> = {
-  "Novo": chartColors.secondary,
-  "Criado": chartColors.primary,
-  "Enviado": chartColors.success,
-  "Qualificado": chartColors.warning,
-  "Convertido": "hsl(142, 76%, 36%)",
-  "Total Leads": chartColors.primary,
+  "Novo": chartColors.bronze,
+  "Criado": chartColors.gold,
+  "Enviado": chartColors.sage,
+  "Qualificado": chartColors.amber,
+  "Convertido": chartColors.ink,
+  "Total Leads": chartColors.gold,
 };
 
 export function MarketingCsvCharts({ analytics, showFunnel = true, showPlatform = true, showEvolution = true, showCampaigns = false }: Props) {
@@ -63,18 +70,18 @@ export function MarketingCsvCharts({ analytics, showFunnel = true, showPlatform 
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={funnel} layout="vertical">
-                <CartesianGrid {...chartTheme.grid} horizontal={false} />
-                <XAxis type="number" />
-                <YAxis dataKey="stage" type="category" width={100} tick={{ fontSize: 12 }} />
+                <CartesianGrid {...modernGridProps} horizontal={false} vertical />
+                <XAxis type="number" {...modernAxisProps} />
+                <YAxis dataKey="stage" type="category" width={100} {...modernAxisProps} />
                 <Tooltip
-                  contentStyle={chartTheme.tooltip.contentStyle}
+                  contentStyle={chartTooltipStyle}
                   formatter={(value: number, _name: string, props: any) => [
                     `${value} leads (${props.payload.percentage}%)`, "Quantidade"
                   ]}
                 />
-                <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="count" radius={[0, 8, 8, 0]}>
                   {funnel.map((entry, idx) => (
-                    <Cell key={idx} fill={FUNNEL_COLORS[entry.stage] || chartColors.primary} />
+                    <Cell key={idx} fill={FUNNEL_COLORS[entry.stage] || seriesColor(idx)} />
                   ))}
                 </Bar>
               </BarChart>
@@ -95,9 +102,12 @@ export function MarketingCsvCharts({ analytics, showFunnel = true, showPlatform 
                   cx="50%"
                   cy="50%"
                   outerRadius={90}
-                  innerRadius={50}
+                  innerRadius={62}
+                  paddingAngle={3}
                   dataKey="count"
                   nameKey="label"
+                  stroke="hsl(var(--card))"
+                  strokeWidth={3}
                   label={({ label, percentage }) => `${label} ${percentage}%`}
                   labelLine={{ strokeWidth: 1 }}
                 >
@@ -106,7 +116,7 @@ export function MarketingCsvCharts({ analytics, showFunnel = true, showPlatform 
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={chartTheme.tooltip.contentStyle}
+                  contentStyle={chartTooltipStyle}
                   formatter={(value: number, name: string) => [`${value} leads`, name]}
                 />
               </PieChart>
@@ -121,16 +131,24 @@ export function MarketingCsvCharts({ analytics, showFunnel = true, showPlatform 
           <CardHeader><CardTitle className="text-base">Evolução de Leads por Dia</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={dailyLeads}>
-                <CartesianGrid {...chartTheme.grid} />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} />
-                <Tooltip contentStyle={chartTheme.tooltip.contentStyle} />
+              <AreaChart data={dailyLeads} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <ChartGradientDefs
+                  gradients={[
+                    { id: "csv-fb", color: chartColors.gold },
+                    { id: "csv-ig", color: chartColors.bronze, fromOpacity: 0.28, glow: false },
+                    { id: "csv-org", color: chartColors.sage, fromOpacity: 0.22, glow: false },
+                    { id: "csv-out", color: chartColors.amber, fromOpacity: 0.2, glow: false },
+                  ]}
+                />
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="date" {...modernAxisProps} />
+                <YAxis allowDecimals={false} {...modernAxisProps} width={36} />
+                <Tooltip contentStyle={chartTooltipStyle} />
                 <Legend />
-                <Area type="monotone" dataKey="fb" name="Facebook" stackId="1" stroke={chartColors.primary} fill={chartColors.primary} fillOpacity={0.6} />
-                <Area type="monotone" dataKey="ig" name="Instagram" stackId="1" stroke={chartColors.secondary} fill={chartColors.secondary} fillOpacity={0.6} />
-                <Area type="monotone" dataKey="organic" name="Orgânico" stackId="1" stroke={chartColors.success} fill={chartColors.success} fillOpacity={0.6} />
-                <Area type="monotone" dataKey="outro" name="Outro" stackId="1" stroke={chartColors.warning} fill={chartColors.warning} fillOpacity={0.6} />
+                <Area type="monotone" dataKey="fb" name="Facebook" stackId="1" stroke={chartColors.gold} fill="url(#csv-fb)" filter="url(#csv-fb-glow)" strokeWidth={2.25} />
+                <Area type="monotone" dataKey="ig" name="Instagram" stackId="1" stroke={chartColors.bronze} fill="url(#csv-ig)" strokeWidth={2} />
+                <Area type="monotone" dataKey="organic" name="Orgânico" stackId="1" stroke={chartColors.sage} fill="url(#csv-org)" strokeWidth={2} />
+                <Area type="monotone" dataKey="outro" name="Outro" stackId="1" stroke={chartColors.amber} fill="url(#csv-out)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>

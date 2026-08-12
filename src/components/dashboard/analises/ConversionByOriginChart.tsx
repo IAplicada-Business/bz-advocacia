@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ConversionByOrigin } from "@/types/analytics";
+import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 interface ConversionByOriginChartProps {
   data: ConversionByOrigin[];
@@ -40,31 +42,23 @@ export function ConversionByOriginChart({ data, loading }: ConversionByOriginCha
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="origem" 
-                className="text-xs"
-                stroke="hsl(var(--muted-foreground))"
-              />
-              <YAxis 
-                className="text-xs"
-                stroke="hsl(var(--muted-foreground))"
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="origem" {...modernAxisProps} />
+              <YAxis
+                {...modernAxisProps}
+                width={40}
                 tickFormatter={(value) => `${value}%`}
               />
               <Tooltip
-                formatter={(value: number, name: string, props: any) => [
+                formatter={(value: number, _name: string, props: any) => [
                   `${value.toFixed(1)}%`,
                   `Taxa de Conversão (${props.payload.convertidos}/${props.payload.totalLeads})`
                 ]}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
+                contentStyle={chartTooltipStyle}
               />
-              <Bar 
-                dataKey="taxaConversao" 
-                fill="hsl(var(--primary))"
+              <Bar
+                dataKey="taxaConversao"
+                fill={chartColors.gold}
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>

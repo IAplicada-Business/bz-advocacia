@@ -10,12 +10,14 @@ import { useProdutividadeEquipe, PeriodoFiltro } from "@/hooks/useProdutividadeE
 import { TIPO_LABELS } from "@/types/demandas";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 const COLORS = {
-  concluidas: "hsl(var(--chart-2))",
-  pendentes: "hsl(var(--chart-4))",
-  emAndamento: "hsl(var(--chart-1))",
-  total: "hsl(var(--chart-5))",
+  concluidas: chartColors.bronze,
+  pendentes: chartColors.sage,
+  emAndamento: chartColors.gold,
+  total: chartColors.amber,
 };
 
 const MEDAL_MAP: Record<number, string> = {
@@ -213,15 +215,23 @@ export function ProdutividadeDashboard() {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart data={data.evolucaoMensal}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="mes" {...modernAxisProps} />
+              <YAxis {...modernAxisProps} width={36} />
+              <Tooltip contentStyle={chartTooltipStyle} />
               <Legend />
               <Bar dataKey="concluidas" name="Concluídas" stackId="a" fill={COLORS.concluidas} radius={[0, 0, 0, 0]} />
               <Bar dataKey="emAndamento" name="Em Andamento" stackId="a" fill={COLORS.emAndamento} />
-              <Bar dataKey="pendentes" name="Pendentes" stackId="a" fill={COLORS.pendentes} radius={[4, 4, 0, 0]} />
-              <Line type="monotone" dataKey="total" name="Total" stroke={COLORS.total} strokeWidth={2} dot={{ r: 4 }} />
+              <Bar dataKey="pendentes" name="Pendentes" stackId="a" fill={COLORS.pendentes} radius={[8, 8, 0, 0]} />
+              <Line
+                type="monotone"
+                dataKey="total"
+                name="Total"
+                stroke={COLORS.total}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: COLORS.total }}
+              />
             </ComposedChart>
           </ResponsiveContainer>
         </CardContent>

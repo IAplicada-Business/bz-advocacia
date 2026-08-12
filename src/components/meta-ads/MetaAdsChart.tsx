@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
 import { MetaChartData } from "@/types/meta-ads";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 interface MetaAdsChartProps {
   data: MetaChartData[];
@@ -29,73 +30,64 @@ export function MetaAdsChart({ data, isLoading }: MetaAdsChartProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis
-              dataKey="data"
-              stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
+          <AreaChart data={data} margin={{ top: 8, right: 20, left: 0, bottom: 5 }}>
+            <ChartGradientDefs
+              gradients={[
+                { id: "meta-chart-gasto", color: "hsl(var(--chart-1))" },
+                { id: "meta-chart-leads", color: "hsl(var(--chart-4))", fromOpacity: 0.25, glow: false },
+              ]}
             />
+            <CartesianGrid {...modernGridProps} />
+            <XAxis dataKey="data" {...modernAxisProps} />
             <YAxis
               yAxisId="left"
-              stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
+              {...modernAxisProps}
+              width={56}
               tickFormatter={(value) => `R$ ${value}`}
             />
             <YAxis
               yAxisId="right"
               orientation="right"
-              stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
+              {...modernAxisProps}
+              width={36}
             />
             <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">Gasto</span>
-                          <span className="font-bold text-blue-600">
-                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload[0].value as number)}
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">Leads</span>
-                          <span className="font-bold text-green-600">{payload[1].value}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
+              contentStyle={chartTooltipStyle}
+              formatter={(v: number, n: string) => {
+                if (n === "Investimento (R$)") {
+                  return [
+                    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v),
+                    n,
+                  ];
                 }
-                return null;
+                return [v, n];
               }}
             />
             <Legend />
-            <Line
+            <Area
               yAxisId="left"
               type="monotone"
               dataKey="gasto"
-              stroke="hsl(var(--primary))"
-              strokeWidth={2}
+              stroke="hsl(var(--chart-1))"
+              strokeWidth={2.75}
+              fill="url(#meta-chart-gasto)"
+              filter="url(#meta-chart-gasto-glow)"
               name="Investimento (R$)"
               dot={false}
+              activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
             />
-            <Line
+            <Area
               yAxisId="right"
               type="monotone"
               dataKey="leads"
-              stroke="#22c55e"
-              strokeWidth={2}
+              stroke="hsl(var(--chart-4))"
+              strokeWidth={2.5}
+              fill="url(#meta-chart-leads)"
               name="Leads"
               dot={false}
+              activeDot={{ r: 4, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-4))" }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

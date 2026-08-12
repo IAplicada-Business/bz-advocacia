@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useFluxoCaixa } from "@/hooks/useFinanceiro";
 import { Download, FileText, TrendingUp, TrendingDown } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { chartColors } from "@/lib/chartConfig";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 export function RelatorioFluxoCaixa() {
   const { data: fluxo, isLoading } = useFluxoCaixa();
@@ -90,46 +90,40 @@ export function RelatorioFluxoCaixa() {
           </Card>
         </div>
 
-        {/* Gráfico de Linha */}
+        {/* Gráfico de área */}
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={fluxo}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="data" 
-                stroke="hsl(var(--muted-foreground))"
+            <AreaChart data={fluxo} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <ChartGradientDefs gradients={[{ id: "fluxo-entradas", color: "hsl(var(--chart-1))" }]} />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis
+                dataKey="data"
+                {...modernAxisProps}
                 tickFormatter={(value) => format(new Date(value), "dd/MM", { locale: ptBR })}
               />
-              <YAxis stroke="hsl(var(--muted-foreground))" />
+              <YAxis {...modernAxisProps} width={48} />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
+                contentStyle={chartTooltipStyle}
                 labelFormatter={(value) => format(new Date(value), "dd 'de' MMMM", { locale: ptBR })}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="entradas" 
-                name="Entradas Previstas" 
-                stroke={chartColors.terracota} 
-                strokeWidth={2}
-                dot={{
-                  fill: chartColors.terracota,
-                  stroke: chartColors.terracota,
-                  strokeWidth: 2,
-                  r: 4,
-                }}
+              <Area
+                type="monotone"
+                dataKey="entradas"
+                name="Entradas Previstas"
+                stroke="hsl(var(--chart-1))"
+                strokeWidth={2.75}
+                fill="url(#fluxo-entradas)"
+                filter="url(#fluxo-entradas-glow)"
+                dot={false}
                 activeDot={{
-                  fill: chartColors.terracota,
-                  stroke: 'hsl(var(--background))',
+                  r: 5,
+                  stroke: "hsl(var(--card))",
                   strokeWidth: 2,
-                  r: 6,
+                  fill: "hsl(var(--chart-1))",
                 }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
