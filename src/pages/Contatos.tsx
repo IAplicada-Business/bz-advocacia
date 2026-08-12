@@ -20,25 +20,8 @@ import {
   LEAD_STAGE_LABELS,
   type LeadStage,
 } from "@/lib/leadStages";
+import { isContato } from "@/lib/isContato";
 import type { Lead, LeadsFilters } from "@/types/leads";
-
-/** Contato = lead que ainda não virou cliente (qualquer estágio exceto ganho/fechado). */
-function isContato(lead: Lead): boolean {
-  if (lead.como_conheceu === "importacao") return false;
-  if (lead.tipo_contato && lead.tipo_contato !== "lead") return false;
-
-  const stage = (lead.stage ?? "").toLowerCase();
-  const estagio = (lead.estagio ?? "").toLowerCase();
-  const statusSdr = (lead.status_sdr ?? "").toLowerCase();
-  const statusCliente = (lead.status_cliente ?? "").toLowerCase();
-
-  if (stage === "ganho") return false;
-  if (estagio === "fechado") return false;
-  if (statusSdr === "cliente") return false;
-  if (statusCliente === "ativo" || statusCliente === "cliente") return false;
-
-  return true;
-}
 
 const baseFilters: LeadsFilters = {
   search: "",
