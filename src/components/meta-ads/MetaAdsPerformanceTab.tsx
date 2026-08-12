@@ -150,7 +150,7 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
                 <XAxis dataKey="data" tick={{ fontSize: 11 }} />
                 <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v: number) => fmtNum(v)} />
-                <Bar dataKey="alcance" name="Alcance" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="alcance" name="Alcance" fill="hsl(var(--chart-4))" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -166,7 +166,7 @@ export function MetaAdsPerformanceTab({ periodo }: Props) {
                 <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend />
-                <Line yAxisId="left" type="monotone" dataKey="ctr" name="CTR (%)" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line yAxisId="left" type="monotone" dataKey="ctr" name="CTR (%)" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
                 <Line yAxisId="right" type="monotone" dataKey="frequencia" name="Frequência" stroke="#ec4899" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>

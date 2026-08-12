@@ -59,7 +59,7 @@ export function LeadsDistributionChart({ data, loading }: LeadsDistributionChart
                 labelLine={false}
                 label={(entry) => `${entry.name}: ${entry.percentage.toFixed(1)}%`}
                 outerRadius={100}
-                fill="#8884d8"
+                fill="hsl(var(--chart-1))"
                 dataKey="value"
               >
                 {chartData.map((entry, index) => (

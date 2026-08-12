@@ -77,6 +77,8 @@ export default {
       },
       boxShadow: {
         lp: "0 24px 60px -28px rgba(26, 31, 26, 0.45)",
+        bz: "0 1px 2px hsla(120, 8%, 11%, 0.04), 0 8px 24px -12px hsla(120, 8%, 11%, 0.08)",
+        "bz-lg": "0 16px 40px -20px hsla(120, 8%, 11%, 0.2)",
       },
       keyframes: {
         "accordion-down": {

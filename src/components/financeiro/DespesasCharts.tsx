@@ -37,7 +37,7 @@ export function DespesasCharts({ filters }: DespesasChartsProps) {
               labelLine={false}
               label={(entry) => `${entry.name}: ${entry.percentual?.toFixed(0) || 0}%`}
               outerRadius={100}
-              fill="#8884d8"
+              fill="hsl(var(--chart-1))"
               dataKey="value"
             >
               {despesasChartData?.map((entry, index) => (

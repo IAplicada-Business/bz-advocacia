@@ -43,8 +43,8 @@ export function DashboardEvolucaoProcessosV2({ data, loading }: Props) {
                   fontSize: 12,
                 }}
               />
-              <Bar dataKey="abertos" fill="#3B6D11" radius={[3, 3, 0, 0]} name="Abertos" />
-              <Bar dataKey="concluidos" fill="#A32D2D" radius={[3, 3, 0, 0]} name="Concluídos" />
+              <Bar dataKey="abertos" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} name="Abertos" />
+              <Bar dataKey="concluidos" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Concluídos" />
             </BarChart>
           </ResponsiveContainer>
         )}

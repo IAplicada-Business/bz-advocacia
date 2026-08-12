@@ -188,46 +188,48 @@ export function AppSidebar() {
     }
   };
 
+  const navActive =
+    "relative bg-sidebar-accent text-sidebar-accent-foreground font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-primary";
+  const navIdle = "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
+
   return (
-    <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="border-b border-border p-4">
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
-          <img src={logoBZ} alt="B&Z Advocacia" className="h-8 w-8 object-contain" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/20">
+            <img src={logoBZ} alt="B&Z Advocacia" className="h-7 w-7 object-contain" />
+          </div>
           {!isCollapsed && (
             <div>
-              <h2 className="text-lg font-seasons font-bold text-foreground">B&Z</h2>
-              <p className="text-xs text-muted-foreground">Advocacia</p>
+              <h2 className="text-lg font-seasons font-semibold tracking-tight text-foreground">B&Z</h2>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Advocacia</p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2 py-3">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-3 text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80">
+            Menu
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {visibleMenuItems.map((item) => {
                 const hasSubmenu = item.submenu && item.submenu.length > 0;
                 const isOpen = openMenus.includes(item.title);
                 
                 if (!hasSubmenu) {
-                  // Item simples sem submenu
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild tooltip={item.label}>
+                      <SidebarMenuButton asChild tooltip={item.label} className="rounded-xl">
                         <NavLink
                           to={item.url!}
                           className={({ isActive }) =>
-                            cn(
-                              "flex items-center gap-2",
-                              isActive
-                                ? "bg-accent text-accent-foreground"
-                                : "hover:bg-accent/50"
-                            )
+                            cn("flex items-center gap-2 rounded-xl", isActive ? navActive : navIdle)
                           }
                         >
-                          <item.icon className="h-4 w-4" />
+                          <item.icon className="h-4 w-4 shrink-0" />
                           {!isCollapsed && <span>{item.label}</span>}
                           {!isCollapsed && item.badge && (
                             <Badge variant="destructive" className="ml-auto">
@@ -257,7 +259,13 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                       ) : (
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton tooltip={item.label}>
+                          <SidebarMenuButton
+                            tooltip={item.label}
+                            className={cn(
+                              "rounded-xl",
+                              isOpen && "bg-sidebar-accent/50 text-sidebar-accent-foreground",
+                            )}
+                          >
                             <item.icon className="h-4 w-4" />
                             <span>{item.label}</span>
                             {item.badge && (
@@ -266,9 +274,9 @@ export function AppSidebar() {
                               </Badge>
                             )}
                             {isOpen ? (
-                              <ChevronUp className="ml-auto h-4 w-4" />
+                              <ChevronUp className="ml-auto h-4 w-4 opacity-60" />
                             ) : (
-                              <ChevronDown className="ml-auto h-4 w-4" />
+                              <ChevronDown className="ml-auto h-4 w-4 opacity-60" />
                             )}
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -276,16 +284,16 @@ export function AppSidebar() {
                       
                       {!isCollapsed && (
                         <CollapsibleContent>
-                          <SidebarMenuSub>
+                          <SidebarMenuSub className="ml-3 border-l border-sidebar-border/80 pl-2">
                             {item.submenu.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.url}>
-                                <SidebarMenuSubButton asChild>
+                                <SidebarMenuSubButton asChild className="rounded-lg">
                                   <NavLink
                                     to={subItem.url}
                                     className={({ isActive }) =>
                                       cn(
-                                        "flex items-center gap-2",
-                                        isActive && "bg-accent text-accent-foreground"
+                                        "flex items-center gap-2 rounded-lg text-sm",
+                                        isActive ? navActive : navIdle,
                                       )
                                     }
                                   >

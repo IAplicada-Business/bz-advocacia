@@ -7,35 +7,24 @@ import { UserAvatar } from "./UserAvatar";
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-      {/* Lado Esquerdo */}
-      <div className="flex items-center gap-4 flex-1 min-w-0">
-        {/* Botão para abrir/fechar sidebar */}
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="h-4" />
-        
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-4 flex-1 min-w-0">
+    <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border/80 bg-card/90 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-card/75 md:gap-4 md:px-5">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <SidebarTrigger className="-ml-1 rounded-full" />
+        <Separator orientation="vertical" className="hidden h-5 sm:block" />
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <DynamicBreadcrumb />
         </div>
       </div>
-      
-      {/* Centro - Busca Global (Desktop) */}
-      <div className="hidden lg:flex flex-1 justify-center max-w-md">
+
+      <div className="hidden max-w-md flex-1 justify-center lg:flex">
         <GlobalSearch />
       </div>
-      
-      {/* Lado Direito */}
-      <div className="flex items-center gap-2">
-        {/* Busca Mobile */}
+
+      <div className="flex items-center gap-1.5 md:gap-2">
         <div className="lg:hidden">
           <GlobalSearch />
         </div>
-        
-        {/* Notificações */}
         <NotificationsDrawer />
-        
-        {/* Avatar */}
         <UserAvatar />
       </div>
     </header>

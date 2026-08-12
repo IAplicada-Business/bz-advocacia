@@ -30,8 +30,8 @@ export function MetaAdsVisaoGeralTab({ chartData }: Props) {
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
               <Tooltip formatter={(v: number, n) => (n === "Gasto" ? [fmtBRL(v), n] : [v, n])} />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="gasto" name="Gasto" stroke="#3b82f6" strokeWidth={2} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="leads" name="Leads" stroke="#10b981" strokeWidth={2} dot={false} />
+              <Line yAxisId="left" type="monotone" dataKey="gasto" name="Gasto" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} />
+              <Line yAxisId="right" type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--chart-4))" strokeWidth={2.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         ) : (
