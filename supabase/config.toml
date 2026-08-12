@@ -121,3 +121,7 @@ verify_jwt = false
 
 [functions.notify-mariana-desq]
 verify_jwt = false
+
+# Meta Conversions API — eventos de funil (Lead/MQL/Schedule/Purchase)
+[functions.meta-capi-events]
+verify_jwt = false

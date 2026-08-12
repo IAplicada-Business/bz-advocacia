@@ -14,6 +14,7 @@ import { MetaAdsPerformanceTab } from "@/components/meta-ads/MetaAdsPerformanceT
 import { MetaAdsCampanhasTab } from "@/components/meta-ads/MetaAdsCampanhasTab";
 import { MetaAdsAnunciosTab } from "@/components/meta-ads/MetaAdsAnunciosTab";
 import { MetaAdsFunilTab } from "@/components/meta-ads/MetaAdsFunilTab";
+import { MetaAdsPorAnuncioTab } from "@/components/meta-ads/MetaAdsPorAnuncioTab";
 
 export default function MetaAds() {
   const [periodo, setPeriodo] = useState<PeriodoFiltro>("90d");
@@ -42,6 +43,7 @@ export default function MetaAds() {
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="campanhas">Campanhas</TabsTrigger>
           <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
+          <TabsTrigger value="por-anuncio">Por Anúncio</TabsTrigger>
           <TabsTrigger value="insights">Insights</TabsTrigger>
         </TabsList>
 
@@ -62,6 +64,10 @@ export default function MetaAds() {
 
         <TabsContent value="anuncios" className="mt-4">
           <MetaAdsAnunciosTab ads={ads} isLoading={isLoadingAds} />
+        </TabsContent>
+
+        <TabsContent value="por-anuncio" className="mt-4">
+          <MetaAdsPorAnuncioTab periodo={periodo} />
         </TabsContent>
 
         <TabsContent value="insights" className="mt-4">

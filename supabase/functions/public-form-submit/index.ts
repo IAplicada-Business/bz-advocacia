@@ -178,6 +178,15 @@ Deno.serve(async (req) => {
   const meta = body.meta as
     | { ad_id?: string; campaign_id?: string; adset_id?: string; fbclid?: string }
     | undefined;
+  const click = (body.click ?? {}) as {
+    gclid?: string;
+    fbp?: string;
+    fbc?: string;
+  };
+  const userAgent =
+    typeof body.userAgent === "string"
+      ? body.userAgent
+      : req.headers.get("user-agent") ?? undefined;
 
   const payload: FormPayload = {
     oferta,
@@ -214,10 +223,33 @@ Deno.serve(async (req) => {
     meta,
   );
 
+  const src = (utm.source ?? "").toLowerCase();
+  const med = (utm.medium ?? "").toLowerCase();
+  const isGoogle =
+    !!click.gclid ||
+    src === "google" ||
+    src === "googleads" ||
+    (med === "cpc" && src.includes("google"));
+  const isMeta =
+    !isGoogle &&
+    (!!attribution.ad_id ||
+      !!meta?.fbclid ||
+      !!click.fbc ||
+      ["facebook", "instagram", "fb", "ig", "meta"].includes(src) ||
+      med === "paid" ||
+      med === "paidsocial");
+  const platform = isGoogle ? "google_ads" : isMeta ? "meta_ads" : "meta_ads";
+  const origemSdr = isGoogle ? "google_ads" : "meta_lead_ads";
+
   const sdrContexto = {
     respostas,
     melhor_horario: melhorHorario ?? null,
     utm,
+    click: {
+      gclid: click.gclid ?? null,
+      fbp: click.fbp ?? null,
+      fbc: click.fbc ?? null,
+    },
     redirecionamento: decisao.redirecionamento ?? null,
     oferta,
   };
@@ -239,8 +271,8 @@ Deno.serve(async (req) => {
     bot_pausado:
       decisao.stage === "desqualificado" || decisao.stage === "continuidade",
     etapa_qualificacao: "M0",
-    platform: "meta_ads",
-    origem_sdr: "meta_lead_ads",
+    platform,
+    origem_sdr: origemSdr,
     is_organic: false,
     ad_id: attribution.ad_id,
     ad_name: attribution.ad_name ?? `lp_${slug}`,
@@ -253,6 +285,14 @@ Deno.serve(async (req) => {
       slug,
       oferta,
       page_url: body.pageUrl ?? null,
+      utm_source: utm.source ?? null,
+      utm_medium: utm.medium ?? null,
+      utm_campaign: utm.campaign ?? null,
+      utm_content: utm.content ?? null,
+      utm_term: utm.term ?? null,
+      gclid: click.gclid ?? null,
+      fbclid: meta?.fbclid ?? null,
+      click,
       ...respostas,
       values_raw: values,
     },
@@ -321,7 +361,7 @@ Deno.serve(async (req) => {
 
   if (leadRow) {
     await espelharContactSubmission(supabase, leadRow as never, {
-      platform: "meta_ads",
+      platform,
       mensagem: `LP ${slug} / ${oferta} → ${decisao.stage}`,
     });
     await supabase
@@ -329,6 +369,11 @@ Deno.serve(async (req) => {
       .update({
         stage: decisao.stage,
         email: email ?? null,
+        utm_source: utm.source ?? null,
+        utm_medium: utm.medium ?? null,
+        utm_campaign: utm.campaign ?? null,
+        origem: isGoogle ? "google" : "meta",
+        como_conheceu: "Mídia Paga",
         estagio: decisao.stage === "mql"
           ? "novo"
           : decisao.stage === "conectado"
@@ -348,8 +393,35 @@ Deno.serve(async (req) => {
       flags: decisao.flags,
       slug,
       ip_hash: ipHash,
+      platform,
     },
   });
+
+  // Meta CAPI: Lead (+ CompleteRegistration se MQL) — fire-and-forget
+  if (platform === "meta_ads") {
+    try {
+      const base = Deno.env.get("SUPABASE_URL")!.replace(/\/$/, "");
+      const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      await fetch(`${base}/functions/v1/meta-capi-events`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          lead_id: leadId,
+          stage: decisao.stage,
+          event_name: "Lead",
+          event_source_url: body.pageUrl ?? null,
+          client_ip: ip,
+          user_agent: userAgent,
+          email: email ?? null,
+        }),
+      });
+    } catch (e) {
+      console.warn("[public-form-submit] meta-capi-events failed:", e);
+    }
+  }
 
   if (decisao.stage === "mql" || decisao.stage === "conectado") {
     await dispararBot(leadId);

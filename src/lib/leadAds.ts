@@ -50,7 +50,11 @@ function isLpFormSignal(cap: Record<string, unknown> | null | undefined): boolea
   if (!cap || typeof cap !== "object") return false;
   const source = String(cap.source ?? "");
   const formId = String(cap.form_id ?? "");
-  return source === "lp_form" || formId.startsWith("lp_");
+  return (
+    source === "lp_form" ||
+    source === "public_form_submit" ||
+    formId.startsWith("lp_")
+  );
 }
 
 export function isAdsLead(l: AdsLeadSignals): boolean {
