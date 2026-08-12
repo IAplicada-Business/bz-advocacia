@@ -64,6 +64,7 @@ const menuItems: MenuItem[] = [
     icon: TrendingUp,
     submenu: [
       { title: "Leads", url: "/dashboard/leads" },
+      { title: "Contatos", url: "/dashboard/leads/contatos" },
       { title: "Marketing", url: "/dashboard/vendas/meta-ads" },
       { title: "Atendimento", url: "/dashboard/atendimento" },
     ]
@@ -290,6 +291,14 @@ export function AppSidebar() {
                                 <SidebarMenuSubButton asChild className="rounded-lg">
                                   <NavLink
                                     to={subItem.url}
+                                    end={
+                                      // Evita "Leads" ficar ativo em /leads/contatos
+                                      item.submenu.some(
+                                        (other) =>
+                                          other.url !== subItem.url &&
+                                          other.url.startsWith(`${subItem.url}/`),
+                                      )
+                                    }
                                     className={({ isActive }) =>
                                       cn(
                                         "flex items-center gap-2 rounded-lg text-sm",
