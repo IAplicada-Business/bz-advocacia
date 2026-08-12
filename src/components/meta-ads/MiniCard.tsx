@@ -9,19 +9,27 @@ interface Props {
   className?: string;
 }
 
-/**
- * Card padrão das abas do Marketing — tamanho e cor consistentes.
- * Background suave (bg-muted/40), padding p-3, label xs, value lg.
- */
+/** Card compacto das abas de Marketing — glass + tipografia objetiva. */
 export function MiniCard({ label, value, sub, Icon, className }: Props) {
   return (
-    <div className={cn("rounded-lg border bg-muted/40 p-3", className)}>
+    <div
+      className={cn(
+        "rounded-2xl border border-white/[0.07] bg-card/80 p-3.5 shadow-bz backdrop-blur-sm transition-shadow hover:shadow-glow",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-medium text-muted-foreground truncate">{label}</p>
-        {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+        <p className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          {label}
+        </p>
+        {Icon && (
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/20">
+            <Icon className="h-3.5 w-3.5" />
+          </span>
+        )}
       </div>
-      <p className="text-lg font-bold mt-1 leading-tight">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{sub}</p>}
+      <p className="mt-1.5 font-seasons text-xl font-semibold leading-tight">{value}</p>
+      {sub && <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground">{sub}</p>}
     </div>
   );
 }

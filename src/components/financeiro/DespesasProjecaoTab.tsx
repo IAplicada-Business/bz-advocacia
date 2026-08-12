@@ -16,10 +16,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, subMonths, startOfMonth, endOfMonth, addMonths, differenceInCalendarMonths, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
+import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
-const COR_FIXA = "hsl(var(--primary))";
-const COR_VARIAVEL = "#94a3b8"; // slate-400
-const COR_TOTAL = "#f59e0b"; // amber-500
+const COR_FIXA = chartColors.gold;
+const COR_VARIAVEL = chartColors.bronze;
+const COR_TOTAL = chartColors.amber;
 
 interface DespesasProjecaoTabProps {
   selectedMes?: string | null;
@@ -171,9 +173,9 @@ export function DespesasProjecaoTab({ selectedMes, onSelectMonth, dateRange }: D
                   if (mesKey && onSelectMonth) onSelectMonth(mesKey);
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11 }} className="text-muted-foreground" />
-                <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} className="text-muted-foreground" />
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="mes" {...modernAxisProps} />
+                <YAxis tickFormatter={formatCurrency} {...modernAxisProps} width={48} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     const label =
@@ -181,11 +183,7 @@ export function DespesasProjecaoTab({ selectedMes, onSelectMonth, dateRange }: D
                     return [formatCurrencyFull(value), label];
                   }}
                   cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--background))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
+                  contentStyle={chartTooltipStyle}
                 />
                 <Legend
                   formatter={(value) =>
@@ -209,7 +207,7 @@ export function DespesasProjecaoTab({ selectedMes, onSelectMonth, dateRange }: D
                   dataKey="variavel"
                   stackId="despesas"
                   fill={COR_VARIAVEL}
-                  radius={[4, 4, 0, 0]}
+                  radius={[8, 8, 0, 0]}
                   cursor={onSelectMonth ? "pointer" : undefined}
                 >
                   {evolucaoDespesas.map((entry) => {
@@ -223,9 +221,9 @@ export function DespesasProjecaoTab({ selectedMes, onSelectMonth, dateRange }: D
                   type="monotone"
                   dataKey="total"
                   stroke={COR_TOTAL}
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: COR_TOTAL }}
-                  activeDot={{ r: 5 }}
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: COR_TOTAL }}
                 />
               </ComposedChart>
             </ResponsiveContainer>

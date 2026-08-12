@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ConversionEvolution } from "@/types/analytics";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 interface ConversionRateEvolutionProps {
   data: ConversionEvolution[];
@@ -32,35 +33,26 @@ export function ConversionRateEvolution({ data, loading }: ConversionRateEvoluti
       <CardContent>
         {data.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="mes" 
-                className="text-xs"
-                stroke="hsl(var(--muted-foreground))"
-              />
-              <YAxis 
-                className="text-xs"
-                stroke="hsl(var(--muted-foreground))"
-                tickFormatter={(value) => `${value}%`}
-              />
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <ChartGradientDefs gradients={[{ id: "conv-rate", color: "hsl(var(--chart-1))" }]} />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="mes" {...modernAxisProps} />
+              <YAxis {...modernAxisProps} tickFormatter={(value) => `${value}%`} width={40} />
               <Tooltip
-                formatter={(value: number) => [`${value.toFixed(1)}%`, 'Taxa de Conversão']}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
+                formatter={(value: number) => [`${value.toFixed(1)}%`, "Taxa de Conversão"]}
+                contentStyle={chartTooltipStyle}
               />
-              <Line 
-                type="monotone" 
-                dataKey="taxaConversao" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))', r: 4 }}
-                activeDot={{ r: 6 }}
+              <Area
+                type="monotone"
+                dataKey="taxaConversao"
+                stroke="hsl(var(--chart-1))"
+                strokeWidth={2.75}
+                fill="url(#conv-rate)"
+                filter="url(#conv-rate-glow)"
+                dot={false}
+                activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           <div className="h-64 flex items-center justify-center text-muted-foreground">

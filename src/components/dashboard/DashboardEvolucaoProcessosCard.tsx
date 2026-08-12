@@ -13,6 +13,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ProcessoEvolucaoMes } from "@/hooks/useProcessosEvolucao";
+import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 interface Props {
   data: ProcessoEvolucaoMes[];
@@ -53,27 +55,21 @@ export function DashboardEvolucaoProcessosCard({ data, loading, abertos30d, vari
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="mes" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-              <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                  color: "hsl(var(--card-foreground))",
-                }}
-              />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="mes" {...modernAxisProps} />
+              <YAxis {...modernAxisProps} width={36} />
+              <Tooltip contentStyle={chartTooltipStyle} />
               <Legend />
-              <Bar dataKey="abertos" name="Abertos" stackId="a" fill="hsl(var(--chart-1))" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="concluidos" name="Concluídos" stackId="a" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="abertos" name="Abertos" stackId="a" fill={chartColors.gold} radius={[0, 0, 0, 0]} />
+              <Bar dataKey="concluidos" name="Concluídos" stackId="a" fill={chartColors.bronze} radius={[8, 8, 0, 0]} />
               <Line
                 type="monotone"
                 dataKey="acumulado"
                 name="Total acumulado"
-                stroke="hsl(var(--chart-5))"
-                strokeWidth={2}
-                dot={{ r: 4 }}
+                stroke={chartColors.amber}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: chartColors.amber }}
               />
             </ComposedChart>
           </ResponsiveContainer>

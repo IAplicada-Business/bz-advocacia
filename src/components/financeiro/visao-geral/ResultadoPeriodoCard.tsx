@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useResultadoMensal } from "@/hooks/useVisaoGeralFinanceiro";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
 const fmt = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
@@ -40,22 +41,31 @@ export function ResultadoPeriodoCard({ ano }: Props) {
         </div>
 
         <ResponsiveContainer width="100%" height={160}>
-          <LineChart data={data.dados}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="mes" tick={{ fontSize: 10 }} />
-            <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 10 }} />
+          <AreaChart data={data.dados} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <ChartGradientDefs gradients={[{ id: "resultado-periodo", color: "hsl(var(--chart-1))" }]} />
+            <CartesianGrid {...modernGridProps} />
+            <XAxis dataKey="mes" {...modernAxisProps} />
+            <YAxis
+              tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+              {...modernAxisProps}
+              width={36}
+              tickCount={4}
+            />
             <Tooltip
               formatter={(v: number) => [fmt(v), "Resultado"]}
-              contentStyle={{ borderRadius: "0.5rem", border: "1px solid hsl(0, 0%, 90%)" }}
+              contentStyle={chartTooltipStyle}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="resultado"
-              stroke="hsl(30, 33%, 55%)"
-              strokeWidth={2}
-              dot={{ r: 3, fill: "hsl(30, 33%, 55%)" }}
+              stroke="hsl(var(--chart-1))"
+              strokeWidth={2.75}
+              fill="url(#resultado-periodo)"
+              filter="url(#resultado-periodo-glow)"
+              dot={false}
+              activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
 
         <p className="text-xs text-muted-foreground text-center">

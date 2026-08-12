@@ -7,7 +7,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { chartColors } from "@/lib/chartConfig";
+import { CHART_SERIES, chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps, seriesColor } from "@/components/charts/ChartPrimitives";
 import { useRelatoriosVendasPeriodo } from "@/hooks/useRelatoriosVendasPeriodo";
 import { Progress } from "@/components/ui/progress";
 
@@ -16,7 +17,7 @@ interface RelatorioFunilVendasProps {
   dataFim: Date;
 }
 
-const FUNNEL_COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#22c55e'];
+const FUNNEL_COLORS = [...CHART_SERIES, chartColors.sage];
 
 export function RelatorioFunilVendas({ dataInicio, dataFim }: RelatorioFunilVendasProps) {
   const { data, isLoading } = useRelatoriosVendasPeriodo(dataInicio, dataFim);
@@ -116,25 +117,21 @@ export function RelatorioFunilVendas({ dataInicio, dataFim }: RelatorioFunilVend
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={funil} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
-                <YAxis 
-                  dataKey="label" 
-                  type="category" 
-                  width={120} 
-                  stroke="hsl(var(--muted-foreground))"
+                <CartesianGrid {...modernGridProps} horizontal={false} vertical />
+                <XAxis type="number" {...modernAxisProps} />
+                <YAxis
+                  dataKey="label"
+                  type="category"
+                  width={120}
+                  {...modernAxisProps}
                 />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
+                <Tooltip
+                  contentStyle={chartTooltipStyle}
                   formatter={(value, name) => [`${value} leads`, 'Quantidade']}
                 />
-                <Bar dataKey="quantidade" name="Quantidade">
+                <Bar dataKey="quantidade" name="Quantidade" radius={[0, 8, 8, 0]}>
                   {funil.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={FUNNEL_COLORS[index % FUNNEL_COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={seriesColor(index)} />
                   ))}
                 </Bar>
               </BarChart>

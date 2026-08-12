@@ -1,33 +1,33 @@
-# Design System B&Z (CRM)
+# Design System B&Z (CRM) v3
 
-Rebrand modular inspirado em UI kit moderno, com cores da marca Borges & Zembruski.
+Rebrand modular: UI kit (pills/cards/estados) + dashboard premium dark (ink + ouro).
 
 ## Princípios
 
-- **Marca primeiro:** ouro B&Z (`#C5A059`) é o sinal primário (CTA, active, charts).
-- **Modular:** botões, cards, tabs e inputs compartilham radius, sombra e estados.
-- **Clara e respirável:** fundo stone-suave, cards brancos, hierarquia tipográfica DM Sans + Cormorant (títulos).
-- **Gráficos com evolução natural:** sequência ouro → bronze → ink → sage → âmbar.
+- **Marca primeiro:** ouro B&Z (`#C5A059`) em CTA, active, glow e série principal de charts.
+- **Canvas ink:** fundo `#1A1F1A` (aprox.), cards glass com borda sutil e radius alto.
+- **Modular:** `MetricCard`, `SegmentControl`, tabs pill e `ChartPrimitives` compartilham o padrão.
+- **Gráficos com evolução natural:** Area com fill em fade + stroke ouro; eixos mínimos; tooltip com glow.
+- **Segmentação objetiva:** pills 3M/6M/1A e abas Operação / Processos / Leads.
 
 ## Tokens (CSS)
 
 | Token | Uso | Hex aprox. |
 |-------|-----|------------|
-| `--primary` | CTA / active | `#C5A059` |
-| `--primary-foreground` | texto sobre ouro | `#1A1F1A` |
-| `--foreground` | texto | `#1A1F1A` |
-| `--background` | app shell | `#F7F6F3` |
-| `--card` | superfícies | `#FFFFFF` |
-| `--muted` | chips / tabs track | `#EFEDE8` |
-| `--border` | divisórias | `#E5E1D8` |
-| `--chart-1…5` | séries | ouro → … → âmbar |
+| `--background` | app shell ink | `#121612` |
+| `--card` | superfícies glass | `#1A1F1A` |
+| `--primary` | CTA / active / glow | `#C5A059` |
+| `--primary-foreground` | texto sobre ouro | ink |
+| `--chart-1…5` | séries | ouro → bronze → cream → sage → âmbar |
 
-## Componentes
+Modo claro opcional via classe `.light` no root (não é o default do CRM).
 
-- `Button`: pill (`rounded-full`), primary ouro + texto ink
-- `Tabs`: segmented control em pill track
-- `Card`: radius maior, borda suave, sombra leve
-- `Sidebar`: indicador ouro à esquerda no item ativo
-- Inputs: radius `xl`, focus ring ouro
+## Componentes-chave
 
-Landing pages (`lp-*`) mantêm identidade própria (cream/gold) e não são alteradas por este rebrand do CRM.
+- `Button` / `Tabs` — pills com glow no active
+- `MetricCard` — KPI número grande + trend pill
+- `SegmentControl` — filtros de período / visão
+- `ChartGradientDefs` + `chartTheme` — AreaCharts modernos
+- Sidebar — item ativo com gradiente ouro + rail
+
+Landing pages (`lp-*`) mantêm identidade própria e não herdam o dark CRM.

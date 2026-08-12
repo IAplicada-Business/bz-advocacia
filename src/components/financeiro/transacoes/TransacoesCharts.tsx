@@ -10,21 +10,16 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   Legend,
 } from "recharts";
 import { useResumoMensal, useKPIsTransacoes, useResumoAnual, useReceitasPorResponsavel } from "@/hooks/useTransacoesFinanceiras";
 import { Skeleton } from "@/components/ui/skeleton";
-import { chartColors } from "@/lib/chartConfig";
+import { chartColors, CHART_SERIES } from "@/lib/chartConfig";
+import { ChartGradientDefs, chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 
-const COLORS = [
-  chartColors.primary,
-  chartColors.secondary,
-  chartColors.success,
-  chartColors.warning,
-  chartColors.dark,
-];
+const COLORS = [...CHART_SERIES];
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("pt-BR", {
@@ -129,33 +124,35 @@ export function TransacoesCharts({ filters }: TransacoesChartsProps) {
           <ResponsiveContainer width="100%" height={300}>
             {showMonthlyChart ? (
               <BarChart data={resumoMensal || []}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <CartesianGrid {...modernGridProps} />
                 <XAxis
                   dataKey="mes_nome"
                   tickFormatter={(v) => v.substring(0, 3)}
-                  className="text-xs"
+                  {...modernAxisProps}
                 />
-                <YAxis tickFormatter={formatCurrency} className="text-xs" />
+                <YAxis tickFormatter={formatCurrency} {...modernAxisProps} width={48} />
                 <Tooltip
                   formatter={(value: number) => formatCurrencyFull(value)}
                   labelFormatter={(label) => `Mês: ${label}`}
+                  contentStyle={chartTooltipStyle}
                 />
                 <Legend />
-                <Bar dataKey="receitas" name="Receitas" fill={chartColors.success} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="despesas" name="Despesas" fill={chartColors.primary} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="receitas" name="Receitas" fill={chartColors.sage} radius={[8, 8, 0, 0]} />
+                <Bar dataKey="despesas" name="Despesas" fill={chartColors.gold} radius={[8, 8, 0, 0]} />
               </BarChart>
             ) : (
               <BarChart data={resumoAnual || []}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="ano" className="text-xs" />
-                <YAxis tickFormatter={formatCurrency} className="text-xs" />
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="ano" {...modernAxisProps} />
+                <YAxis tickFormatter={formatCurrency} {...modernAxisProps} width={48} />
                 <Tooltip
                   formatter={(value: number) => formatCurrencyFull(value)}
                   labelFormatter={(label) => `Ano: ${label}`}
+                  contentStyle={chartTooltipStyle}
                 />
                 <Legend />
-                <Bar dataKey="receitas" name="Receitas" fill={chartColors.success} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="despesas" name="Despesas" fill={chartColors.primary} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="receitas" name="Receitas" fill={chartColors.sage} radius={[8, 8, 0, 0]} />
+                <Bar dataKey="despesas" name="Despesas" fill={chartColors.gold} radius={[8, 8, 0, 0]} />
               </BarChart>
             )}
           </ResponsiveContainer>
@@ -174,10 +171,12 @@ export function TransacoesCharts({ filters }: TransacoesChartsProps) {
                 data={pfVsPjData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
+                innerRadius={62}
+                outerRadius={90}
+                paddingAngle={3}
                 dataKey="value"
+                stroke="hsl(var(--card))"
+                strokeWidth={3}
                 label={({ name, percent }) =>
                   `${name}: ${(percent * 100).toFixed(0)}%`
                 }
@@ -186,7 +185,7 @@ export function TransacoesCharts({ filters }: TransacoesChartsProps) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => formatCurrencyFull(value)} />
+              <Tooltip formatter={(value: number) => formatCurrencyFull(value)} contentStyle={chartTooltipStyle} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -204,11 +203,13 @@ export function TransacoesCharts({ filters }: TransacoesChartsProps) {
                 data={receitasResponsavel || []}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
+                innerRadius={62}
+                outerRadius={90}
+                paddingAngle={3}
                 dataKey="total"
                 nameKey="responsavel"
+                stroke="hsl(var(--card))"
+                strokeWidth={3}
                 label={({ responsavel, percentual }) =>
                   `${responsavel}: ${percentual.toFixed(0)}%`
                 }
@@ -217,7 +218,7 @@ export function TransacoesCharts({ filters }: TransacoesChartsProps) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => formatCurrencyFull(value)} />
+              <Tooltip formatter={(value: number) => formatCurrencyFull(value)} contentStyle={chartTooltipStyle} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -231,20 +232,24 @@ export function TransacoesCharts({ filters }: TransacoesChartsProps) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={dadosAcumulados}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="mes" className="text-xs" />
-                <YAxis tickFormatter={formatCurrency} className="text-xs" />
-                <Tooltip formatter={(value: number) => formatCurrencyFull(value)} />
-                <Line
+              <AreaChart data={dadosAcumulados} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <ChartGradientDefs gradients={[{ id: "trans-acumulado", color: "hsl(var(--chart-1))" }]} />
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="mes" {...modernAxisProps} />
+                <YAxis tickFormatter={formatCurrency} {...modernAxisProps} width={48} />
+                <Tooltip formatter={(value: number) => formatCurrencyFull(value)} contentStyle={chartTooltipStyle} />
+                <Area
                   type="monotone"
                   dataKey="acumulado"
                   name="Acumulado"
-                  stroke={chartColors.primary}
-                  strokeWidth={2}
-                  dot={{ fill: chartColors.primary }}
+                  stroke="hsl(var(--chart-1))"
+                  strokeWidth={2.75}
+                  fill="url(#trans-acumulado)"
+                  filter="url(#trans-acumulado-glow)"
+                  dot={false}
+                  activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

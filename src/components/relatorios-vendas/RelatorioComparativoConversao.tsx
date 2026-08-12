@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 import { useRelatoriosVendasPeriodo } from "@/hooks/useRelatoriosVendasPeriodo";
 
 interface RelatorioComparativoConversaoProps {
@@ -173,19 +174,13 @@ export function RelatorioComparativoConversao({ dataInicio, dataFim }: Relatorio
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="metrica" stroke="hsl(var(--muted-foreground))" />
-              <YAxis stroke="hsl(var(--muted-foreground))" />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-              />
+              <CartesianGrid {...modernGridProps} />
+              <XAxis dataKey="metrica" {...modernAxisProps} />
+              <YAxis {...modernAxisProps} width={40} />
+              <Tooltip contentStyle={chartTooltipStyle} />
               <Legend />
-              <Bar dataKey="atual" name="Período Atual" fill={chartColors.primary} />
-              <Bar dataKey="anterior" name="Período Anterior" fill={chartColors.secondary} />
+              <Bar dataKey="atual" name="Período Atual" fill={chartColors.gold} radius={[8, 8, 0, 0]} />
+              <Bar dataKey="anterior" name="Período Anterior" fill={chartColors.bronze} radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

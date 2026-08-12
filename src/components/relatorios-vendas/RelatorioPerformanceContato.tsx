@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { chartColors } from "@/lib/chartConfig";
+import { chartTooltipStyle, modernAxisProps, modernGridProps } from "@/components/charts/ChartPrimitives";
 import { useRelatoriosVendasPeriodo } from "@/hooks/useRelatoriosVendasPeriodo";
 import { Progress } from "@/components/ui/progress";
 
@@ -37,8 +38,8 @@ export function RelatorioPerformanceContato({ dataInicio, dataFim }: RelatorioPe
   const leads = data?.leads || [];
 
   const chartData = [
-    { name: 'Contatados', value: contato?.leadsContatados || 0, fill: chartColors.primary },
-    { name: 'Sem Contato', value: contato?.leadsSemContato || 0, fill: chartColors.muted },
+    { name: 'Contatados', value: contato?.leadsContatados || 0, fill: chartColors.gold },
+    { name: 'Sem Contato', value: contato?.leadsSemContato || 0, fill: chartColors.bronze },
   ];
 
   const exportData = [
@@ -151,17 +152,11 @@ export function RelatorioPerformanceContato({ dataInicio, dataFim }: RelatorioPe
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Bar dataKey="value" name="Quantidade">
+                <CartesianGrid {...modernGridProps} />
+                <XAxis dataKey="name" {...modernAxisProps} />
+                <YAxis {...modernAxisProps} width={36} />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Bar dataKey="value" name="Quantidade" radius={[8, 8, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}

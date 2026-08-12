@@ -32,7 +32,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <main
             id="main-content"
             tabIndex={-1}
-            className="min-w-0 flex-1 overflow-x-auto bg-background p-4 md:p-6 lg:p-8"
+            className="min-w-0 flex-1 overflow-x-auto bg-background bg-ambient-gold p-4 md:p-6 lg:p-8"
           >
             <div className="mx-auto w-full max-w-[1600px] animate-in fade-in-0 duration-300">
               {children}
