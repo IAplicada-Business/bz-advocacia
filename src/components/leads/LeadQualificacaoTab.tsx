@@ -114,7 +114,7 @@ export function LeadQualificacaoTab({
   if (!leadGeralId) {
     return (
       <div className="text-center py-10 text-sm text-muted-foreground">
-        Este lead ainda não tem conversa registrada com a Claudia.
+        Este lead ainda não tem conversa registrada com o bot da B&Z.
       </div>
     );
   }
@@ -179,11 +179,11 @@ export function LeadQualificacaoTab({
       <div className="rounded-lg border bg-muted/30 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">Dados capturados pela Claudia</h3>
+          <h3 className="text-sm font-semibold">Dados capturados pelo bot da B&Z</h3>
         </div>
         {entries.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Nada extraído ainda — a Claudia preenche este bloco automaticamente conforme o lead responde.
+            Nada extraído ainda — o bot da B&Z preenche este bloco automaticamente conforme o lead responde.
           </p>
         ) : (
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
@@ -256,7 +256,7 @@ export function LeadQualificacaoTab({
 
       <Separator />
       <p className="text-[11px] text-muted-foreground">
-        Score é calculado pela Claudia a cada resposta, com base na área, urgência e completude dos dados.
+        Score é calculado pelo bot da B&Z a cada resposta, com base na área, urgência e completude dos dados.
         A regra completa está no prompt do classificador (patch B).
       </p>
     </div>

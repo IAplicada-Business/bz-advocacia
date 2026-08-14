@@ -106,7 +106,7 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
       if (error) throw error;
       toast({
         title: "Bot reativado",
-        description: "Novas mensagens deste contato serão processadas pela Claudia.",
+        description: "Novas mensagens deste contato serão processadas pelo bot da B&Z.",
       });
       setShowReativarBot(false);
       setReativarMotivo("");
@@ -412,7 +412,7 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
                   size="sm"
                   className="gap-1.5 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowReativarBot(true)}
-                  title="Permite que o bot Claudia volte a responder este contato"
+                  title="Permite que o bot da B&Z volte a responder este contato"
                 >
                   <Unlock className="h-3.5 w-3.5" />
                   Reativar bot pra este contato
@@ -424,10 +424,10 @@ export function LeadDetailsDialog({ open, onClose, lead, onEdit, isCliente = fal
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle className="flex items-center gap-2">
-                    <BotIcon className="h-4 w-4" /> Reativar bot Claudia
+                    <BotIcon className="h-4 w-4" /> Reativar bot da B&Z
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Isso vai permitir que o bot Claudia volte a responder mensagens deste número.
+                    Isso vai permitir que o bot da B&Z volte a responder mensagens deste número.
                     Use apenas em casos específicos (ex: cliente antigo com demanda nova,
                     falso positivo, número familiar reaproveitado).
                   </AlertDialogDescription>
