@@ -1179,7 +1179,7 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     },
   });
 
-  let classificacao: Awaited<ReturnType<typeof claudeJson<ClassificacaoV1>>>;
+  let classificacao: ClaudeJsonResult<ClassificacaoV1>;
   try {
     classificacao = await claudeJson<ClassificacaoV1>(
       systemPrompt,
