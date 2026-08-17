@@ -1179,19 +1179,37 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     },
   });
 
-  const classificacao = await claudeJson<ClassificacaoV1>(
-    systemPrompt,
-    [{ role: "user", content: userPrompt }],
-    { maxTokens: 1024, temperature: 0.2 },
-  );
+  let classificacao: Awaited<ReturnType<typeof claudeJson<ClassificacaoV1>>>;
+  try {
+    classificacao = await claudeJson<ClassificacaoV1>(
+      systemPrompt,
+      [{ role: "user", content: userPrompt }],
+      { maxTokens: 1024, temperature: 0.2 },
+    );
+  } catch (e) {
+    await registrarEvento(supabase, lead.id, "haiku_falhou", {
+      erro: (e as Error)?.message ?? String(e),
+      stack: (e as Error)?.stack ?? null,
+      etapa: lead.etapa_qualificacao,
+      fase: "exception",
+    });
+    return new Response(JSON.stringify({ erro: "haiku_exception" }), { status: 500 });
+  }
 
   if (!classificacao.ok || !classificacao.data) {
+    await registrarEvento(supabase, lead.id, "haiku_falhou", {
+      erro: classificacao.error,
+      raw: classificacao.rawText,
+      etapa: lead.etapa_qualificacao,
+      fase: "resposta_invalida",
+    });
     await registrarEvento(supabase, lead.id, "claude_falhou", {
       erro: classificacao.error,
       raw: classificacao.rawText,
     });
     return new Response(JSON.stringify({ erro: classificacao.error }), { status: 500 });
   }
+
 
   const r = classificacao.data;
   const etapaAnterior = (lead.etapa_qualificacao ?? "M0").toString();
