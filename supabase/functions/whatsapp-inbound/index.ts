@@ -17,7 +17,7 @@ import {
   Lead,
 } from "../_shared/db.ts";
 import { normalizarTelefone, zapiSendText } from "../_shared/zapi.ts";
-import { claudeJson } from "../_shared/claude.ts";
+import { claudeJson, type ClaudeJsonResult } from "../_shared/claude.ts";
 import {
   AREA_LABEL,
   AREA_NUM_TO_KEY,
