@@ -41,6 +41,8 @@ import {
   SYSTEM_PROMPT_ROTEIRO_V1,
   aplicarRegrasV1,
   cadencia,
+  etapasPendentes,
+  respostasFormParaDadosBot,
   templateV1,
   type ClassificacaoV1,
 } from "../_shared/roteiro-v1.ts";
