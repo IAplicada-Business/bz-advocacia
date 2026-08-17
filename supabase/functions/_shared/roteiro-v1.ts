@@ -447,3 +447,130 @@ export async function cadencia(): Promise<void> {
   const delay = 2000 + Math.random() * 2000;
   await new Promise((r) => setTimeout(r, delay));
 }
+
+// ============================================================
+// PONTE FORM (LP) → ROTEIRO DO BOT
+// Converte as respostas gravadas em leads_geral.sdr_contexto.respostas
+// nas chaves e labels que o roteiro/regras usam.
+// ============================================================
+
+/** Chaves aceitas no form (canônicas ou legadas) por chave do roteiro. */
+export const FORM_KEYS_POR_CHAVE_BOT: Record<string, Record<string, string[]>> = {
+  familia: {
+    situacao: ["situacao", "situacao_civil"],
+    patrimonio: ["patrimonio", "patrimonio_existente", "bens"],
+    renda: ["renda", "renda_familiar"],
+  },
+  inventario: {
+    fase: ["fase", "fase_inventario"],
+    patrimonio_estimado: ["patrimonio_estimado", "patrimonio_total"],
+    composicao: ["composicao", "composicao_patrimonio"],
+    risco_conflito: ["risco_conflito", "conflito", "risco_conflito_herdeiros"],
+  },
+  saude: {
+    situacao_plano: ["situacao_plano", "situacao_com_plano"],
+    tipo_cobertura: ["tipo_cobertura", "cobertura"],
+    urgencia: ["urgencia", "urgencia_clinica"],
+    valor_plano: ["valor_plano", "plano_valor"],
+  },
+};
+
+/** Valores canônicos do form → labels que as regras determinísticas leem. */
+export const VALOR_FORM_PARA_LABEL: Record<string, string> = {
+  casado_pensando: "Ainda casada(o) e pensando em me separar",
+  separado_sem_processo: "Já separada(o) mas sem processo iniciado",
+  consensual_negociacao: "Divórcio consensual em negociação",
+  litigioso_andamento: "Divórcio litigioso em andamento",
+  processo_travado: "Processo iniciado mas travado",
+  imoveis: "Imóveis",
+  empresa: "Empresa ou participações societárias",
+  aplicacoes: "Aplicações e investimentos",
+  veiculos: "Veículos",
+  exterior: "Bens no exterior",
+  outros: "Outros",
+  sem_patrimonio_significativo: "Sem patrimônio significativo",
+  nao_certeza: "Não tenho certeza",
+  ate_10k: "Até R$ 10.000",
+  "10k_30k": "R$ 10.000 a R$ 30.000",
+  "30k_60k": "R$ 30.000 a R$ 60.000",
+  acima_60k: "Acima de R$ 60.000",
+  falecimento_recente: "Faleceu recentemente, ainda não abrimos o processo",
+  aberto_andamento: "Inventário aberto e em andamento",
+  travado: "Inventário aberto mas travado, com algum problema",
+  preventivo: "Ninguém faleceu ainda, estou pensando em planejamento sucessório preventivo",
+  ate_300k: "Até R$ 300 mil",
+  "300k_1M": "R$ 300 mil a R$ 1 milhão",
+  "1M_5M": "R$ 1 milhão a R$ 5 milhões",
+  acima_5M: "Acima de R$ 5 milhões",
+  nao_sei: "Não sei estimar",
+  sim: "Sim, já há divergências",
+  talvez: "Talvez, ainda não conversamos abertamente",
+  nao: "Não, todos alinhados",
+  negou_escrito: "O plano negou o tratamento por escrito",
+  negou_verbal: "O plano negou verbalmente, sem documento",
+  autorizou_nao_cumpre: "O plano autorizou mas não está cumprindo",
+  enrolando: "O plano está enrolando pra responder",
+  nao_pedi: "Ainda não pedi, mas sei que vou precisar",
+  cirurgia: "Cirurgia",
+  medicamento_alto_custo: "Medicamento de alto custo",
+  home_care: "Home care",
+  oncologico: "Tratamento oncológico",
+  terapia_continuada: "Terapia continuada",
+  uti: "UTI ou internação",
+  exame: "Exame de alta complexidade",
+  outro: "Outro",
+  risco_vida: "Extrema (risco de vida ou piora rápida)",
+  ate_30_dias: "Precisa começar em até 30 dias",
+  sem_urgencia: "Sem urgência imediata, mas tem direito",
+  ate_500: "Até R$ 500",
+  "500_1500": "R$ 500 a R$ 1.500",
+  "1500_3000": "R$ 1.500 a R$ 3.000",
+  acima_3000: "Acima de R$ 3.000",
+};
+
+function labelRegra(v: string): string {
+  return VALOR_FORM_PARA_LABEL[v] ?? v;
+}
+
+/**
+ * Converte respostas do form da LP nas chaves do roteiro do bot,
+ * já com os labels que aplicarRegrasV1 espera.
+ */
+export function respostasFormParaDadosBot(
+  area: string,
+  respostas: Record<string, unknown>,
+): Record<string, unknown> {
+  const mapa = FORM_KEYS_POR_CHAVE_BOT[area];
+  const out: Record<string, unknown> = {};
+  if (!mapa || !respostas) return out;
+
+  for (const [chaveBot, aliases] of Object.entries(mapa)) {
+    for (const alias of aliases) {
+      const v = respostas[alias];
+      if (v === undefined || v === null || v === "") continue;
+      if (Array.isArray(v)) {
+        const arr = v.map((x) => labelRegra(String(x))).filter(Boolean);
+        if (arr.length === 0) continue;
+        out[chaveBot] = arr;
+      } else {
+        out[chaveBot] = labelRegra(String(v));
+      }
+      break;
+    }
+  }
+  return out;
+}
+
+/** Etapas da sequência da área que ainda NÃO têm resposta nos dados. */
+export function etapasPendentes(
+  area: string,
+  dados: Record<string, unknown>,
+): string[] {
+  const seq = SEQUENCIA[area] ?? [];
+  return seq.filter((etapa) => {
+    const chave = CHAVE_POR_ETAPA[etapa];
+    const v = chave ? dados[chave] : undefined;
+    if (Array.isArray(v)) return v.length === 0;
+    return !(v !== undefined && v !== null && String(v).trim() !== "");
+  });
+}
