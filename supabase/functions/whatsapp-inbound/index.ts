@@ -1053,11 +1053,161 @@ Deno.serve(async (req) => {
     if ((msgsM0?.length ?? 0) === 0) {
       const { data: leadForm } = await supabase
         .from("leads_geral")
-        .select("oferta_origem, form_flags, stage, sdr_contexto")
+        .select("oferta_origem, form_flags, stage, sdr_contexto, dados_capturados, flags_qualificacao")
         .eq("id", lead.id)
         .maybeSingle();
       const ofertaM0 = (leadForm?.oferta_origem ?? null) as Oferta | null;
       const ctxM0 = (leadForm?.sdr_contexto ?? null) as SdrContexto | null;
+      const areaForm = ofertaM0 ? areaFromOferta(ofertaM0) : null;
+      const respostasForm = (ctxM0?.respostas ?? {}) as Record<string, unknown>;
+      const dadosForm = areaForm
+        ? respostasFormParaDadosBot(areaForm, respostasForm)
+        : {};
+
+      // ---------- Lead veio de LP com respostas: não repetir o form ----------
+      if (areaForm && Object.keys(dadosForm).length > 0) {
+        const TEMA: Record<string, string> = {
+          familia: "partilha e divórcio",
+          inventario: "inventário",
+          saude: "caso com o plano de saúde",
+        };
+        const pendentes = etapasPendentes(areaForm, dadosForm);
+        const dadosPrevM0 = ((leadForm as any)?.dados_capturados ?? {}) as Record<string, unknown>;
+        const dadosMergeM0: Record<string, unknown> = {
+          ...dadosPrevM0,
+          ...dadosForm,
+          area: areaForm,
+          veio_do_form: true,
+        };
+        const flagsPrevM0 = ((leadForm as any)?.flags_qualificacao ?? []) as string[];
+
+        const saudacao = `Oi ${nomePrimeiro(lead)}, tudo bem? Aqui é do escritório Borges & Zembruski Advocacia.`;
+
+        if (pendentes.length === 0) {
+          // Form completo → M0 de confirmação + handoff direto, sem perguntas.
+          const seqArea = SEQUENCIA[areaForm] ?? [];
+          const regra = aplicarRegrasV1(
+            areaForm,
+            seqArea[seqArea.length - 1],
+            dadosMergeM0,
+          );
+          const flagsM0 = [...new Set([...flagsPrevM0, ...regra.flags, "veio_do_form"])];
+          const msgCompleto =
+            `${saudacao}\n\nRecebemos as informações que você deixou no site. Já anotamos tudo e uma das nossas advogadas entra em contato ainda hoje pra conversar em detalhes com você.`;
+
+          await cadencia();
+          const envioC = await zapiSendText(telefone, msgCompleto);
+          await registrarMensagem(supabase, lead.id, "bot", msgCompleto, {
+            etapa: "M0",
+            zapi_status: envioC.status,
+            motivo: "m0_form_completo",
+            personalizado_form: true,
+            handoff: regra.proxima,
+          });
+
+          const ehDesq = IDS_DESQUALIFICA.includes(regra.proxima);
+          const patchM0: Record<string, unknown> = {
+            etapa_qualificacao: regra.proxima,
+            area_normalizada: areaForm,
+            dados_capturados: dadosMergeM0,
+            flags_qualificacao: flagsM0,
+            status_sdr: ehDesq ? "desqualificado" : "sql_aguardando_humano",
+            bot_pausado: true,
+            ultima_mensagem_em: new Date().toISOString(),
+          };
+          if (ehDesq) {
+            patchM0.stage = "desqualificado";
+            patchM0.desqualificado_em = new Date().toISOString();
+          }
+          await supabase.from("leads_geral").update(patchM0).eq("id", lead.id);
+
+          let advogadaId: string | null = null;
+          if (!ehDesq) {
+            const advogada = await pickAdvogada(supabase, areaForm as AreaHandoff);
+            advogadaId = advogada?.id ?? null;
+            if (advogada) {
+              await supabase.from("leads_geral").update({
+                humano_responsavel: advogada.id,
+                advogada_responsavel_id: advogada.id,
+                stage: "sal",
+                prioridade_max: flagsM0.includes("urgente_saude"),
+                caso_forte: flagsM0.includes("caso_forte"),
+                ticket_minimo: flagsM0.includes("ticket_baixo"),
+                produto_diferente: flagsM0.includes("produto_diferente"),
+              }).eq("id", lead.id);
+            }
+            await notificarAdvogado(supabase, lead.id, advogadaId, regra.proxima, {
+              prioridadeMax: flagsM0.includes("urgente_saude"),
+              flags: {
+                caso_forte: flagsM0.includes("caso_forte"),
+                ticket_minimo: flagsM0.includes("ticket_baixo"),
+                produto_diferente: flagsM0.includes("produto_diferente"),
+                prioridade_max: flagsM0.includes("urgente_saude"),
+              },
+            });
+          }
+
+          await registrarEvento(supabase, lead.id, "m0_form_completo_handoff", {
+            oferta: ofertaM0,
+            area: areaForm,
+            handoff: regra.proxima,
+            flags: flagsM0,
+          });
+          return new Response(
+            JSON.stringify({ acao: "m0_form_handoff", lead_id: lead.id, etapa: regra.proxima }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        // Form parcial → M0 personalizado + primeira pergunta que faltou.
+        const proximaPergunta = pendentes[0];
+        const msgParcial =
+          `${saudacao}\n\nRecebemos as informações que você deixou no site sobre ${TEMA[areaForm]}. Anotamos tudo e falta só uma última pergunta pra a gente encaminhar pra advogada certa.`;
+
+        await cadencia();
+        const envioP = await zapiSendText(telefone, msgParcial);
+        await registrarMensagem(supabase, lead.id, "bot", msgParcial, {
+          etapa: "M0",
+          zapi_status: envioP.status,
+          motivo: "m0_form_parcial",
+          personalizado_form: true,
+          proxima_pergunta: proximaPergunta,
+        });
+
+        const textoPergunta = templateV1(proximaPergunta);
+        await cadencia();
+        const envioQ = await zapiSendText(telefone, textoPergunta);
+        await registrarMensagem(supabase, lead.id, "bot", textoPergunta, {
+          etapa: proximaPergunta,
+          zapi_status: envioQ.status,
+          motivo: "pergunta_pendente_form",
+        });
+
+        await supabase
+          .from("leads_geral")
+          .update({
+            etapa_qualificacao: proximaPergunta,
+            area_normalizada: areaForm,
+            dados_capturados: dadosMergeM0,
+            flags_qualificacao: [...new Set([...flagsPrevM0, "veio_do_form"])],
+            status_sdr: "em_atendimento_bot",
+            ultima_mensagem_em: new Date().toISOString(),
+          })
+          .eq("id", lead.id);
+
+        await registrarEvento(supabase, lead.id, "m0_form_parcial", {
+          oferta: ofertaM0,
+          area: areaForm,
+          pendentes,
+          respondidas_form: Object.keys(dadosForm),
+        });
+        return new Response(
+          JSON.stringify({ acao: "m0_form_parcial", lead_id: lead.id, etapa: proximaPergunta }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      // ---------- Sem form: fluxo M0 padrão (inalterado) ----------
       const msgM0 = montarM0Personalizado({
         oferta: ofertaM0,
         stage: (leadForm?.stage ?? "mql") as StageDecisao,
