@@ -17,7 +17,7 @@ import {
   Lead,
 } from "../_shared/db.ts";
 import { normalizarTelefone, zapiSendText } from "../_shared/zapi.ts";
-import { claudeJson } from "../_shared/claude.ts";
+import { claudeJson, type ClaudeJsonResult } from "../_shared/claude.ts";
 import {
   AREA_LABEL,
   AREA_NUM_TO_KEY,
@@ -249,10 +249,14 @@ Deno.serve(async (req) => {
   // Bot fica fora — não cria lead, não responde, não classifica.
   // ============================================================
   if (!modoTeste) {
+    // Compara pelos últimos 8 dígitos — a tabela tem formatos mistos
+    // (com/sem DDI, e o backfill v2 grava só os 8 finais).
+    const ult8Bloq = telefone.replace(/\D/g, "").slice(-8);
     const { data: bloqueado } = await supabase
       .from("numeros_bloqueados_bot")
       .select("telefone, nome, motivo")
-      .eq("telefone", telefone)
+      .like("telefone", `%${ult8Bloq}`)
+      .limit(1)
       .maybeSingle();
     if (bloqueado) {
       await registrarEvento(supabase, null, "numero_bloqueado_ignorado", {
@@ -267,6 +271,7 @@ Deno.serve(async (req) => {
       );
     }
   }
+
 
 
   // ============================================================
@@ -632,6 +637,40 @@ Deno.serve(async (req) => {
       telefone, senderName, platform, veioDeAnuncio, adContext,
     });
 
+    // ============================================================
+    // FIX RACE — 2 mensagens do mesmo telefone chegando quase juntas
+    // criavam 2 leads (e 2 saudações M0). Antes de inserir, verifica
+    // se já existe lead desse telefone criado nos últimos 30s.
+    // ============================================================
+    {
+      const tel8Race = telefone.replace(/\D/g, "").slice(-8);
+      const desde = new Date(Date.now() - 30_000).toISOString();
+      const { data: leadRecente } = await supabase
+        .from("leads_geral")
+        .select("id")
+        .like("telefone_digits", `%${tel8Race}`)
+        .gte("created_time", desde)
+        .order("created_time", { ascending: false })
+        .limit(1);
+
+      if (leadRecente && leadRecente.length > 0) {
+        const idExistente = (leadRecente[0] as { id: string }).id;
+        await registrarEvento(supabase, idExistente, "lead_criacao_evitada_race", {
+          telefone,
+          tel8: tel8Race,
+          janela_segundos: 30,
+        });
+        await registrarMensagem(supabase, idExistente, "lead", texto, {
+          telefone,
+          race_dedup: true,
+        });
+        return new Response(
+          JSON.stringify({ ok: true, acao: "lead_race_reaproveitado", lead_id: idExistente }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     lead = await criarLeadWhatsApp(supabase, {
       nome: senderName ?? "Lead WhatsApp",
       telefone,
@@ -639,6 +678,7 @@ Deno.serve(async (req) => {
       origem: veioDeAnuncio ? "meta_lead_ads" : "whatsapp_bot",
       adContext,
     });
+
     if (!lead) {
       await registrarEvento(supabase, null, "lead_auto_criar_falhou", { telefone });
       return new Response(JSON.stringify({ erro: "criar_lead_falhou" }), { status: 500 });
@@ -1139,19 +1179,37 @@ Decida a próxima etapa seguindo as regras do system prompt e retorne o JSON.`;
     },
   });
 
-  const classificacao = await claudeJson<ClassificacaoV1>(
-    systemPrompt,
-    [{ role: "user", content: userPrompt }],
-    { maxTokens: 1024, temperature: 0.2 },
-  );
+  let classificacao: ClaudeJsonResult<ClassificacaoV1>;
+  try {
+    classificacao = await claudeJson<ClassificacaoV1>(
+      systemPrompt,
+      [{ role: "user", content: userPrompt }],
+      { maxTokens: 1024, temperature: 0.2 },
+    );
+  } catch (e) {
+    await registrarEvento(supabase, lead.id, "haiku_falhou", {
+      erro: (e as Error)?.message ?? String(e),
+      stack: (e as Error)?.stack ?? null,
+      etapa: lead.etapa_qualificacao,
+      fase: "exception",
+    });
+    return new Response(JSON.stringify({ erro: "haiku_exception" }), { status: 500 });
+  }
 
   if (!classificacao.ok || !classificacao.data) {
+    await registrarEvento(supabase, lead.id, "haiku_falhou", {
+      erro: classificacao.error,
+      raw: classificacao.rawText,
+      etapa: lead.etapa_qualificacao,
+      fase: "resposta_invalida",
+    });
     await registrarEvento(supabase, lead.id, "claude_falhou", {
       erro: classificacao.error,
       raw: classificacao.rawText,
     });
     return new Response(JSON.stringify({ erro: classificacao.error }), { status: 500 });
   }
+
 
   const r = classificacao.data;
   const etapaAnterior = (lead.etapa_qualificacao ?? "M0").toString();
