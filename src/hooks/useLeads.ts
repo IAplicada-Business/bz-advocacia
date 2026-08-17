@@ -340,6 +340,19 @@ export function useUpdateLeadStage() {
         });
       }
 
+      // Meta CAPI — etapas do funil (lookalike / otimização)
+      if (resolvedStage && ["mql", "conectado", "reuniao_agendada", "proposta", "ganho"].includes(resolvedStage)) {
+        void supabase.functions
+          .invoke("meta-capi-events", {
+            body: {
+              contact_submission_id: id,
+              lead_id: leadGeralId ?? undefined,
+              stage: resolvedStage,
+            },
+          })
+          .catch((err) => console.warn("[useUpdateLeadStage] meta-capi-events", err));
+      }
+
       return data;
     },
     onSuccess: () => {

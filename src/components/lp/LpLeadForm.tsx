@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackMetaLead } from "@/lib/metaPixel";
+import { readClickIds, readMetaIds, readUtms } from "@/lib/adTracking";
 import { optionLabel, optionValue, type LpFormField } from "./types";
 
 type LpLeadFormProps = {
@@ -11,38 +12,6 @@ type LpLeadFormProps = {
   fields: LpFormField[];
   cta: string;
 };
-
-function readUtms() {
-  if (typeof window === "undefined") return {};
-  const params = new URLSearchParams(window.location.search);
-  const pick = (key: string) => params.get(key) ?? params.get(key.toUpperCase()) ?? undefined;
-  return {
-    source: pick("utm_source"),
-    medium: pick("utm_medium"),
-    campaign: pick("utm_campaign"),
-    content: pick("utm_content"),
-    term: pick("utm_term"),
-  };
-}
-
-/** IDs Meta da URL (URL tags {{ad.id}} etc. ou params custom). */
-function readMetaIds() {
-  if (typeof window === "undefined") return {};
-  const params = new URLSearchParams(window.location.search);
-  const pick = (...keys: string[]) => {
-    for (const k of keys) {
-      const v = params.get(k) ?? params.get(k.toUpperCase());
-      if (v?.trim()) return v.trim();
-    }
-    return undefined;
-  };
-  return {
-    ad_id: pick("ad_id", "adid", "hsa_ad"),
-    campaign_id: pick("campaign_id", "campaignid", "hsa_cam"),
-    adset_id: pick("adset_id", "adsetid", "hsa_grp"),
-    fbclid: pick("fbclid"),
-  };
-}
 
 type FormValues = Record<string, string | string[]>;
 
@@ -91,7 +60,9 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
           values,
           utm: readUtms(),
           meta: readMetaIds(),
+          click: readClickIds(),
           pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
         },
       });
 

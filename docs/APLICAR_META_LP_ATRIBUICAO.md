@@ -19,8 +19,10 @@ Já incluso: LPs enviam `utm_*` + `ad_id` / `campaign_id` / `adset_id` / `fbclid
 
 ## 4. URL tags recomendadas nos anúncios Meta
 
+Links prontos por campanha (Meta + Google): **`docs/LINKS_UTM_CAMPANHAS_ALONSO.md`**
+
 ```
-?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.id}}&utm_term={{adset.name}}&ad_id={{ad.id}}&campaign_id={{campaign.id}}&adset_id={{adset.id}}
+?utm_source=facebook&utm_medium=paid&utm_campaign=meta_<area>&utm_content={{ad.name}}&utm_term={{adset.name}}&ad_id={{ad.id}}&campaign_id={{campaign.id}}&adset_id={{adset.id}}
 ```
 
 ## 5. Validação
