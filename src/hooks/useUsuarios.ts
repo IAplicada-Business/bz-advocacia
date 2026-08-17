@@ -280,38 +280,52 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      email, 
-      password, 
+    mutationFn: async ({
+      email,
+      password,
       role,
-      nome_completo 
-    }: { 
-      email: string; 
-      password: string; 
+      nome_completo
+    }: {
+      email: string;
+      password: string;
       role: string;
       nome_completo: string;
     }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Não autenticado");
+      // Uso `functions.invoke` em vez de fetch cru — o cliente Supabase ja
+      // injeta Authorization + apikey e trata melhor respostas non-JSON
+      // (evita o "Unexpected token '<' <!doctype…" que aparecia quando o
+      // edge proxy devolvia HTML 404/500 antes da funcao carregar).
+      const { data, error } = await supabase.functions.invoke("create-user", {
+        body: { email, password, role, nome_completo },
+      });
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ email, password, role, nome_completo }),
+      if (error) {
+        // FunctionsHttpError, FunctionsRelayError, FunctionsFetchError.
+        // Tenta extrair mensagem util do context (edge function retornou
+        // JSON com error). Se nao der, cai no message generico.
+        let msg = error.message || "Erro ao criar usuario";
+        try {
+          const ctx = (error as any).context;
+          if (ctx && typeof ctx.json === "function") {
+            const body = await ctx.json();
+            if (body?.error) msg = body.error;
+          }
+        } catch {
+          // ignore parse failure — nao adianta reclamar de erro do erro
         }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erro ao criar usuário");
+        // Erro de "edge function nao encontrada" tem um sinal claro:
+        // status/body mencionam 404 ou "Function not found".
+        if (msg.includes("<!doctype") || msg.includes("Function not found") || msg.includes("<html")) {
+          msg = "Edge function 'create-user' nao esta acessivel. Verifique se foi deployada no Supabase.";
+        }
+        throw new Error(msg);
       }
 
-      return await response.json();
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usuarios"] });
