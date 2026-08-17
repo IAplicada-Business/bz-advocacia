@@ -637,6 +637,40 @@ Deno.serve(async (req) => {
       telefone, senderName, platform, veioDeAnuncio, adContext,
     });
 
+    // ============================================================
+    // FIX RACE — 2 mensagens do mesmo telefone chegando quase juntas
+    // criavam 2 leads (e 2 saudações M0). Antes de inserir, verifica
+    // se já existe lead desse telefone criado nos últimos 30s.
+    // ============================================================
+    {
+      const tel8Race = telefone.replace(/\D/g, "").slice(-8);
+      const desde = new Date(Date.now() - 30_000).toISOString();
+      const { data: leadRecente } = await supabase
+        .from("leads_geral")
+        .select("id")
+        .like("telefone_digits", `%${tel8Race}`)
+        .gte("created_time", desde)
+        .order("created_time", { ascending: false })
+        .limit(1);
+
+      if (leadRecente && leadRecente.length > 0) {
+        const idExistente = (leadRecente[0] as { id: string }).id;
+        await registrarEvento(supabase, idExistente, "lead_criacao_evitada_race", {
+          telefone,
+          tel8: tel8Race,
+          janela_segundos: 30,
+        });
+        await registrarMensagem(supabase, idExistente, "lead", texto, {
+          telefone,
+          race_dedup: true,
+        });
+        return new Response(
+          JSON.stringify({ ok: true, acao: "lead_race_reaproveitado", lead_id: idExistente }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     lead = await criarLeadWhatsApp(supabase, {
       nome: senderName ?? "Lead WhatsApp",
       telefone,
@@ -644,6 +678,7 @@ Deno.serve(async (req) => {
       origem: veioDeAnuncio ? "meta_lead_ads" : "whatsapp_bot",
       adContext,
     });
+
     if (!lead) {
       await registrarEvento(supabase, null, "lead_auto_criar_falhou", { telefone });
       return new Response(JSON.stringify({ erro: "criar_lead_falhou" }), { status: 500 });
