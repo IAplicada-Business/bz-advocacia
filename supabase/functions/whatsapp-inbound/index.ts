@@ -249,10 +249,14 @@ Deno.serve(async (req) => {
   // Bot fica fora — não cria lead, não responde, não classifica.
   // ============================================================
   if (!modoTeste) {
+    // Compara pelos últimos 8 dígitos — a tabela tem formatos mistos
+    // (com/sem DDI, e o backfill v2 grava só os 8 finais).
+    const ult8Bloq = telefone.replace(/\D/g, "").slice(-8);
     const { data: bloqueado } = await supabase
       .from("numeros_bloqueados_bot")
       .select("telefone, nome, motivo")
-      .eq("telefone", telefone)
+      .like("telefone", `%${ult8Bloq}`)
+      .limit(1)
       .maybeSingle();
     if (bloqueado) {
       await registrarEvento(supabase, null, "numero_bloqueado_ignorado", {
@@ -267,6 +271,7 @@ Deno.serve(async (req) => {
       );
     }
   }
+
 
 
   // ============================================================
