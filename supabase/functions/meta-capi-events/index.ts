@@ -91,6 +91,20 @@ Deno.serve(async (req) => {
 
   if (!leadId) return json({ error: "missing_lead_id" }, 400);
 
+  // Purchase exige value real; mandar value=1 fake polui Advantage+ audiences.
+  const purchaseValue =
+    body.value != null ? Number(body.value) : null;
+  const willBePurchase =
+    (eventNameOverride ?? "") === "Purchase" ||
+    stageHint === "ganho" ||
+    (body.stage as string | undefined) === "ganho";
+  if (willBePurchase && (purchaseValue == null || !Number.isFinite(purchaseValue) || purchaseValue <= 0)) {
+    return json(
+      { error: "missing_purchase_value", hint: "envie body.value com o valor real do contrato (BRL)" },
+      400,
+    );
+  }
+
   const { data: lead, error: leadErr } = await supabase
     .from("leads_geral")
     .select(
@@ -175,7 +189,7 @@ Deno.serve(async (req) => {
       eventSourceUrl:
         eventSourceUrl ||
         (dados.page_url as string) ||
-        "https://gestao.borgesezembruski.com",
+        "https://borgesezembruski.com",
       actionSource: eventName === "Lead" ? "website" : "system_generated",
       userData: {
         email,
@@ -193,7 +207,7 @@ Deno.serve(async (req) => {
         ad_id: lead.ad_id ?? undefined,
         campaign_id: lead.campaign_id ?? undefined,
         currency: eventName === "Purchase" ? "BRL" : undefined,
-        value: eventName === "Purchase" ? 1 : undefined,
+        value: eventName === "Purchase" ? purchaseValue ?? undefined : undefined,
       },
     },
   ];
