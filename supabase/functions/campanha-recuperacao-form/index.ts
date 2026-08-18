@@ -397,6 +397,21 @@ async function processarUm(sb: any, cs: any, dryRun: boolean): Promise<{ ok: boo
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // Auth: cron via X-Webhook-Secret ou chamada interna com service role
+  const expectedSecret = Deno.env.get("SDR_WEBHOOK_SECRET") ?? "";
+  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const sec = req.headers.get("x-webhook-secret") ?? "";
+  const bearer = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const autorizado =
+    (expectedSecret !== "" && sec === expectedSecret) ||
+    (serviceRole !== "" && bearer === serviceRole);
+  if (!autorizado) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
     const mode: "smoke" | "rollout" = body.mode === "smoke" ? "smoke" : "rollout";

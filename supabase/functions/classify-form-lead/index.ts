@@ -73,6 +73,18 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "only_post" }, 405);
 
+  // Core interno: só aceita service role (chamadas de outras functions) ou o
+  // secret do cron/webhook. As LPs devem usar public-form-submit.
+  const expectedSecret = Deno.env.get("SDR_WEBHOOK_SECRET") ?? "";
+  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const sec = req.headers.get("x-webhook-secret") ?? "";
+  const bearer = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const autorizado =
+    (expectedSecret !== "" && sec === expectedSecret) ||
+    (serviceRole !== "" && bearer === serviceRole);
+  if (!autorizado) return json({ error: "unauthorized" }, 401);
+
+
   let payload: FormPayload;
   try {
     payload = await req.json();
