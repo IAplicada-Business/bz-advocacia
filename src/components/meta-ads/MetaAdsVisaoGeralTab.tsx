@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMetaCampaignStatus } from "@/hooks/useMetaCampaignStatus";
 import { MetaChartData } from "@/types/meta-ads";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
