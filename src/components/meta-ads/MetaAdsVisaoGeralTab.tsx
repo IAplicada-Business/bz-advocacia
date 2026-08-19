@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMetaCampaignStatus } from "@/hooks/useMetaCampaignStatus";
 import { MetaChartData } from "@/types/meta-ads";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -15,6 +16,7 @@ function fmtBRL(v: number) {
 
 export function MetaAdsVisaoGeralTab({ chartData }: Props) {
   const hasData = chartData.length > 0;
+  const { data: campaignStatus } = useMetaCampaignStatus();
 
   return (
     <Card>
@@ -65,9 +67,12 @@ export function MetaAdsVisaoGeralTab({ chartData }: Props) {
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-sm text-muted-foreground text-center py-12">
-            Sem dados de performance ainda — aguardando sync de insights.
-          </p>
+          <div className="text-center py-12 space-y-1">
+            <p className="text-sm font-medium">Sem dados de performance no período</p>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              {campaignStatus?.mensagem ?? "Aguardando sync de insights."}
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>

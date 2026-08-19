@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetaKPIs, PeriodoFiltro } from "@/types/meta-ads";
-import { DollarSign, Users, Target, TrendingUp, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
+import { DollarSign, Users, Target, TrendingUp, RefreshCw, Loader2, AlertTriangle, CircleDot } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { MiniCard } from "./MiniCard";
+import { useMetaCampaignStatus } from "@/hooks/useMetaCampaignStatus";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   kpis: MetaKPIs;
@@ -29,6 +31,7 @@ export function MetaAdsHeader({
   ultimaStructure, ultimaInsights,
 }: Props) {
   const qc = useQueryClient();
+  const { data: campaignStatus } = useMetaCampaignStatus();
   const [syncing, setSyncing] = useState(false);
 
   // 4 KPIs compactos
@@ -103,6 +106,20 @@ export function MetaAdsHeader({
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {campaignStatus && (
+            <Badge
+              variant={campaignStatus.ativas > 0 ? "secondary" : "destructive"}
+              className="h-9 px-3 text-xs gap-1.5 rounded-md"
+            >
+              {campaignStatus.ativas > 0 ? (
+                <CircleDot className="h-3.5 w-3.5" />
+              ) : (
+                <AlertTriangle className="h-3.5 w-3.5" />
+              )}
+              {campaignStatus.ativas} ativas
+              <span className="opacity-70">/ {campaignStatus.total}</span>
+            </Badge>
+          )}
           <Select value={statusFilter} onValueChange={onStatusChange}>
             <SelectTrigger className="h-9 w-[140px] text-xs">
               <SelectValue />
