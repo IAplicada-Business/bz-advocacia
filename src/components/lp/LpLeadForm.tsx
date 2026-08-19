@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from "react";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ArrowUpRight, ChevronDown, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackMetaLead } from "@/lib/metaPixel";
 import { readClickIds, readMetaIds, readUtms } from "@/lib/adTracking";
-import { optionLabel, optionValue, type LpFormField } from "./types";
+import { optionLabel, optionValue, type LpFormField, type LpFormOption } from "./types";
 
 type LpLeadFormProps = {
   slug: "saude" | "inventario" | "divorcio";
@@ -14,6 +14,85 @@ type LpLeadFormProps = {
 };
 
 type FormValues = Record<string, string | string[]>;
+
+function MultiSelectDropdown({
+  field,
+  selected,
+  onToggle,
+}: {
+  field: LpFormField;
+  selected: string[];
+  onToggle: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  const opts = (field.options ?? []) as Array<string | LpFormOption>;
+  const selectedLabels = opts
+    .filter((o) => selected.includes(optionValue(o)))
+    .map((o) => optionLabel(o));
+
+  const summary =
+    selectedLabels.length === 0
+      ? field.placeholder ?? "Selecione uma ou mais opções"
+      : selectedLabels.length <= 2
+        ? selectedLabels.join(", ")
+        : `${selectedLabels.length} selecionadas`;
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={`flex w-full items-center justify-between gap-2 rounded-2xl border border-lp-ink/10 bg-white/90 px-3.5 py-2.5 text-left text-sm outline-none transition focus:border-lp-gold ${
+          selectedLabels.length === 0 ? "text-lp-ink/45" : "text-lp-ink"
+        }`}
+      >
+        <span className="truncate">{summary}</span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-lp-ink/40 transition ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-2xl border border-lp-ink/10 bg-white/98 p-1.5 shadow-lp backdrop-blur-xl"
+        >
+          {opts.map((opt) => {
+            const val = optionValue(opt);
+            const isSel = selected.includes(val);
+            return (
+              <label
+                key={val}
+                className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm text-lp-ink hover:bg-lp-gold/10"
+              >
+                <input
+                  type="checkbox"
+                  checked={isSel}
+                  onChange={() => onToggle(val)}
+                  className="h-4 w-4 rounded border-lp-ink/20 text-lp-gold focus:ring-lp-gold"
+                />
+                <span>{optionLabel(opt)}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
@@ -53,11 +132,26 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
     setSubmitting(true);
 
     try {
+      // Se o form tem nome/telefone separados, monta body.contato explícito.
+      // Fallback (legacy): o backend ainda parseia values.contato "Nome DDD numero".
+      const nomeSeparado = typeof values.nome === "string" ? values.nome.trim() : "";
+      const telefoneSeparado =
+        typeof values.telefone === "string"
+          ? values.telefone.trim()
+          : typeof values.whatsapp === "string"
+            ? (values.whatsapp as string).trim()
+            : "";
+      const contato =
+        nomeSeparado && telefoneSeparado
+          ? { nome: nomeSeparado, whatsapp: telefoneSeparado }
+          : undefined;
+
       // Endpoint público: classifica MQL + grava sdr_contexto + dispara bot sem repetir form
       const { data, error: fnError } = await supabase.functions.invoke("public-form-submit", {
         body: {
           slug,
           values,
+          contato,
           utm: readUtms(),
           meta: readMetaIds(),
           click: readClickIds(),
@@ -151,32 +245,23 @@ export function LpLeadForm({ slug, title, subtitle, fields, cta }: LpLeadFormPro
                 ))}
               </select>
             ) : field.type === "multiselect" ? (
-              <div className="space-y-1.5 rounded-2xl border border-lp-ink/10 bg-white/90 p-2.5">
-                {field.options?.map((opt) => {
-                  const val = optionValue(opt);
-                  const selected = Array.isArray(values[field.id])
-                    ? (values[field.id] as string[]).includes(val)
-                    : false;
-                  return (
-                    <label
-                      key={val}
-                      className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm text-lp-ink hover:bg-lp-gold/10"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleMulti(field.id, val)}
-                        className="h-4 w-4 rounded border-lp-ink/20 text-lp-gold focus:ring-lp-gold"
-                      />
-                      <span>{optionLabel(opt)}</span>
-                    </label>
-                  );
-                })}
-              </div>
+              <MultiSelectDropdown
+                field={field}
+                selected={Array.isArray(values[field.id]) ? (values[field.id] as string[]) : []}
+                onToggle={(val) => toggleMulti(field.id, val)}
+              />
             ) : (
               <input
                 type={field.type}
                 required={field.required}
+                inputMode={field.type === "tel" ? "tel" : undefined}
+                autoComplete={
+                  field.type === "tel"
+                    ? "tel"
+                    : field.id === "nome"
+                      ? "name"
+                      : undefined
+                }
                 placeholder={field.placeholder}
                 value={typeof values[field.id] === "string" ? (values[field.id] as string) : ""}
                 onChange={(e) => setValues((v) => ({ ...v, [field.id]: e.target.value }))}
