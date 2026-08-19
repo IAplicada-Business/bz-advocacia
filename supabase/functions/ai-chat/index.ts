@@ -167,7 +167,12 @@ ${contextBlock}`;
       ...(history || []).map((m) => ({ role: m.role, content: m.content })),
     ];
 
-    // Call AI Gateway with streaming
+    // Modelo default estavel do gateway Lovable. `gemini-3-flash-preview`
+    // era um preview e foi descontinuado — deixar hardcoded quebra a chamada.
+    // Pode sobrescrever via env LOVABLE_AI_MODEL sem precisar redeploy do
+    // codigo (util quando o gateway rotaciona modelos).
+    const model = Deno.env.get("LOVABLE_AI_MODEL") ?? "google/gemini-2.5-flash";
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -175,7 +180,7 @@ ${contextBlock}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model,
         messages,
         stream: true,
       }),
@@ -193,8 +198,17 @@ ${contextBlock}`;
         });
       }
       const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
-      throw new Error("AI gateway error");
+      console.error("AI gateway error:", aiResponse.status, model, errText);
+      // 400 do gateway costuma ser modelo invalido/descontinuado —
+      // devolve mensagem clara pro frontend em vez de "AI gateway error".
+      const detail =
+        aiResponse.status === 400
+          ? `Modelo "${model}" nao aceito pelo gateway. Configure LOVABLE_AI_MODEL com um modelo valido (ex.: google/gemini-2.5-flash).`
+          : `Gateway respondeu ${aiResponse.status}. ${errText.slice(0, 200)}`;
+      return new Response(JSON.stringify({ error: detail }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // We need to collect the full response to save it

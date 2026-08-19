@@ -117,11 +117,11 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: Deno.env.get("LOVABLE_AI_MODEL") ?? "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: `Você é uma assistente de comunicação de um escritório de advocacia chamado B&Z Advocacia. 
+            content: `Você é uma assistente de comunicação de um escritório de advocacia chamado B&Z Advocacia.
 Sua função é transformar as melhorias técnicas do sistema em um texto profissional, acessível e amigável para ser enviado aos clientes do escritório via WhatsApp ou e-mail.
 
 Regras:
