@@ -69,7 +69,7 @@ Exemplo de resposta:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: Deno.env.get("LOVABLE_AI_MODEL") ?? "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Analise este documento (tipo: ${tipo || 'proposta'}):\n\n${content.substring(0, 10000)}` }
